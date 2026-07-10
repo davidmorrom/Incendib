@@ -27,7 +27,30 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-6.29, 40.36],
     startedAt: '2026-07-07T14:20:00+02:00',
     updatedAt: '2026-07-10T14:26:00+02:00',
-    resources: { aerial: 14, ground: 42, personnel: 310, note: 'UME' },
+    resources: {
+      aerial: 14,
+      ground: 42,
+      personnel: 310,
+      note: 'UME',
+      aerialUnits: [
+        { kind: 'anfibio', count: 4 },
+        { kind: 'avion-carga', count: 3 },
+        { kind: 'helicoptero', count: 5 },
+        { kind: 'coordinacion', count: 1 },
+        { kind: 'dron', count: 1 },
+      ],
+      groundUnits: [
+        { kind: 'brigada', count: 16 },
+        { kind: 'autobomba', count: 12 },
+        { kind: 'maquinaria', count: 4 },
+        { kind: 'ume', count: 6 },
+        { kind: 'gc', count: 4 },
+      ],
+      foreign: [
+        { country: 'Francia', mechanism: 'rescEU', note: '2 aviones anfibios Canadair CL-415', aerial: 2 },
+        { country: 'Italia', mechanism: 'MPCU', note: '1 avión anfibio Canadair CL-415', aerial: 1 },
+      ],
+    },
     evacuation: 'Evacuación en Riomalo de Abajo y Las Mestas · EX-204 cortada',
     sources: ['nacional', 'effis'],
     fwi: 'Extremo',
@@ -64,7 +87,21 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-15.61, 27.99],
     startedAt: '2026-07-08T11:05:00+01:00',
     updatedAt: '2026-07-10T14:21:00+01:00',
-    resources: { aerial: 9, ground: 26 },
+    resources: {
+      aerial: 9,
+      ground: 26,
+      aerialUnits: [
+        { kind: 'anfibio', count: 3 },
+        { kind: 'helicoptero', count: 4 },
+        { kind: 'coordinacion', count: 1 },
+        { kind: 'dron', count: 1 },
+      ],
+      groundUnits: [
+        { kind: 'brigada', count: 12 },
+        { kind: 'autobomba', count: 10 },
+        { kind: 'maquinaria', count: 4 },
+      ],
+    },
     evacuation: '900 evacuados en Tejeda y Artenara',
     sources: ['nacional', 'effis'],
   },
@@ -84,7 +121,19 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-7.99, 39.55],
     startedAt: '2026-07-09T16:40:00+01:00',
     updatedAt: '2026-07-10T14:18:00+01:00',
-    resources: { aerial: 6, ground: 18 },
+    resources: {
+      aerial: 6,
+      ground: 18,
+      aerialUnits: [
+        { kind: 'anfibio', count: 2 },
+        { kind: 'helicoptero', count: 4 },
+      ],
+      groundUnits: [
+        { kind: 'brigada', count: 8 },
+        { kind: 'autobomba', count: 8 },
+        { kind: 'maquinaria', count: 2 },
+      ],
+    },
     sources: ['fogos', 'effis'],
   },
   {
@@ -102,7 +151,18 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-6.98, 42.41],
     startedAt: '2026-07-09T20:15:00+02:00',
     updatedAt: '2026-07-10T14:23:00+02:00',
-    resources: { aerial: 4, ground: 14 },
+    resources: {
+      aerial: 4,
+      ground: 14,
+      aerialUnits: [
+        { kind: 'helicoptero', count: 3 },
+        { kind: 'coordinacion', count: 1 },
+      ],
+      groundUnits: [
+        { kind: 'brigada', count: 8 },
+        { kind: 'autobomba', count: 6 },
+      ],
+    },
     sources: ['nacional', 'effis'],
   },
   {
@@ -121,7 +181,18 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-8.63, 37.6],
     startedAt: '2026-07-06T13:10:00+01:00',
     updatedAt: '2026-07-10T14:14:00+01:00',
-    resources: { aerial: 3, personnel: 240 },
+    resources: {
+      aerial: 3,
+      personnel: 240,
+      aerialUnits: [
+        { kind: 'helicoptero', count: 2 },
+        { kind: 'coordinacion', count: 1 },
+      ],
+      groundUnits: [
+        { kind: 'brigada', count: 8 },
+        { kind: 'autobomba', count: 6 },
+      ],
+    },
     sources: ['fogos'],
   },
   {

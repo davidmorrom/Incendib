@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
+import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
@@ -208,8 +209,9 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </div>
         </div>
 
-        {/* Evolución */}
+        {/* Medios desplegados + Evolución */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3">
+          <ResourcesPanel resources={fire.resources} />
           {fire.timeline && fire.timeline.length > 0 ? (
             <>
               <div className="font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
