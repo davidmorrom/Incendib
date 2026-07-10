@@ -17,6 +17,7 @@ const es = {
     loading: 'Cargando…',
     offline: 'Sin conexión — mostrando datos en caché',
     reconnected: '+{n} focos nuevos · Ver cambios',
+    online: 'Conexión restablecida',
     sourceDegraded: 'Fuente degradada',
     retry: 'Reintentar',
   },
@@ -49,6 +50,7 @@ const es = {
     degraded: '{source} no responde — datos de las {time}',
   },
   fire: {
+    incidentOf: 'Incendio de {name}',
     surface: 'Superficie',
     start: 'Inicio',
     resources: 'Medios',

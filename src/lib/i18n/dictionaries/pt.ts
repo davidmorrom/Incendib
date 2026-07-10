@@ -18,6 +18,7 @@ const pt: Dictionary = {
     loading: 'A carregar…',
     offline: 'Sem ligação — a mostrar dados em cache',
     reconnected: '+{n} focos novos · Ver alterações',
+    online: 'Ligação restabelecida',
     sourceDegraded: 'Fonte degradada',
     retry: 'Tentar de novo',
   },
@@ -50,6 +51,7 @@ const pt: Dictionary = {
     degraded: '{source} não responde — dados das {time}',
   },
   fire: {
+    incidentOf: 'Incêndio de {name}',
     surface: 'Área',
     start: 'Início',
     resources: 'Meios',
