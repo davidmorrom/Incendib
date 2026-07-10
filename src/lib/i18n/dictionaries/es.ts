@@ -20,6 +20,8 @@ const es = {
     online: 'Conexión restablecida',
     sourceDegraded: 'Fuente degradada',
     retry: 'Reintentar',
+    errorTitle: 'No se pudieron cargar los datos',
+    errorBody: 'Ha fallado una fuente o tu conexión. Puedes reintentar.',
   },
   states: {
     activo: 'Activo',
