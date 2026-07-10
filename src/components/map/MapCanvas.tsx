@@ -68,6 +68,7 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
   const mapRef = useRef<MapRef>(null);
   const [tip, setTip] = useState<string | null>(null);
   const [hotspotTip, setHotspotTip] = useState<HotspotTip | null>(null);
+  const [cursor, setCursor] = useState<'grab' | 'pointer'>('grab');
 
   const paint = useMemo(() => maskPaint(theme), [theme]);
   const peninsular = useMemo(() => fires.filter((f) => !isIslandFire(f)), [fires]);
@@ -162,6 +163,9 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
       reuseMaps
       onLoad={handleLoad}
       onClick={handleMapClick}
+      onMouseEnter={() => setCursor('pointer')}
+      onMouseLeave={() => setCursor('grab')}
+      cursor={cursor}
       interactiveLayerIds={showHotspots ? ['hotspot-clusters', 'hotspot-core'] : undefined}
       mapStyle={MAP_STYLE[theme]}
       initialViewState={INITIAL_VIEW}
@@ -319,14 +323,14 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
         </Popup>
       )}
 
-      {hotspotTip && (
+      {showHotspots && hotspotTip && (
         <Popup
           longitude={hotspotTip.lng}
           latitude={hotspotTip.lat}
           anchor="bottom"
           offset={12}
           closeButton={false}
-          closeOnClick
+          closeOnClick={false}
           onClose={() => setHotspotTip(null)}
           className="if-tooltip"
         >

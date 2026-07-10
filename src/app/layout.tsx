@@ -22,8 +22,10 @@ const mono = IBM_Plex_Mono({
 
 // URL canónica: variable explícita → dominio de producción de Vercel (previews)
 // → localhost en desarrollo. Se usa para metadataBase, OG y enlaces /f/{slug}.
+// `||` (no `??`): una env var vacía ("") no debe dejar `new URL("")` (rompería
+// el build); cae al dominio de Vercel o a localhost.
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : 'http://localhost:3000');

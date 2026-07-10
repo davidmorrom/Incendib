@@ -183,6 +183,7 @@ const RAW_FIRES: Fire[] = [
     updatedAt: '2026-07-10T14:14:00+01:00',
     resources: {
       aerial: 3,
+      ground: 14,
       personnel: 240,
       aerialUnits: [
         { kind: 'helicoptero', count: 2 },
@@ -336,9 +337,6 @@ export const MOCK_HOTSPOTS: Hotspot[] = [
   ...RAW_FIRES.filter((f) => f.state === 'activo' || f.state === 'controlado').flatMap(clusterFor),
   ...backgroundHotspots(),
 ];
-
-/** Recuento de focos detectados en 24 h (KPI). En live = hotspots.length real. */
-export const MOCK_HOTSPOTS_24H = MOCK_HOTSPOTS.length;
 
 /** Estado de fuentes mock (pantalla Fuentes 3b). */
 export const MOCK_SOURCE_STATUS: SourceStatus[] = [

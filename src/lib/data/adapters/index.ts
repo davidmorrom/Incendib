@@ -16,6 +16,7 @@
  */
 
 import type { Fire, Hotspot } from '@/types/fire';
+import { inEsPt } from '@/lib/geo/point-in-region';
 
 export interface FetchOptions {
   /** Bounding box [minLon, minLat, maxLon, maxLat]. */
@@ -30,21 +31,13 @@ export interface FetchOptions {
 const FIRMS_BASE = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv';
 
 /**
- * BBOX Península + Baleares [minLon, minLat, maxLon, maxLat]. Coincide con el
- * encuadre inicial del mapa (IBERIA_BOUNDS). Canarias/Azores/Madeira quedan
- * pendientes (fuera del encuadre; se ven en el inset con incendios, no focos).
+ * BBOX Península + Baleares [minLon, minLat, maxLon, maxLat] para la CONSULTA a
+ * FIRMS. Coincide con el encuadre inicial del mapa (IBERIA_BOUNDS). El BBOX
+ * incluye Francia, Andorra y mar; el recorte fino a tierra ES+PT lo hace después
+ * `inEsPt` (punto-en-polígono contra el contorno real). Canarias/Azores/Madeira
+ * quedan pendientes (fuera del encuadre; se ven en el inset con incendios).
  */
 export const IBERIA_BBOX: [number, number, number, number] = [-10, 36, 4.5, 44];
-
-/**
- * Zonas DENTRO del BBOX que no son España/Portugal (mar de Alborán / franja
- * mediterránea hacia la costa argelina). Se recortan para no mostrar focos
- * fuera del ámbito ES+PT. Es un recorte conservador: no toca tierra ibérica
- * (el sur peninsular tiene lon < -0.6; Baleares, lat > 38.9).
- */
-const EXCLUDE_BOXES: [number, number, number, number][] = [
-  [-0.6, 36.0, 4.5, 37.4],
-];
 
 /**
  * Fuentes FIRMS a combinar. "All VIIRS" (SNPP + NOAA-20) da la máxima cobertura
@@ -69,9 +62,8 @@ export async function fetchFirmsHotspots(opts: FetchOptions = {}): Promise<Hotsp
     FIRMS_SOURCES.map((source) => fetchFirmsSource(key, source, bboxStr, days, opts.signal)),
   );
 
-  const inRegion = perSource
-    .flat()
-    .filter((h) => inIberia(h.coordinates[1], h.coordinates[0], bbox));
+  // Recorte fino a tierra de España/Portugal (excluye Francia, Andorra y mar).
+  const inRegion = perSource.flat().filter((h) => inEsPt(h.coordinates[0], h.coordinates[1]));
 
   return dedupeHotspots(inRegion);
 }
@@ -169,19 +161,6 @@ function toIso(date: string, time: string): string {
   const hhmm = (time || '0').padStart(4, '0');
   const t = Date.parse(`${date}T${hhmm.slice(0, 2)}:${hhmm.slice(2, 4)}:00Z`);
   return Number.isNaN(t) ? `${date}T00:00:00Z` : new Date(t).toISOString();
-}
-
-function inIberia(
-  lat: number,
-  lon: number,
-  bbox: [number, number, number, number],
-): boolean {
-  const [minLon, minLat, maxLon, maxLat] = bbox;
-  if (lon < minLon || lon > maxLon || lat < minLat || lat > maxLat) return false;
-  for (const [xmin, ymin, xmax, ymax] of EXCLUDE_BOXES) {
-    if (lon >= xmin && lon <= xmax && lat >= ymin && lat <= ymax) return false;
-  }
-  return true;
 }
 
 function dedupeHotspots(list: Hotspot[]): Hotspot[] {

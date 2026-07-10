@@ -5,9 +5,11 @@ import type { Theme } from '@/lib/design/tokens';
  * Estilos sin API key (OpenFreeMap). El oscuro (`dark`, fondo ~#0C0C0C) es el
  * modo por defecto "sala de control"; el claro (`positron`) para exteriores.
  */
+// `||` (no `??`): una env var vacía ("") debe caer al valor por defecto, no
+// dejar una URL de estilo vacía que rompería el mapa.
 export const MAP_STYLE: Record<Theme, string> = {
-  dark: process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/dark',
-  light: process.env.NEXT_PUBLIC_MAP_STYLE_URL_LIGHT ?? 'https://tiles.openfreemap.org/styles/positron',
+  dark: process.env.NEXT_PUBLIC_MAP_STYLE_URL || 'https://tiles.openfreemap.org/styles/dark',
+  light: process.env.NEXT_PUBLIC_MAP_STYLE_URL_LIGHT || 'https://tiles.openfreemap.org/styles/positron',
 };
 
 /** URLs de las geometrías estáticas (generadas por scripts/gen-mask.mjs). */

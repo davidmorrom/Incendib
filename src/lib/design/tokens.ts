@@ -69,8 +69,10 @@ export const light = {
   },
   text: {
     primary: '#1C222A',
-    secondary: '#6B7480',
-    mute: '#6B7480',
+    // #5C6470: contraste AA (≥4.5:1) sobre fondos claros (base #F4F2EC 5.34:1,
+    // sunken/map #EAE7DD 4.83:1). Antes #6B7480 (4.23:1) no cumplía.
+    secondary: '#5C6470',
+    mute: '#5C6470',
     body: '#1C222A',
   },
   state: {

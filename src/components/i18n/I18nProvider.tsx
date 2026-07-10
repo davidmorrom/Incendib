@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { es, getDictionary, isLocale, type Dictionary } from '@/lib/i18n';
 import { useUIStore } from '@/lib/store';
 
@@ -24,7 +24,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const theme = useUIStore((s) => s.theme);
 
   const [dict, setDict] = useState<Dictionary>(es);
-  const hydrated = useRef(false);
+  // Estado (no ref): al cambiar provoca re-render, de modo que los efectos de
+  // aplicar-tema/persistir-idioma NO se ejecuten en el primer render (cuando
+  // theme aún es null). Con `:root` en claro, ejecutarlos entonces quitaría
+  // data-theme y provocaría un parpadeo oscuro→claro→oscuro a los usuarios en
+  // modo oscuro.
+  const [hydrated, setHydrated] = useState(false);
 
   // Hidratar preferencias guardadas una sola vez.
   useEffect(() => {
@@ -36,7 +41,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* almacenamiento no disponible: seguimos con los valores por defecto */
     }
-    hydrated.current = true;
+    setHydrated(true);
   }, [setLocale, setTheme]);
 
   // Cargar el diccionario del idioma activo.
@@ -50,9 +55,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     };
   }, [locale]);
 
-  // Aplicar + persistir tema.
+  // Aplicar + persistir tema (solo tras hidratar, con el tema ya resuelto).
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     const root = document.documentElement;
     try {
       if (theme === null) {
@@ -65,17 +70,20 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* noop */
     }
-  }, [theme]);
+    // La barra del navegador (theme-color) sigue al tema activo; null = claro.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    meta?.setAttribute('content', theme === 'dark' ? '#0C1117' : '#F4F2EC');
+  }, [theme, hydrated]);
 
   // Persistir idioma.
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     try {
       localStorage.setItem(LOCALE_KEY, locale);
     } catch {
       /* noop */
     }
-  }, [locale]);
+  }, [locale, hydrated]);
 
   return <DictContext.Provider value={dict}>{children}</DictContext.Provider>;
 }

@@ -198,9 +198,9 @@ export function ResourcesPanel({ resources }: { resources?: Resources }) {
             {d.resources.foreign}
           </div>
           <ul className="mt-1 flex flex-col gap-1">
-            {foreign.map((f) => (
+            {foreign.map((f, i) => (
               <li
-                key={f.country}
+                key={`${f.country}-${f.mechanism ?? i}`}
                 className="flex items-start gap-2 rounded-[6px] border border-subtle px-2 py-1.5"
               >
                 <span className="mt-px flex-none text-action-text">
