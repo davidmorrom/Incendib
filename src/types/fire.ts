@@ -85,6 +85,12 @@ export interface Fire {
   /** Fuentes que alimentan esta ficha, en orden de prioridad. */
   sources: SourceId[];
   timeline?: TimelineEntry[];
+  /**
+   * Perímetro de área quemada (anillo exterior [lon,lat], cerrado), si está
+   * disponible. En live proviene de EFFIS (Sentinel-2, ~20 m). Puede faltar:
+   * los focos pequeños o muy recientes no siempre tienen perímetro mapeado.
+   */
+  perimeter?: [number, number][];
 }
 
 /**

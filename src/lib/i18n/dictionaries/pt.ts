@@ -68,6 +68,7 @@ const pt: Dictionary = {
     estabilizado: 'Estabilizado',
     extinguido: 'Extinto',
     foco: 'Foco de satélite VIIRS',
+    perimeter: 'Perímetro de área ardida',
   },
   sources: {
     title: 'Fontes e licenças',

@@ -68,6 +68,7 @@ const en: Dictionary = {
     estabilizado: 'Stabilised',
     extinguido: 'Extinguished',
     foco: 'VIIRS satellite hotspot',
+    perimeter: 'Burned-area perimeter',
   },
   sources: {
     title: 'Sources and licences',

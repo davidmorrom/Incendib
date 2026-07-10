@@ -20,6 +20,8 @@ import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
 import { isIslandFire } from '@/lib/fires/derive';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
+import { statePalette } from '@/lib/design/tokens';
+import type { FeatureCollection, Polygon } from 'geojson';
 import { formatNumber } from '@/lib/utils/format';
 import { timeAgoNow } from '@/lib/time';
 import {
@@ -49,6 +51,8 @@ export interface MapCanvasProps {
 export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasProps) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const perimetersVisible = useUIStore((s) => s.perimetersVisible);
+  const togglePerimeters = useUIStore((s) => s.togglePerimeters);
   const theme = useEffectiveTheme();
   const mapRef = useRef<MapRef>(null);
   const [tip, setTip] = useState<string | null>(null);
@@ -57,6 +61,22 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
   const peninsular = useMemo(() => fires.filter((f) => !isIslandFire(f)), [fires]);
   const islands = useMemo(() => fires.filter(isIslandFire), [fires]);
   const tipFire = tip ? fires.find((f) => f.slug === tip) : null;
+
+  // Perímetros de área quemada (EFFIS): color por estado, según tema.
+  const perimeters = useMemo<FeatureCollection<Polygon>>(() => {
+    const palette = statePalette(theme);
+    return {
+      type: 'FeatureCollection',
+      features: fires
+        .filter((f) => f.perimeter && f.perimeter.length > 2)
+        .map((f) => ({
+          type: 'Feature',
+          properties: { slug: f.slug, color: palette[f.state].base },
+          geometry: { type: 'Polygon', coordinates: [f.perimeter!] },
+        })),
+    };
+  }, [fires, theme]);
+  const hasPerimeters = perimeters.features.length > 0;
 
   const handleLocate = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -78,10 +98,19 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
     [onHover],
   );
 
+  // Hook de pruebas E2E (solo con ?e2e en la URL): expone el mapa para tests
+  // visuales automatizados. Sin efecto en uso normal.
+  const handleLoad = useCallback((e: { target: unknown }) => {
+    if (typeof window !== 'undefined' && window.location.search.includes('e2e')) {
+      (window as unknown as { __ibermap?: unknown }).__ibermap = e.target;
+    }
+  }, []);
+
   return (
     <Map
       ref={mapRef}
       reuseMaps
+      onLoad={handleLoad}
       mapStyle={MAP_STYLE[theme]}
       initialViewState={INITIAL_VIEW}
       minZoom={MIN_ZOOM}
@@ -117,6 +146,23 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
           paint={{ 'line-color': paint.outline, 'line-width': 1, 'line-opacity': 0.55 }}
         />
       </Source>
+
+      {/* Perímetros de área quemada (EFFIS): relleno traslúcido + borde definido */}
+      {perimetersVisible && hasPerimeters && (
+        <Source id="perimeters" type="geojson" data={perimeters}>
+          <Layer
+            id="perimeter-fill"
+            type="fill"
+            paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.16 }}
+          />
+          <Layer
+            id="perimeter-line"
+            type="line"
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+            paint={{ 'line-color': ['get', 'color'], 'line-width': 1.6, 'line-opacity': 0.85 }}
+          />
+        </Source>
+      )}
 
       {peninsular.map((f) => (
         <Marker key={f.slug} longitude={f.coordinates[0]} latitude={f.coordinates[1]} anchor="center">
@@ -159,7 +205,11 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
         </Popup>
       )}
 
-      <MapControls onLocate={handleLocate} />
+      <MapControls
+        onLocate={handleLocate}
+        layersActive={perimetersVisible && hasPerimeters}
+        onToggleLayers={togglePerimeters}
+      />
       <MapLegend />
       <IslandInset fires={islands} onSelect={onSelect} />
     </Map>

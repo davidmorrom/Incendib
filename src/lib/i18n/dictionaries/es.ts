@@ -67,6 +67,7 @@ const es = {
     estabilizado: 'Estabilizado',
     extinguido: 'Extinguido',
     foco: 'Foco satelital VIIRS',
+    perimeter: 'Perímetro de área quemada',
   },
   sources: {
     title: 'Fuentes y licencias',

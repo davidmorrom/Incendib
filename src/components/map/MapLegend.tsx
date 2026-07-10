@@ -3,6 +3,7 @@
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { mix, V } from '@/lib/design/color';
 import type { GlyphState } from '@/lib/fires/style';
 
 const ENTRIES: { state: GlyphState; key: keyof ReturnType<typeof useDict>['legend'] }[] = [
@@ -33,6 +34,15 @@ export function MapLegend() {
               <span className="text-[11px] text-fg-body">{d.legend[key]}</span>
             </div>
           ))}
+          {/* Perímetro de área quemada (EFFIS): relleno traslúcido + borde */}
+          <div className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="h-[12px] w-[13px] flex-none rounded-[2px]"
+              style={{ backgroundColor: mix(V.activo, 16), border: `1.5px solid ${mix(V.activo, 85)}` }}
+            />
+            <span className="text-[11px] text-fg-body">{d.legend.perimeter}</span>
+          </div>
         </div>
       )}
 

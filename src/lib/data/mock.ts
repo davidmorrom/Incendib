@@ -5,12 +5,13 @@
  */
 
 import type { Fire, SourceStatus } from '@/types/fire';
+import { generatePerimeter } from '@/lib/fires/perimeter';
 
 /** Focos satelitales (FIRMS) detectados en 24 h. Placeholder: en live vendrá
  * del recuento real de hotspots. */
 export const MOCK_HOTSPOTS_24H = 214;
 
-export const MOCK_FIRES: Fire[] = [
+const RAW_FIRES: Fire[] = [
   {
     slug: 'las-hurdes',
     name: 'Las Hurdes',
@@ -160,6 +161,17 @@ export const MOCK_FIRES: Fire[] = [
     sources: ['jcyl'],
   },
 ];
+
+/**
+ * Adjunta un perímetro (mock) a los incendios con superficie relevante
+ * (≥ 300 ha). Los pequeños se dejan sin perímetro para reflejar el caso "dato
+ * no disponible". En live esto lo sustituye el WFS de EFFIS.
+ */
+export const MOCK_FIRES: Fire[] = RAW_FIRES.map((f) =>
+  f.hectares >= 300
+    ? { ...f, perimeter: generatePerimeter(f.slug, f.coordinates, f.hectares) }
+    : f,
+);
 
 /** Estado de fuentes mock (pantalla Fuentes). */
 export const MOCK_SOURCE_STATUS: SourceStatus[] = [
