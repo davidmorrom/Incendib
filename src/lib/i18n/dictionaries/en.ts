@@ -76,8 +76,13 @@ const en: Dictionary = {
     statusHeading: 'SOURCE STATUS',
     attributionHeading: 'ATTRIBUTION AND LICENCES',
     ok: 'OK',
-    degraded: 'DEGRADED',
-    down: 'DOWN',
+    degraded: 'degraded',
+    down: 'down',
+    disclaimerTitle: 'Not a substitute for official channels',
+    disclaimerBody:
+      'This site is informational and aggregates data with delay. In an emergency, call 112.',
+    about: 'About the project',
+    methodology: 'Methodology',
   },
   disclaimer: {
     short: 'Not a substitute for official emergency channels. Emergencies: 112',

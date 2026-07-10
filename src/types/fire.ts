@@ -115,6 +115,8 @@ export interface SourceStatus {
   label: string;
   description: string;
   status: 'ok' | 'degraded' | 'down';
+  /** Línea de licencia/latencia bajo el nombre (p. ej. "CC BY 4.0"). */
+  note?: string;
   /** ISO 8601 del último dato disponible. */
   lastUpdate: string;
 }

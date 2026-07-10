@@ -76,8 +76,13 @@ const pt: Dictionary = {
     statusHeading: 'ESTADO DAS FONTES',
     attributionHeading: 'ATRIBUIÇÃO E LICENÇAS',
     ok: 'OK',
-    degraded: 'DEGRADADA',
-    down: 'EM BAIXO',
+    degraded: 'degradada',
+    down: 'em baixo',
+    disclaimerTitle: 'Não substitui os canais oficiais',
+    disclaimerBody:
+      'Este site é informativo e agrega dados com atraso. Em caso de emergência, ligue 112.',
+    about: 'Sobre o projeto',
+    methodology: 'Metodologia',
   },
   disclaimer: {
     short: 'Não substitui os canais oficiais de emergência. Emergências: 112',

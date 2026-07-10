@@ -75,8 +75,13 @@ const es = {
     statusHeading: 'ESTADO DE LAS FUENTES',
     attributionHeading: 'ATRIBUCIÓN Y LICENCIAS',
     ok: 'OK',
-    degraded: 'DEGRADADA',
-    down: 'CAÍDA',
+    degraded: 'degradada',
+    down: 'caída',
+    disclaimerTitle: 'No sustituye a los canales oficiales',
+    disclaimerBody:
+      'Esta web es informativa y agrega datos con demora. En caso de emergencia, llame al 112.',
+    about: 'Acerca del proyecto',
+    methodology: 'Metodología',
   },
   disclaimer: {
     short: 'No sustituye a los canales oficiales de emergencia. Emergencias: 112',
