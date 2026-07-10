@@ -32,7 +32,8 @@ const JUST_NOW: Record<Locale, string> = {
  */
 export function timeAgo(iso: string, now: number = Date.now(), locale: Locale = 'es'): string {
   const min = Math.round((now - new Date(iso).getTime()) / 60000);
-  if (Math.abs(min) < 1) return JUST_NOW[locale];
+  // < 1 min o marca futura (desfases de reloj/zona) → "ahora mismo".
+  if (min < 1) return JUST_NOW[locale];
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'always', style: 'short' });
   if (Math.abs(min) < 60) return rtf.format(-min, 'minute');
   const h = Math.round(min / 60);
