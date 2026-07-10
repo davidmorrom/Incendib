@@ -4,12 +4,12 @@
  * Se sirven cuando NEXT_PUBLIC_DATA_MODE=mock (por defecto).
  */
 
-import type { Fire, SourceStatus } from '@/types/fire';
+import type { Fire, Hotspot, SourceStatus } from '@/types/fire';
 import { generatePerimeter } from '@/lib/fires/perimeter';
 
-/** Focos satelitales (FIRMS) detectados en 24 h. Placeholder: en live vendrá
- * del recuento real de hotspots. */
-export const MOCK_HOTSPOTS_24H = 214;
+/** "Ahora" de los mocks (idéntico a MOCK_NOW en src/lib/time.ts). Local para no
+ * crear un ciclo de imports (time → data → mock). */
+const MOCK_NOW = Date.parse('2026-07-10T14:32:00+02:00');
 
 const RAW_FIRES: Fire[] = [
   {
@@ -190,6 +190,84 @@ export const MOCK_FIRES: Fire[] = RAW_FIRES.map((f) =>
     ? { ...f, perimeter: generatePerimeter(f.slug, f.coordinates, f.hectares) }
     : f,
 );
+
+// ── Focos satelitales mock (FIRMS) ───────────────────────────────────────────
+// Deterministas (sin Math.random): mismo resultado en server y cliente. En live
+// los sustituye el recuento real de fetchFirmsHotspots (VIIRS/MODIS).
+
+/** PRNG determinista (LCG) sembrado por cadena, para jitter reproducible. */
+function seeded(seedStr: string): () => number {
+  let s = 2166136261 >>> 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    s ^= seedStr.charCodeAt(i);
+    s = Math.imul(s, 16777619);
+  }
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 0xffffffff;
+  };
+}
+
+/** Genera un cúmulo de focos alrededor de un incendio, según su superficie. */
+function clusterFor(fire: Fire): Hotspot[] {
+  const rng = seeded(fire.slug);
+  const count = Math.min(70, Math.max(5, Math.round(fire.hectares / 50)));
+  const spread = 0.02 + Math.sqrt(fire.hectares) / 1400; // grados ~ tamaño del frente
+  const [lon, lat] = fire.coordinates;
+  const out: Hotspot[] = [];
+  for (let i = 0; i < count; i++) {
+    const ageMs = rng() * 24 * 3600e3; // últimas 24 h
+    const frp = Math.round((2 + rng() * rng() * 120) * 10) / 10; // sesgado a valores bajos
+    const conf = rng();
+    out.push({
+      id: `mock-${fire.slug}-${i}`,
+      coordinates: [
+        lon + (rng() - 0.5) * spread * 2,
+        lat + (rng() - 0.5) * spread * 2,
+      ],
+      frp,
+      confidence: conf > 0.75 ? 'high' : conf > 0.25 ? 'nominal' : 'low',
+      sensor: rng() > 0.85 ? 'MODIS' : 'VIIRS',
+      acquiredAt: new Date(MOCK_NOW - ageMs).toISOString(),
+    });
+  }
+  return out;
+}
+
+/** Focos de fondo repartidos por la península (quemas agrícolas, industria…). */
+const BACKGROUND_HOTSPOTS: [number, number][] = [
+  [-3.7, 40.4], [-5.9, 37.4], [-4.4, 41.6], [-2.9, 39.5], [-0.9, 41.6],
+  [-7.6, 42.3], [-8.4, 43.2], [-1.6, 42.8], [1.1, 41.3], [-6.3, 38.9],
+  [-4.7, 36.9], [-3.6, 37.2], [-8.6, 40.0], [-7.9, 38.6], [-9.1, 38.7],
+  [-2.5, 40.9], [0.6, 40.6], [-5.5, 42.6], [-3.0, 42.3], [-6.9, 37.9],
+];
+
+function backgroundHotspots(): Hotspot[] {
+  const rng = seeded('incendib-bg');
+  return BACKGROUND_HOTSPOTS.flatMap(([lon, lat], gi) => {
+    const n = 1 + Math.floor(rng() * 3);
+    return Array.from({ length: n }, (_, i) => {
+      const ageMs = rng() * 24 * 3600e3;
+      return {
+        id: `mock-bg-${gi}-${i}`,
+        coordinates: [lon + (rng() - 0.5) * 0.3, lat + (rng() - 0.5) * 0.3] as [number, number],
+        frp: Math.round((1 + rng() * rng() * 40) * 10) / 10,
+        confidence: (rng() > 0.6 ? 'nominal' : 'low') as Hotspot['confidence'],
+        sensor: (rng() > 0.8 ? 'MODIS' : 'VIIRS') as Hotspot['sensor'],
+        acquiredAt: new Date(MOCK_NOW - ageMs).toISOString(),
+      };
+    });
+  });
+}
+
+/** Focos satelitales mock (detección térmica, NO incendio confirmado). */
+export const MOCK_HOTSPOTS: Hotspot[] = [
+  ...RAW_FIRES.filter((f) => f.state === 'activo' || f.state === 'controlado').flatMap(clusterFor),
+  ...backgroundHotspots(),
+];
+
+/** Recuento de focos detectados en 24 h (KPI). En live = hotspots.length real. */
+export const MOCK_HOTSPOTS_24H = MOCK_HOTSPOTS.length;
 
 /** Estado de fuentes mock (pantalla Fuentes 3b). */
 export const MOCK_SOURCE_STATUS: SourceStatus[] = [

@@ -12,14 +12,22 @@ import { DesktopFireList } from '@/components/fires/DesktopFireList';
 import { computeKpis, sortByGravity } from '@/lib/fires/derive';
 import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
 import { useNow } from '@/components/time/NowProvider';
-import type { Fire } from '@/types/fire';
+import type { Fire, Hotspot } from '@/types/fire';
 
 /**
  * Pantalla Mapa (home, 2a móvil / 1d desktop). Un único mapa compartido; el
  * layout es una pila en móvil y un panel de 3 columnas (filtros · mapa · lista)
  * en `lg:`. Filtros unificados que afectan a mapa y lista.
  */
-export function MapaScreen({ fires, focos24h }: { fires: Fire[]; focos24h: number }) {
+export function MapaScreen({
+  fires,
+  hotspots,
+  focos24h,
+}: {
+  fires: Fire[];
+  hotspots: Hotspot[];
+  focos24h: number;
+}) {
   const router = useRouter();
   const now = useNow();
   const [filters, setFilters] = useState<FireFilters>(DEFAULT_FILTERS);
@@ -57,7 +65,13 @@ export function MapaScreen({ fires, focos24h }: { fires: Fire[]; focos24h: numbe
 
       {/* Mapa compartido */}
       <div className="relative min-h-0 flex-1 bg-bg-map lg:col-start-2">
-        <MapCanvasClient fires={visible} onSelect={select} hoveredSlug={hovered} onHover={setHovered} />
+        <MapCanvasClient
+          fires={visible}
+          hotspots={hotspots}
+          onSelect={select}
+          hoveredSlug={hovered}
+          onHover={setHovered}
+        />
         <DesktopKpiOverlay
           className="hidden lg:flex lg:flex-col"
           activos={kpis.activos}

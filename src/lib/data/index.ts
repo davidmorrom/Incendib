@@ -6,8 +6,9 @@
  * agotar su rate limit (5000 tx / 10 min) — ver docs/DATA-SOURCES.md §Recommendations.
  */
 
-import type { Fire, SourceStatus } from '@/types/fire';
-import { MOCK_FIRES, MOCK_SOURCE_STATUS } from './mock';
+import type { Fire, Hotspot, SourceStatus } from '@/types/fire';
+import { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS } from './mock';
+import { fetchFirmsHotspots } from './adapters';
 
 export type DataMode = 'mock' | 'live';
 
@@ -29,8 +30,20 @@ export async function getFire(slug: string): Promise<Fire | null> {
   return fires.find((f) => f.slug === slug) ?? null;
 }
 
+/**
+ * Focos satelitales (NASA FIRMS). Detección térmica, NO incendio confirmado.
+ * En live consulta FIRMS (cacheado en el servidor por su rate limit); en mock
+ * devuelve un cúmulo determinista. Nunca lanza: ante fallo devuelve [].
+ */
+export async function getHotspots(): Promise<Hotspot[]> {
+  if (getDataMode() === 'live') {
+    return fetchFirmsHotspots({ days: 1 });
+  }
+  return MOCK_HOTSPOTS;
+}
+
 export async function getSourceStatus(): Promise<SourceStatus[]> {
   return MOCK_SOURCE_STATUS;
 }
 
-export { MOCK_FIRES, MOCK_SOURCE_STATUS };
+export { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS };

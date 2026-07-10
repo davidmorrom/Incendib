@@ -26,6 +26,8 @@ interface UIState {
   copied: boolean;
   /** Capa de perímetros de área quemada (EFFIS) visible en el mapa. */
   perimetersVisible: boolean;
+  /** Capa de focos satelitales (FIRMS) visible en el mapa. */
+  hotspotsVisible: boolean;
   network: NetworkState;
   /** null = seguir preferencia del sistema. */
   theme: Theme | null;
@@ -36,6 +38,7 @@ interface UIState {
   setFilter: (filter: CountryFilter) => void;
   toggleLegend: () => void;
   togglePerimeters: () => void;
+  toggleHotspots: () => void;
   openShare: () => void;
   closeShare: () => void;
   setCopied: (v: boolean) => void;
@@ -52,6 +55,7 @@ export const useUIStore = create<UIState>((set) => ({
   shareOpen: false,
   copied: false,
   perimetersVisible: true,
+  hotspotsVisible: true,
   network: 'loading',
   theme: null,
   locale: 'es',
@@ -61,6 +65,7 @@ export const useUIStore = create<UIState>((set) => ({
   setFilter: (filter) => set({ filter }),
   toggleLegend: () => set((s) => ({ legendOpen: !s.legendOpen })),
   togglePerimeters: () => set((s) => ({ perimetersVisible: !s.perimetersVisible })),
+  toggleHotspots: () => set((s) => ({ hotspotsVisible: !s.hotspotsVisible })),
   openShare: () => set({ shareOpen: true, copied: false }),
   closeShare: () => set({ shareOpen: false }),
   setCopied: (copied) => set({ copied }),
