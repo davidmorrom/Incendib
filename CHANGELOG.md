@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.5.0] - 2026-07-10
+
+### Cambiado
+
+- **Modo claro por defecto.** El tema claro pasa a ser el predeterminado; el
+  oscuro "sala de control" queda como opt-in del usuario vía el toggle
+  (`[data-theme="dark"]`). El tema sigue siendo una decisión explícita (no se
+  sigue `prefers-color-scheme`) y persiste en `localStorage`. Se reestructuran
+  las variables de tema (`globals.css`), el selector `darkMode` de Tailwind, el
+  tema efectivo por defecto y el `theme-color` del navegador.
+
 ## [0.4.3] - 2026-07-10
 
 ### Corregido
@@ -192,6 +203,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.5.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.5.0
 [0.4.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.3
 [0.4.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.2
 [0.4.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.1

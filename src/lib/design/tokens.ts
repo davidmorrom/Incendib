@@ -15,10 +15,10 @@
 /** Estado operativo canónico de un incendio. */
 export type FireState = 'activo' | 'controlado' | 'estabilizado' | 'extinguido';
 
-/** Tema visual. Oscuro por defecto (sala de control); claro para exteriores. */
+/** Tema visual. Claro por defecto; oscuro (sala de control) opt-in del usuario. */
 export type Theme = 'dark' | 'light';
 
-// ── Paleta modo OSCURO (base) ────────────────────────────────────────────────
+// ── Paleta modo OSCURO (sala de control, opt-in) ─────────────────────────────
 export const dark = {
   bg: {
     base: '#0C1117',
@@ -56,7 +56,7 @@ export const dark = {
   },
 } as const;
 
-// ── Paleta modo CLARO (exterior, pantalla 7c) ────────────────────────────────
+// ── Paleta modo CLARO (por defecto) ──────────────────────────────────────────
 // Estados oscurecidos para contraste sobre fondo claro; marcadores con borde
 // blanco 1.5px en el mapa.
 export const light = {

@@ -5,7 +5,8 @@ Guía de trabajo para agentes en este repositorio.
 ## Qué es
 
 Visor web (PWA mobile-first) de incendios forestales activos en España y
-Portugal. Sin ánimo de lucro. Modo oscuro por defecto, con panel desktop.
+Portugal. Sin ánimo de lucro. Modo claro por defecto (oscuro "sala de control"
+opt-in), con panel desktop.
 
 ## Documentos de referencia (leer antes de implementar)
 
