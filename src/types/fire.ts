@@ -39,6 +39,46 @@ export type SourceId =
   | 'aemet'
   | 'nacional';
 
+/**
+ * Tipos de medio aéreo (para el desglose de medios). El color no aplica aquí;
+ * cada tipo lleva icono + etiqueta en la ficha.
+ */
+export type AerialKind =
+  | 'anfibio' // avión anfibio (Canadair CL-215/415)
+  | 'avion-carga' // avión de carga en tierra (ACT)
+  | 'helicoptero' // helicóptero bombardero
+  | 'helicoptero-coord' // helicóptero de coordinación
+  | 'coordinacion' // avión de coordinación y observación (ACO)
+  | 'dron'; // UAS / dron
+
+/** Tipos de medio terrestre. */
+export type GroundKind =
+  | 'bomberos' // bomberos forestales
+  | 'brigada' // brigada / cuadrilla forestal (BRIF)
+  | 'autobomba' // vehículo autobomba
+  | 'maquinaria' // bulldozer / maquinaria pesada
+  | 'ume' // Unidad Militar de Emergencias
+  | 'gc'; // Guardia Civil / seguridad
+
+/** Unidad de medio con su recuento (aéreo o terrestre). */
+export interface ResourceUnit<K extends string> {
+  kind: K;
+  count: number;
+}
+
+/** Ayuda internacional (medios extranjeros vía rescEU / Mec. de Protección Civil UE). */
+export interface ForeignAid {
+  /** País de procedencia (p. ej. "Francia"). */
+  country: string;
+  /** Mecanismo (p. ej. "rescEU", "MPCU"). */
+  mechanism?: string;
+  /** Detalle libre (p. ej. "2 Canadair CL-415"). */
+  note?: string;
+  aerial?: number;
+  ground?: number;
+  personnel?: number;
+}
+
 /** Medios desplegados. */
 export interface Resources {
   aerial?: number;
@@ -48,6 +88,12 @@ export interface Resources {
   note?: string;
   /** Texto libre cuando la fuente no desglosa (p. ej. "vigilancia"). */
   raw?: string;
+  /** Desglose de medios aéreos por tipo. */
+  aerialUnits?: ResourceUnit<AerialKind>[];
+  /** Desglose de medios terrestres por tipo. */
+  groundUnits?: ResourceUnit<GroundKind>[];
+  /** Medios extranjeros / ayuda internacional desplegada. */
+  foreign?: ForeignAid[];
 }
 
 /** Meteorología local en el foco (ficha). */

@@ -5,6 +5,20 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.7.0] - 2026-07-10
+
+### Añadido
+
+- **Desglose de medios desplegados** en la ficha de incendio: medios **aéreos**
+  por tipo (aviones anfibios, de carga, helicópteros, coordinación, drones),
+  medios **terrestres** por tipo (brigadas, autobombas, maquinaria, UME, Guardia
+  Civil) y **medios extranjeros** (ayuda internacional vía rescEU / Mecanismo de
+  Protección Civil de la UE), cada uno con icono, etiqueta y recuento en cifras
+  mono. Se muestra cuando la fuente aporta el detalle; si no, la ficha mantiene
+  el resumen agregado. Copy en ES/PT/EN.
+- Modelo de dominio ampliado (`ResourceUnit`, `AerialKind`, `GroundKind`,
+  `ForeignAid`) y datos mock enriquecidos con el desglose por incendio.
+
 ## [0.6.0] - 2026-07-10
 
 ### Añadido
@@ -224,6 +238,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.7.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.0
 [0.6.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.6.0
 [0.5.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.5.0
 [0.4.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.3
