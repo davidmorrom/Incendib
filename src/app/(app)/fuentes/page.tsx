@@ -1,8 +1,10 @@
-import { ScaffoldNotice } from '@/components/ScaffoldNotice';
+import { getSourceStatus } from '@/lib/data';
+import { FuentesScreen } from '@/components/screens/FuentesScreen';
 
 // Pantalla canónica 3b: estado por fuente + atribución + disclaimer 112.
 export const metadata = { title: 'Fuentes y licencias' };
 
-export default function FuentesPage() {
-  return <ScaffoldNotice screen="Fuentes y licencias" canonicalId="3b" />;
+export default async function FuentesPage() {
+  const sources = await getSourceStatus();
+  return <FuentesScreen sources={sources} />;
 }

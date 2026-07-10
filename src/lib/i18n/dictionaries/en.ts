@@ -2,7 +2,7 @@ import type { Dictionary } from '../index';
 
 const en: Dictionary = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Active wildfires · Spain and Portugal',
   },
   tabs: {
@@ -47,6 +47,7 @@ const en: Dictionary = {
     colUpdated: 'UPD.',
     empty: 'No fires match the current filters',
     clearFilters: 'Clear filters',
+    degraded: '{source} is not responding — data from {time}',
   },
   fire: {
     surface: 'Area',
@@ -60,6 +61,13 @@ const en: Dictionary = {
     copied: '✓ Copied',
     shareNote: 'The link always shows the current state, not a snapshot from now.',
     satelliteUnconfirmed: '{sensor} satellite detection — unconfirmed',
+    follow: 'Follow this fire',
+    evolution: 'Timeline',
+    viewFull: 'View full timeline ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} VIIRS hotspots · last pass {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'no spread 24 h',
   },
   legend: {
     title: 'Legend',
@@ -75,12 +83,17 @@ const en: Dictionary = {
     statusHeading: 'SOURCE STATUS',
     attributionHeading: 'ATTRIBUTION AND LICENCES',
     ok: 'OK',
-    degraded: 'DEGRADED',
-    down: 'DOWN',
+    degraded: 'degraded',
+    down: 'down',
+    disclaimerTitle: 'Not a substitute for official channels',
+    disclaimerBody:
+      'This site is informational and aggregates data with delay. In an emergency, call 112.',
+    about: 'About the project',
+    methodology: 'Methodology',
   },
   disclaimer: {
     short: 'Not a substitute for official emergency channels. Emergencies: 112',
-    full: 'Iberfuego is not an official emergency channel. In case of immediate danger call 112.',
+    full: 'Incendib is not an official emergency channel. In case of immediate danger call 112.',
   },
   empty: {
     good: 'No active fires in your area',
@@ -112,6 +125,7 @@ const en: Dictionary = {
     skipToContent: 'Skip to content',
     openFire: 'Open fire details',
     back: 'Back',
+    dismiss: 'Dismiss notice',
   },
 };
 

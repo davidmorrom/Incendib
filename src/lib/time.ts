@@ -1,5 +1,5 @@
 import { getDataMode } from '@/lib/data';
-import { timeAgo } from '@/lib/utils/format';
+import { timeAgo, elapsedShort } from '@/lib/utils/format';
 import type { Locale } from '@/lib/i18n/config';
 
 /**
@@ -17,4 +17,9 @@ export function getNow(): number {
 /** timeAgo relativo al "ahora" de referencia, en el idioma activo. */
 export function timeAgoNow(iso: string, locale: Locale = 'es'): string {
   return timeAgo(iso, getNow(), locale);
+}
+
+/** Antigüedad compacta ("6 min", "1 h 12") relativa al "ahora" de referencia. */
+export function elapsedShortNow(iso: string): string {
+  return elapsedShort(iso, getNow());
 }

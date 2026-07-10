@@ -13,7 +13,7 @@ export function registerServiceWorker() {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((err) => {
       // No romper la app si el registro falla; la web funciona sin SW.
-      console.warn('[iberfuego] SW registration failed:', err);
+      console.warn('[incendib] SW registration failed:', err);
     });
   });
 }

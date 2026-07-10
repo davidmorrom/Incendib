@@ -1,5 +1,5 @@
 /**
- * Modelo de dominio de Iberfuego.
+ * Modelo de dominio de Incendib.
  *
  * Un `Fire` es la unidad canónica que ve el usuario (mapa, informe, ficha).
  * Se construye agregando/normalizando varias fuentes (ver src/lib/data). Los
@@ -44,8 +44,18 @@ export interface Resources {
   aerial?: number;
   ground?: number;
   personnel?: number;
+  /** Nota (p. ej. "UME"). */
+  note?: string;
   /** Texto libre cuando la fuente no desglosa (p. ej. "vigilancia"). */
   raw?: string;
+}
+
+/** Meteorología local en el foco (ficha). */
+export interface Weather {
+  tempC: number;
+  humidity: number;
+  /** Viento ya formateado, p. ej. "NO 32 km/h". */
+  wind: string;
 }
 
 /** Punto de la evolución temporal del incendio (timeline de la ficha). */
@@ -85,6 +95,10 @@ export interface Fire {
   /** Fuentes que alimentan esta ficha, en orden de prioridad. */
   sources: SourceId[];
   timeline?: TimelineEntry[];
+  /** Riesgo meteorológico (FWI/IPIF) ya etiquetado, p. ej. "Extremo". */
+  fwi?: string;
+  /** Meteorología local en el foco. */
+  weather?: Weather;
   /**
    * Perímetro de área quemada (anillo exterior [lon,lat], cerrado), si está
    * disponible. En live proviene de EFFIS (Sentinel-2, ~20 m). Puede faltar:
@@ -115,6 +129,8 @@ export interface SourceStatus {
   label: string;
   description: string;
   status: 'ok' | 'degraded' | 'down';
+  /** Línea de licencia/latencia bajo el nombre (p. ej. "CC BY 4.0"). */
+  note?: string;
   /** ISO 8601 del último dato disponible. */
   lastUpdate: string;
 }

@@ -23,7 +23,7 @@ export function ScaffoldNotice({
         />
       </div>
       <div>
-        <h1 className="font-sans text-title font-bold text-fg">Iberfuego</h1>
+        <h1 className="font-sans text-title font-bold text-fg">Incendib</h1>
         <p className="mt-1 font-mono text-meta text-fg-mute">estructura lista · en construcción</p>
       </div>
       <div className="rounded-card border border-subtle bg-bg-raised px-4 py-3">

@@ -1,5 +1,5 @@
 /*
- * Iberfuego — Service Worker (ANDAMIAJE).
+ * Incendib — Service Worker (ANDAMIAJE).
  *
  * Cubre dos necesidades del handoff:
  *  1) Caché offline: servir la última vista con antigüedad visible cuando no
@@ -12,7 +12,7 @@
  * reales. Este archivo se registra desde src/lib/pwa/register-sw.ts.
  */
 
-const CACHE = 'iberfuego-v1';
+const CACHE = 'incendib-v1';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -50,7 +50,7 @@ self.addEventListener('push', (event) => {
   const isEvacuation = data.severity === 'evacuation';
 
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Iberfuego', {
+    self.registration.showNotification(data.title ?? 'Incendib', {
       body: data.body,
       icon: '/icons/icon-192.png',
       badge: '/icons/badge-72.png',

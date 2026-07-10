@@ -1,7 +1,7 @@
 /** Diccionario base (ES). Define la forma del tipo `Dictionary`. */
 const es = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Incendios forestales activos · España y Portugal',
   },
   tabs: {
@@ -46,6 +46,7 @@ const es = {
     colUpdated: 'ACT.',
     empty: 'Sin incendios con los filtros actuales',
     clearFilters: 'Limpiar filtros',
+    degraded: '{source} no responde — datos de las {time}',
   },
   fire: {
     surface: 'Superficie',
@@ -59,6 +60,13 @@ const es = {
     copied: '✓ Copiado',
     shareNote: 'El enlace muestra siempre el estado actual, no una captura de ahora.',
     satelliteUnconfirmed: 'Detección satelital {sensor} — no confirmada',
+    follow: 'Seguir este incendio',
+    evolution: 'Evolución',
+    viewFull: 'Ver evolución completa ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} focos VIIRS · última pasada {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'sin avance 24 h',
   },
   legend: {
     title: 'Leyenda',
@@ -74,12 +82,17 @@ const es = {
     statusHeading: 'ESTADO DE LAS FUENTES',
     attributionHeading: 'ATRIBUCIÓN Y LICENCIAS',
     ok: 'OK',
-    degraded: 'DEGRADADA',
-    down: 'CAÍDA',
+    degraded: 'degradada',
+    down: 'caída',
+    disclaimerTitle: 'No sustituye a los canales oficiales',
+    disclaimerBody:
+      'Esta web es informativa y agrega datos con demora. En caso de emergencia, llame al 112.',
+    about: 'Acerca del proyecto',
+    methodology: 'Metodología',
   },
   disclaimer: {
     short: 'No sustituye a los canales oficiales de emergencia. Emergencias: 112',
-    full: 'Iberfuego no es un canal oficial de emergencias. Ante peligro inmediato llama al 112.',
+    full: 'Incendib no es un canal oficial de emergencias. Ante peligro inmediato llama al 112.',
   },
   empty: {
     good: 'Sin incendios activos en tu zona',
@@ -111,6 +124,7 @@ const es = {
     skipToContent: 'Saltar al contenido',
     openFire: 'Abrir ficha del incendio',
     back: 'Volver',
+    dismiss: 'Descartar aviso',
   },
 };
 

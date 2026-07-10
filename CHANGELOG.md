@@ -5,6 +5,51 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.2] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Ficha de incendio** (1c), con URL propia y compartible (`/f/{slug}`):
+  mapa enfocado (perímetro + marcador), badges de estado/nivel/FWI, estadísticas
+  (superficie, inicio, medios, meteo), evolución (timeline) y acciones (seguir,
+  compartir con Web Share / copiar enlace). Layout i18n propio para `/f`.
+- Modelo enriquecido: meteorología local, índice FWI y `timeline` por incendio.
+
+### Corregido
+
+- Atribución del mapa reposicionada para no solaparse con los controles.
+
+## [0.3.1] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Fuentes y licencias** (3b): disclaimer 112 destacado, estado de
+  cada fuente (OK / degradada / caída) con licencia y último dato, atribución
+  completa y accesos a "Acerca" y "Metodología".
+
+## [0.3.0] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Informe de situación** (2b): KPIs 2×2 (activos, hectáreas, focos
+  24 h, nivel máximo), filtros por país (Todos/España/Portugal) y **tabla
+  ordenable** por columna. Accesible: `<table>` semántica con `aria-sort` y
+  cabeceras que ordenan.
+- Banner de **fuente degradada** (p. ej. fogos.pt) con hora del último dato.
+- Formato de tiempo compacto ("6 min", "1 h 12") para columnas densas.
+- Componentes reutilizables: `ScreenHeader`, `LangButton`.
+
+## [0.2.2] - 2026-07-10
+
+### Cambiado
+
+- **Rebranding a Incendib** (dominio incendib.es): el nombre anterior era marca
+  registrada en España. Se renombran la aplicación, el manifiesto PWA, los
+  metadatos, el service worker y la interfaz. El identificador del repositorio
+  se mantiene.
+- URL canónica de producción para metadatos, imágenes OG y enlaces `/f/{slug}`,
+  con respaldo automático al dominio de Vercel en despliegues de vista previa.
+
 ## [0.2.1] - 2026-07-10
 
 ### Añadido
@@ -58,6 +103,10 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
-[0.2.1]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.1
-[0.2.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.0
-[0.1.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.1.0
+[0.3.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.2
+[0.3.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.1
+[0.3.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.0
+[0.2.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.2
+[0.2.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.1
+[0.2.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.0
+[0.1.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.1.0
