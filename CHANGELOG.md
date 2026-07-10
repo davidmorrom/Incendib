@@ -5,6 +5,27 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.6.0] - 2026-07-10
+
+### Añadido
+
+- **Datos en vivo: focos satelitales de NASA FIRMS.** Adaptador que consulta el
+  CSV de FIRMS (VIIRS SNPP + NOAA-20, 375 m) para el ámbito España + Portugal,
+  lo normaliza a `Hotspot[]` (coordenadas, FRP, confianza, sensor, hora de la
+  pasada) y lo cachea en el servidor (revalidación 5 min) para respetar el rate
+  limit de NASA (5000 tx / 10 min). Recorta la franja mediterránea hacia la
+  costa argelina para ceñirse a ES+PT. Resiliente: ante cualquier fallo devuelve
+  vacío y no rompe el mapa.
+- **Capa de focos en el mapa**: puntos naranja (#FF6A3D) con glow, tamaño por
+  FRP y **clustering** con recuento a poco zoom. Al pulsar un foco, popup con
+  sensor, FRP y el aviso **"detección satelital — no confirmada"**.
+- **Panel de capas** en los controles del mapa: conmutadores independientes para
+  focos satelitales y perímetros de área quemada.
+- KPI "Focos 24 h" (mapa e informe) alimentado por el recuento real de focos.
+- Focos mock deterministas para el modo demo; pruebas unitarias del parser CSV
+  de FIRMS (confianza VIIRS l/n/h y MODIS 0–100, hora HHMM UTC, cuerpos no-CSV).
+- `/api/fires` incluye ahora los focos satelitales además de los incendios.
+
 ## [0.5.0] - 2026-07-10
 
 ### Cambiado
@@ -203,6 +224,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.6.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.6.0
 [0.5.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.5.0
 [0.4.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.3
 [0.4.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.2
