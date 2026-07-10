@@ -46,7 +46,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
     const nav = typeof navigator !== 'undefined' ? navigator : undefined;
     if (nav?.share) {
       try {
-        await nav.share({ title: `Incendio de ${fire.name}`, url });
+        await nav.share({ title: interpolate(d.fire.incidentOf, { name: fire.name }), url });
         return;
       } catch {
         /* cancelado */
@@ -144,7 +144,9 @@ export function FichaScreen({ fire }: { fire: Fire }) {
             </button>
           </div>
 
-          <h1 className="mt-2.5 text-[18px] font-bold tracking-[-0.01em]">Incendio de {fire.name}</h1>
+          <h1 className="mt-2.5 text-[18px] font-bold tracking-[-0.01em]">
+            {interpolate(d.fire.incidentOf, { name: fire.name })}
+          </h1>
           <p className="mt-px text-[12px] text-fg-secondary">
             {fire.municipality} · {fire.province} · {fire.region.replace(/\s*\(PT\)/, '')}
           </p>

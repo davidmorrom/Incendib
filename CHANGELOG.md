@@ -5,6 +5,50 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.7] - 2026-07-10
+
+### Añadido
+
+- **Suite de pruebas** con Vitest (18 tests) para la lógica pura: formato de
+  cifras/tiempos, orden por gravedad, KPIs, geometría de perímetros e
+  interpolación i18n. Script `npm test`.
+
+## [0.3.6] - 2026-07-10
+
+### Añadido
+
+- **Estado de carga con skeleton** (4a): `loading.tsx` con bloques shimmer
+  mientras el servidor resuelve los datos (respeta `prefers-reduced-motion`).
+
+## [0.3.5] - 2026-07-10
+
+### Añadido
+
+- **Estado de error con marca** (4c): boundary de Next para el shell que muestra
+  un aviso con reintento en vez del error crudo del navegador.
+
+## [0.3.4] - 2026-07-10
+
+### Añadido
+
+- **Estado de red global** (4d/5b): banda de "sin conexión" (datos en caché) y
+  toast de reconexión, con `aria-live`. La caída de red no rompe la UI.
+
+### Corregido
+
+- El título "Incendio de …" ahora se localiza (ES/PT/EN) en la ficha y al
+  compartir.
+
+## [0.3.3] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Noticias y directos** (3a): directo 24 h (embed YouTube nocookie
+  con carga al pulsar y conmutador de canal), titulares filtrados por incendio,
+  cámaras DGT cercanas y cuentas oficiales.
+- Con esto se completan las **cinco pantallas principales** (Mapa, Informe,
+  Fuentes, Ficha y Noticias).
+
 ## [0.3.2] - 2026-07-10
 
 ### Añadido
@@ -103,6 +147,11 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.3.7]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.7
+[0.3.6]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.6
+[0.3.5]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.5
+[0.3.4]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.4
+[0.3.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.3
 [0.3.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.2
 [0.3.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.1
 [0.3.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.0
