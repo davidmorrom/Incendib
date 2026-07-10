@@ -5,6 +5,13 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.5] - 2026-07-10
+
+### Añadido
+
+- **Estado de error con marca** (4c): boundary de Next para el shell que muestra
+  un aviso con reintento en vez del error crudo del navegador.
+
 ## [0.3.4] - 2026-07-10
 
 ### Añadido
@@ -125,6 +132,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.3.5]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.5
 [0.3.4]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.4
 [0.3.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.3
 [0.3.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.2

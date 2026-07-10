@@ -21,6 +21,8 @@ const en: Dictionary = {
     online: 'Connection restored',
     sourceDegraded: 'Source degraded',
     retry: 'Retry',
+    errorTitle: 'Could not load the data',
+    errorBody: 'A source or your connection failed. You can retry.',
   },
   states: {
     activo: 'Active',

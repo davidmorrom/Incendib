@@ -21,6 +21,8 @@ const pt: Dictionary = {
     online: 'Ligação restabelecida',
     sourceDegraded: 'Fonte degradada',
     retry: 'Tentar de novo',
+    errorTitle: 'Não foi possível carregar os dados',
+    errorBody: 'Falhou uma fonte ou a sua ligação. Pode tentar de novo.',
   },
   states: {
     activo: 'Ativo',
