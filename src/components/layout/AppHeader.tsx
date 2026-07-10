@@ -1,6 +1,7 @@
 'use client';
 
 import { Logo } from '@/components/ui/Logo';
+import { Wordmark } from '@/components/ui/Wordmark';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
@@ -29,7 +30,7 @@ export function AppHeader() {
   return (
     <header className="flex h-[50px] flex-none items-center gap-[10px] border-b px-screen">
       <Logo size={24} />
-      <span className="text-title font-bold tracking-[-0.01em] text-fg">{d.app.name}</span>
+      <Wordmark className="text-title" />
       <div className="flex-1" />
 
       <button type="button" className={btn} aria-label={d.map.searchAria}>

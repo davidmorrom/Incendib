@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/ui/Logo';
+import { Wordmark } from '@/components/ui/Wordmark';
 import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
@@ -32,7 +33,7 @@ export function DesktopTopNav({ className }: { className?: string }) {
     <header className={cn('h-[52px] flex-none items-center gap-4 border-b px-4', className)}>
       <Link href="/" className="flex flex-none items-center gap-2.5">
         <Logo size={24} />
-        <span className="text-title font-bold text-fg">{d.app.name}</span>
+        <Wordmark className="text-title" />
       </Link>
 
       <div className="flex h-8 w-[300px] flex-none items-center gap-2 rounded-btn border border-default bg-bg-sunken px-2.5">

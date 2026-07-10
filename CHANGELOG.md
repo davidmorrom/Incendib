@@ -5,6 +5,13 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.4.2] - 2026-07-10
+
+### Cambiado
+
+- Logotipo tipográfico **"Incend·IB"**: las dos últimas letras en el rojo de
+  marca, como guiño a Iberia. El nombre accesible sigue siendo "Incendib".
+
 ## [0.4.1] - 2026-07-10
 
 ### Cambiado
@@ -173,6 +180,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.4.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.2
 [0.4.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.1
 [0.4.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.0
 [0.3.7]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.7
