@@ -2,7 +2,7 @@ import type { Dictionary } from '../index';
 
 const pt: Dictionary = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Incêndios florestais ativos · Espanha e Portugal',
   },
   tabs: {
@@ -80,7 +80,7 @@ const pt: Dictionary = {
   },
   disclaimer: {
     short: 'Não substitui os canais oficiais de emergência. Emergências: 112',
-    full: 'O Iberfuego não é um canal oficial de emergência. Perante perigo imediato, ligue 112.',
+    full: 'O Incendib não é um canal oficial de emergência. Perante perigo imediato, ligue 112.',
   },
   empty: {
     good: 'Sem incêndios ativos na sua zona',

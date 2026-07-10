@@ -1,4 +1,4 @@
-# CLAUDE.md — Iberfuego
+# CLAUDE.md — Incendib
 
 Guía de trabajo para agentes en este repositorio.
 

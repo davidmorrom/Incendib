@@ -16,24 +16,30 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+// URL canónica: variable explícita → dominio de producción de Vercel (previews)
+// → localhost en desarrollo. Se usa para metadataBase, OG y enlaces /f/{slug}.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'http://localhost:3000');
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Iberfuego — Incendios forestales activos · España y Portugal',
-    template: '%s · Iberfuego',
+    default: 'Incendib — Incendios forestales activos · España y Portugal',
+    template: '%s · Incendib',
   },
   description:
     'Visor sin ánimo de lucro de incendios forestales activos en España y Portugal. ' +
     'Agrega NASA FIRMS, EFFIS/Copernicus y fuentes oficiales. No sustituye al 112.',
-  applicationName: 'Iberfuego',
+  applicationName: 'Incendib',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Iberfuego' },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Incendib' },
   formatDetection: { telephone: false },
   openGraph: {
     type: 'website',
-    siteName: 'Iberfuego',
+    siteName: 'Incendib',
     locale: 'es_ES',
   },
 };
@@ -50,7 +56,7 @@ export const viewport: Viewport = {
  * Fija data-theme antes del primer paint (evita flash al cargar la preferencia
  * guardada). Si no hay preferencia, no toca nada y manda prefers-color-scheme.
  */
-const themeInit = `(function(){try{var t=localStorage.getItem('iberfuego-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+const themeInit = `(function(){try{var t=localStorage.getItem('incendib-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

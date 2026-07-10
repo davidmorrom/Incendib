@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.2.2] - 2026-07-10
+
+### Cambiado
+
+- **Rebranding a Incendib** (dominio incendib.es): el nombre anterior era marca
+  registrada en España. Se renombran la aplicación, el manifiesto PWA, los
+  metadatos, el service worker y la interfaz. El identificador del repositorio
+  se mantiene.
+- URL canónica de producción para metadatos, imágenes OG y enlaces `/f/{slug}`,
+  con respaldo automático al dominio de Vercel en despliegues de vista previa.
+
 ## [0.2.1] - 2026-07-10
 
 ### Añadido
@@ -58,6 +69,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.2.2]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.2
 [0.2.1]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.1
 [0.2.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.0
 [0.1.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.1.0

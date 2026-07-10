@@ -1,5 +1,5 @@
 /**
- * i18n de Iberfuego. Tres idiomas: ES (por defecto), PT, EN.
+ * i18n de Incendib. Tres idiomas: ES (por defecto), PT, EN.
  *
  * Nota de arquitectura: se usa un diccionario tipado propio (ligero, sin
  * routing por locale) porque el idioma es una preferencia del usuario, no una

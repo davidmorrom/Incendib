@@ -1,7 +1,7 @@
 /** Diccionario base (ES). Define la forma del tipo `Dictionary`. */
 const es = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Incendios forestales activos · España y Portugal',
   },
   tabs: {
@@ -79,7 +79,7 @@ const es = {
   },
   disclaimer: {
     short: 'No sustituye a los canales oficiales de emergencia. Emergencias: 112',
-    full: 'Iberfuego no es un canal oficial de emergencias. Ante peligro inmediato llama al 112.',
+    full: 'Incendib no es un canal oficial de emergencias. Ante peligro inmediato llama al 112.',
   },
   empty: {
     good: 'Sin incendios activos en tu zona',

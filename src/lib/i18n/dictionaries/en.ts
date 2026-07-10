@@ -2,7 +2,7 @@ import type { Dictionary } from '../index';
 
 const en: Dictionary = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Active wildfires · Spain and Portugal',
   },
   tabs: {
@@ -80,7 +80,7 @@ const en: Dictionary = {
   },
   disclaimer: {
     short: 'Not a substitute for official emergency channels. Emergencies: 112',
-    full: 'Iberfuego is not an official emergency channel. In case of immediate danger call 112.',
+    full: 'Incendib is not an official emergency channel. In case of immediate danger call 112.',
   },
   empty: {
     good: 'No active fires in your area',

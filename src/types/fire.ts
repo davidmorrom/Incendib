@@ -1,5 +1,5 @@
 /**
- * Modelo de dominio de Iberfuego.
+ * Modelo de dominio de Incendib.
  *
  * Un `Fire` es la unidad canónica que ve el usuario (mapa, informe, ficha).
  * Se construye agregando/normalizando varias fuentes (ver src/lib/data). Los
