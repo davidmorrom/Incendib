@@ -60,6 +60,13 @@ const es = {
     copied: '✓ Copiado',
     shareNote: 'El enlace muestra siempre el estado actual, no una captura de ahora.',
     satelliteUnconfirmed: 'Detección satelital {sensor} — no confirmada',
+    follow: 'Seguir este incendio',
+    evolution: 'Evolución',
+    viewFull: 'Ver evolución completa ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} focos VIIRS · última pasada {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'sin avance 24 h',
   },
   legend: {
     title: 'Leyenda',

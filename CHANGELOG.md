@@ -5,6 +5,20 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.2] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Ficha de incendio** (1c), con URL propia y compartible (`/f/{slug}`):
+  mapa enfocado (perímetro + marcador), badges de estado/nivel/FWI, estadísticas
+  (superficie, inicio, medios, meteo), evolución (timeline) y acciones (seguir,
+  compartir con Web Share / copiar enlace). Layout i18n propio para `/f`.
+- Modelo enriquecido: meteorología local, índice FWI y `timeline` por incendio.
+
+### Corregido
+
+- Atribución del mapa reposicionada para no solaparse con los controles.
+
 ## [0.3.1] - 2026-07-10
 
 ### Añadido
@@ -89,6 +103,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.3.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.2
 [0.3.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.1
 [0.3.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.0
 [0.2.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.2

@@ -61,6 +61,13 @@ const pt: Dictionary = {
     copied: '✓ Copiado',
     shareNote: 'A ligação mostra sempre o estado atual, não uma captura de agora.',
     satelliteUnconfirmed: 'Deteção de satélite {sensor} — não confirmada',
+    follow: 'Seguir este incêndio',
+    evolution: 'Evolução',
+    viewFull: 'Ver evolução completa ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} focos VIIRS · última passagem {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'sem avanço 24 h',
   },
   legend: {
     title: 'Legenda',

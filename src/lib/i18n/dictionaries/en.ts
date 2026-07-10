@@ -61,6 +61,13 @@ const en: Dictionary = {
     copied: '✓ Copied',
     shareNote: 'The link always shows the current state, not a snapshot from now.',
     satelliteUnconfirmed: '{sensor} satellite detection — unconfirmed',
+    follow: 'Follow this fire',
+    evolution: 'Timeline',
+    viewFull: 'View full timeline ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} VIIRS hotspots · last pass {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'no spread 24 h',
   },
   legend: {
     title: 'Legend',

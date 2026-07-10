@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getFire, getFires } from '@/lib/data';
-import { ScaffoldNotice } from '@/components/ScaffoldNotice';
+import { FichaScreen } from '@/components/screens/FichaScreen';
 
 // Pantalla canónica 1c: ficha con URL propia y compartible. SIEMPRE muestra el
 // estado actual (no una captura). La imagen OG se genera en opengraph-image.tsx.
@@ -31,5 +31,5 @@ export default async function FichaPage({ params }: Params) {
   const { slug } = await params;
   const fire = await getFire(slug);
   if (!fire) notFound();
-  return <ScaffoldNotice screen={`Ficha · ${fire.name}`} canonicalId="1c" />;
+  return <FichaScreen fire={fire} />;
 }

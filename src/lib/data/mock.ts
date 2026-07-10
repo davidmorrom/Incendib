@@ -27,9 +27,27 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-6.29, 40.36],
     startedAt: '2026-07-07T14:20:00+02:00',
     updatedAt: '2026-07-10T14:26:00+02:00',
-    resources: { aerial: 14, ground: 42 },
+    resources: { aerial: 14, ground: 42, personnel: 310, note: 'UME' },
     evacuation: 'Evacuación en Riomalo de Abajo y Las Mestas · EX-204 cortada',
     sources: ['nacional', 'effis'],
+    fwi: 'Extremo',
+    weather: { tempC: 38, humidity: 14, wind: 'NO 32 km/h' },
+    timeline: [
+      {
+        at: '2026-07-10T09:12:00+02:00',
+        label: 'Declarado nivel 2. Solicitada la intervención de la UME.',
+        state: 'activo',
+      },
+      {
+        at: '2026-07-09T18:40:00+02:00',
+        label: 'El frente norte cruza la EX-204; nuevas evacuaciones preventivas.',
+        state: 'activo',
+      },
+      {
+        at: '2026-07-07T14:20:00+02:00',
+        label: 'Primera detección satelital VIIRS · FRP 86 MW — no confirmada.',
+      },
+    ],
   },
   {
     slug: 'tejeda',
