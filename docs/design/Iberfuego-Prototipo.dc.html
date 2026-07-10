@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EAE7E0;font-family:'IBM Plex Sans',sans-serif}
+a{color:#2A5FA8;text-decoration:none}
+a:hover{color:#1C4986;text-decoration:underline}
+@keyframes ifPulse{0%{transform:scale(1);opacity:.55}70%{transform:scale(2.4);opacity:0}100%{opacity:0}}
+@keyframes ifShimmer{0%{opacity:.45}50%{opacity:.9}100%{opacity:.45}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;box-sizing:border-box">
+  <div style="display:flex;align-items:center;gap:9px">
+    <div style="width:20px;height:20px;background:#E5484D;border-radius:5px;display:grid;place-items:center"><div style="width:7px;height:7px;background:#EAE7E0;border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></div></div>
+    <span style="font-weight:700;font-size:14px;color:#1a1a1a">Iberfuego · prototipo navegable</span>
+    <span style="font:500 10.5px 'IBM Plex Mono',monospace;color:rgba(0,0,0,.45)">pestañas · filtros · ficha · compartir</span>
+  </div>
+
+  <div data-screen-label="prototipo móvil" style="width:390px;height:800px;background:#0C1117;border:1px solid rgba(0,0,0,.25);border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.2);overflow:hidden;position:relative;display:flex;flex-direction:column;color:#E8EDF2">
+
+    <!-- status bar -->
+    <div style="height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex:none">
+      <span style="font:600 13px 'IBM Plex Mono',monospace">14:32</span>
+      <div style="display:flex;align-items:flex-end;gap:6px">
+        <div style="display:flex;align-items:flex-end;gap:1.5px"><span style="width:2.5px;height:4px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:6px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:8px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:10px;background:rgba(232,237,242,.35);border-radius:1px"></span></div>
+        <div style="width:20px;height:9px;border:1px solid rgba(232,237,242,.5);border-radius:2.5px;padding:1px;box-sizing:border-box"><div style="width:70%;height:100%;background:#E8EDF2;border-radius:1px"></div></div>
+      </div>
+    </div>
+
+    <!-- ============ PANTALLA MAPA ============ -->
+    <sc-if value="{{ isMapa }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="mapa" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;flex:none;border-bottom:1px solid rgba(255,255,255,.09)">
+          <div style="width:22px;height:22px;background:#E5484D;border-radius:5px;display:grid;place-items:center"><div style="width:7px;height:7px;background:#0C1117;border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></div></div>
+          <span style="font-weight:700;font-size:15px">Iberfuego</span>
+          <div style="flex:1"></div>
+          <div style="display:flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:12px;background:rgba(61,190,122,.12);border:1px solid rgba(61,190,122,.35)"><span style="width:6px;height:6px;border-radius:50%;background:#3DBE7A;animation:ifShimmer 1.6s ease-in-out infinite"></span><span style="font:600 10px 'IBM Plex Mono',monospace;color:#5FD494">en vivo</span></div>
+        </div>
+        <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.09);flex:none;background:#0F151C">
+          <div style="flex:1;padding:8px 14px;border-right:1px solid rgba(255,255,255,.07)"><div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.09em;color:#66727E;text-transform:uppercase">Activos</div><div style="font:600 18px 'IBM Plex Mono',monospace;color:#E5484D">{{ nActivos }}</div></div>
+          <div style="flex:1;padding:8px 14px;border-right:1px solid rgba(255,255,255,.07)"><div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.09em;color:#66727E;text-transform:uppercase">Superficie</div><div style="font:600 18px 'IBM Plex Mono',monospace">{{ haTotal }} <span style="font-size:11px;color:#66727E">ha</span></div></div>
+          <div style="flex:1;padding:8px 14px"><div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.09em;color:#66727E;text-transform:uppercase">Evacuados</div><div style="font:600 18px 'IBM Plex Mono',monospace">2 130</div></div>
+        </div>
+        <div style="flex:1;position:relative;min-height:0;background:radial-gradient(120% 90% at 50% 20%,#141b24 0%,#0C1117 75%);overflow:hidden">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 47px,rgba(255,255,255,.03) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,rgba(255,255,255,.03) 47px 48px)"></div>
+          <sc-if value="{{ mostrarFocos }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;left:24%;top:33%"><span style="display:block;width:5px;height:5px;border-radius:50%;background:#FF6A3D;opacity:.9;box-shadow:0 0 6px rgba(255,106,61,.8)"></span></div>
+            <div style="position:absolute;left:27%;top:36%"><span style="display:block;width:4px;height:4px;border-radius:50%;background:#FF6A3D;opacity:.7"></span></div>
+            <div style="position:absolute;left:22%;top:38%"><span style="display:block;width:4px;height:4px;border-radius:50%;background:#FF6A3D;opacity:.55"></span></div>
+            <div style="position:absolute;left:11%;top:60%"><span style="display:block;width:4px;height:4px;border-radius:50%;background:#FF6A3D;opacity:.6"></span></div>
+          </sc-if>
+          <sc-for list="{{ mapFires }}" as="f" hint-placeholder-count="6">
+            <div style="position:absolute;left:{{ f.left }};top:{{ f.top }};width:34px;height:34px;margin:-17px 0 0 -17px;display:grid;place-items:center;cursor:pointer;z-index:2" onClick="{{ f.open }}">
+              <span style="position:absolute;width:14px;height:14px;border-radius:50%;background:{{ f.pulseBg }};animation:ifPulse 1.8s ease-out infinite;display:{{ f.pulseDisp }}"></span>
+              <span style="width:10px;height:10px;background:{{ f.bg }};border-radius:{{ f.rad }};transform:{{ f.tf }};border:{{ f.bord }};box-shadow:{{ f.glow }};box-sizing:border-box"></span>
+            </div>
+          </sc-for>
+          <div onClick="{{ toggleLegend }}" style="position:absolute;left:14px;top:12px;display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:15px;background:rgba(18,25,34,.94);border:1px solid rgba(255,255,255,.14);cursor:pointer;z-index:3">
+            <svg width="12" height="12" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#E5484D" stroke-width="1"></circle><circle cx="7" cy="7" r="3" fill="#E5484D"></circle></svg>
+            <span style="font:600 10.5px 'IBM Plex Sans',sans-serif;color:#C7D0D9">Leyenda</span>
+          </div>
+          <sc-if value="{{ legendOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:14px;top:50px;width:216px;padding:11px 13px;border-radius:9px;background:rgba(18,25,34,.97);border:1px solid rgba(255,255,255,.14);z-index:4;display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 20px rgba(0,0,0,.5)">
+              <div style="display:flex;align-items:center;gap:8px"><svg width="12" height="12" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#E5484D" stroke-width="1.2"></circle><circle cx="7" cy="7" r="3" fill="#E5484D"></circle></svg><span style="font-size:11px;color:#C7D0D9">Activo / em curso</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;background:#E8912D;transform:rotate(45deg);margin:0 1.5px"></span><span style="font-size:11px;color:#C7D0D9">Controlado</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;background:#E5C337;margin:0 1.5px"></span><span style="font-size:11px;color:#C7D0D9">Estabilizado</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;border:2px solid #6E7B87;box-sizing:border-box;margin:0 1px"></span><span style="font-size:11px;color:#C7D0D9">Extinguido</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#FF6A3D;box-shadow:0 0 5px rgba(255,106,61,.8);margin:0 2px"></span><span style="font-size:11px;color:#C7D0D9">Foco satelital VIIRS</span></div>
+            </div>
+          </sc-if>
+          <div onClick="{{ openHurdes }}" style="position:absolute;left:14px;right:14px;bottom:12px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:rgba(18,25,34,.96);border:1px solid rgba(255,255,255,.14);cursor:pointer;z-index:3;box-shadow:0 4px 14px rgba(0,0,0,.4)">
+            <svg width="12" height="12" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="6" fill="none" stroke="#E5484D" stroke-width="1"></circle><circle cx="7" cy="7" r="3" fill="#E5484D"></circle></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">Las Hurdes <span style="font:600 9px 'IBM Plex Mono',monospace;color:#F0B269">N2</span></div><div style="font:500 10px 'IBM Plex Mono',monospace;color:#66727E">3 241 ha · el más cercano a ti · 38 km</div></div>
+            <span style="font-size:11.5px;font-weight:600;color:#7FA9E8;flex:none">Ficha</span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PANTALLA INFORME ============ -->
+    <sc-if value="{{ isInforme }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="informe" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;flex:none">
+          <div style="width:22px;height:22px;background:#E5484D;border-radius:5px;display:grid;place-items:center"><div style="width:7px;height:7px;background:#0C1117;border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></div></div>
+          <span style="font-weight:700;font-size:15px">Informe de situación</span>
+          <div style="flex:1"></div>
+          <span style="font:500 10px 'IBM Plex Mono',monospace;color:#66727E">10 jul · 14:32</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09);flex:none;background:#0F151C">
+          <div style="padding:12px 16px;border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)">
+            <div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Incendios activos</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><span style="width:9px;height:9px;border-radius:50%;background:#E5484D"></span><span style="font:600 28px 'IBM Plex Mono',monospace;color:#FF8B8E">{{ nActivos }}</span><span style="font:500 11px 'IBM Plex Mono',monospace;color:#FF8B8E">▲ 2 hoy</span></div>
+          </div>
+          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07)">
+            <div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Ha afectadas</div>
+            <div style="font:600 28px 'IBM Plex Mono',monospace;margin-top:2px">{{ haTotal }}</div>
+          </div>
+          <div style="padding:12px 16px;border-right:1px solid rgba(255,255,255,.07)">
+            <div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Focos 24 h</div>
+            <div style="font:600 28px 'IBM Plex Mono',monospace;color:#FFB59A;margin-top:2px">214</div>
+          </div>
+          <div style="padding:12px 16px">
+            <div style="font:600 9.5px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Nivel máximo</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><span style="font:600 28px 'IBM Plex Mono',monospace;color:#F0B269">N2</span><span style="font-size:10.5px;color:#66727E;line-height:1.25">Las Hurdes,<br>Tejeda</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;padding:10px 14px 0;flex:none">
+          <span onClick="{{ fTodos }}" style="padding:5px 10px;border-radius:4px;border:{{ chipTodosB }};background:{{ chipTodosBg }};font-size:11.5px;font-weight:600;color:{{ chipTodosC }};cursor:pointer">Todos ({{ nTodos }})</span>
+          <span onClick="{{ fEs }}" style="padding:5px 10px;border-radius:4px;border:{{ chipEsB }};background:{{ chipEsBg }};font-size:11.5px;font-weight:600;color:{{ chipEsC }};cursor:pointer">España ({{ nEs }})</span>
+          <span onClick="{{ fPt }}" style="padding:5px 10px;border-radius:4px;border:{{ chipPtB }};background:{{ chipPtBg }};font-size:11.5px;font-weight:600;color:{{ chipPtC }};cursor:pointer">Portugal ({{ nPt }})</span>
+        </div>
+        <div style="display:flex;align-items:center;padding:10px 14px 6px;flex:none">
+          <span style="flex:1;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#66727E">INCENDIO</span>
+          <span style="width:86px;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#66727E">ESTADO</span>
+          <span style="width:62px;text-align:right;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#7FA9E8">HA ▾</span>
+          <span style="width:48px;text-align:right;font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:#66727E">ACT.</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;min-height:0">
+          <sc-for list="{{ rows }}" as="f" hint-placeholder-count="6">
+            <div onClick="{{ f.open }}" style="display:flex;align-items:center;padding:9px 14px;border-top:1px solid rgba(255,255,255,.06);cursor:pointer" style-hover="background:rgba(255,255,255,.03)">
+              <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+                <span style="width:16px;flex:none;display:grid;place-items:center"><span style="width:9px;height:9px;background:{{ f.bg }};border-radius:{{ f.rad }};transform:{{ f.tf }};border:{{ f.bord }};box-sizing:border-box"></span></span>
+                <div><div style="font-size:12.5px;font-weight:600">{{ f.name }} <span style="font:600 9px 'IBM Plex Mono',monospace;color:#F0B269">{{ f.nivelTxt }}</span></div><div style="font-size:10px;color:#66727E">{{ f.lugar }}</div></div>
+              </div>
+              <span style="width:86px;font-size:10px;font-weight:600;color:{{ f.stColor }}">{{ f.stTxt }}</span>
+              <span style="width:62px;text-align:right;font:600 12px 'IBM Plex Mono',monospace">{{ f.haFmt }}</span>
+              <span style="width:48px;text-align:right;font:400 10px 'IBM Plex Mono',monospace;color:#66727E">{{ f.upd }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:7px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:#66727E;flex:none">No sustituye a los canales oficiales de emergencia. Emergencias: <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:#9AAAB8">112</span></div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PANTALLA NOTICIAS ============ -->
+    <sc-if value="{{ isNoticias }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="noticias" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;flex:none;border-bottom:1px solid rgba(255,255,255,.09)">
+          <div style="width:22px;height:22px;background:#E5484D;border-radius:5px;display:grid;place-items:center"><div style="width:7px;height:7px;background:#0C1117;border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></div></div>
+          <span style="font-weight:700;font-size:15px">Noticias y directos</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;min-height:0">
+          <div style="padding:12px 14px 0">
+            <div style="height:150px;border-radius:10px;background:repeating-linear-gradient(135deg,#161d26 0 8px,#10151b 8px 16px);border:1px solid rgba(255,255,255,.09);position:relative;overflow:hidden">
+              <span style="position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:4px;background:rgba(229,72,77,.92);font:700 10px 'IBM Plex Mono',monospace;color:#fff"><span style="width:5px;height:5px;border-radius:50%;background:#fff;animation:ifShimmer 1.2s ease-in-out infinite"></span>DIRECTO</span>
+              <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 20 20" fill="#E8EDF2"><path d="M6 4 L16 10 L6 16 Z"></path></svg></span>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:26px 12px 10px;background:linear-gradient(transparent,rgba(10,15,20,.92))">
+                <div style="font-size:12.5px;font-weight:700;line-height:1.3">Comparecencia del Plan INFOEX — Las Hurdes</div>
+                <div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#9AAAB8;margin-top:2px">desde las 14:00 · 12 400 viendo</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 14px 6px"><span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#66727E">FILTRADO POR INCENDIOS ACTIVOS</span></div>
+          <div style="padding:0 14px">
+            <div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0">
+                <div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#66727E;margin-bottom:3px">EFE · hace 12 min · <span style="color:#F0B269">Las Hurdes N2</span></div>
+                <div style="font-size:12.5px;font-weight:600;line-height:1.3">La UME refuerza el operativo en Las Hurdes ante el cambio de viento</div>
+              </div>
+              <div style="width:66px;height:50px;border-radius:6px;background:repeating-linear-gradient(135deg,#1a222c 0 6px,#141c26 6px 12px);border:1px solid rgba(255,255,255,.08);flex:none"></div>
+            </div>
+            <div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0">
+                <div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#66727E;margin-bottom:3px">RTVE · hace 41 min · <span style="color:#F0B269">Tejeda N2</span></div>
+                <div style="font-size:12.5px;font-weight:600;line-height:1.3">Estabilizado el flanco norte del incendio de Tejeda; siguen las 900 evacuaciones</div>
+              </div>
+              <div style="width:66px;height:50px;border-radius:6px;background:repeating-linear-gradient(135deg,#1a222c 0 6px,#141c26 6px 12px);border:1px solid rgba(255,255,255,.08);flex:none"></div>
+            </div>
+            <div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <div style="flex:1;min-width:0">
+                <div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#66727E;margin-bottom:3px">Lusa · há 26 min · <span style="color:#F0B269">Odemira</span></div>
+                <div style="font-size:12.5px;font-weight:600;line-height:1.3">Odemira: incêndio em resolução mobiliza 240 operacionais no Alentejo</div>
+              </div>
+              <div style="width:66px;height:50px;border-radius:6px;background:repeating-linear-gradient(135deg,#1a222c 0 6px,#141c26 6px 12px);border:1px solid rgba(255,255,255,.08);flex:none"></div>
+            </div>
+          </div>
+          <div style="padding:14px 14px 6px"><span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#66727E">CÁMARAS DGT · ZONA LAS HURDES</span></div>
+          <div style="display:flex;gap:8px;padding:0 14px 14px;overflow:hidden">
+            <div style="width:118px;flex:none">
+              <div style="height:66px;border-radius:6px;background:repeating-linear-gradient(135deg,#161d26 0 7px,#10151b 7px 14px);border:1px solid rgba(255,255,255,.09);position:relative"><span style="position:absolute;left:5px;top:5px;padding:2px 5px;border-radius:3px;background:rgba(0,0,0,.6);font:600 8px 'IBM Plex Mono',monospace;color:#5FD494">● REC</span></div>
+              <div style="font-size:10px;color:#9AAAB8;margin-top:4px">Caminomorisco N</div>
+            </div>
+            <div style="width:118px;flex:none">
+              <div style="height:66px;border-radius:6px;background:repeating-linear-gradient(135deg,#161d26 0 7px,#10151b 7px 14px);border:1px solid rgba(255,255,255,.09);position:relative"><span style="position:absolute;left:5px;top:5px;padding:2px 5px;border-radius:3px;background:rgba(0,0,0,.6);font:600 8px 'IBM Plex Mono',monospace;color:#5FD494">● REC</span></div>
+              <div style="font-size:10px;color:#9AAAB8;margin-top:4px">Plasencia</div>
+            </div>
+            <div style="width:118px;flex:none">
+              <div style="height:66px;border-radius:6px;background:repeating-linear-gradient(135deg,#161d26 0 7px,#10151b 7px 14px);border:1px solid rgba(255,255,255,.09);position:relative"><span style="position:absolute;left:5px;top:5px;padding:2px 5px;border-radius:3px;background:rgba(0,0,0,.6);font:600 8px 'IBM Plex Mono',monospace;color:#9AAAB8">SIN SEÑAL</span></div>
+              <div style="font-size:10px;color:#66727E;margin-top:4px">EX-204 km 18</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ PANTALLA FUENTES ============ -->
+    <sc-if value="{{ isFuentes }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="fuentes" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;flex:none;border-bottom:1px solid rgba(255,255,255,.09)">
+          <div style="width:22px;height:22px;background:#E5484D;border-radius:5px;display:grid;place-items:center"><div style="width:7px;height:7px;background:#0C1117;border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></div></div>
+          <span style="font-weight:700;font-size:15px">Fuentes y licencias</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;min-height:0">
+          <div style="padding:14px 14px 7px"><span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#66727E">ESTADO DE LAS FUENTES</span></div>
+          <div style="padding:0 14px">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <span style="width:7px;height:7px;border-radius:50%;background:#3DBE7A;flex:none"></span>
+              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">112 Extremadura / INFOEX</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E">incidentes ES · hace 6 min</div></div>
+              <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#5FD494">OK</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <span style="width:7px;height:7px;border-radius:50%;background:#3DBE7A;flex:none"></span>
+              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">EFFIS / Copernicus EMS</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E">perímetros · hace 42 min</div></div>
+              <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#5FD494">OK</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <span style="width:7px;height:7px;border-radius:50%;background:#3DBE7A;flex:none"></span>
+              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">NASA FIRMS · VIIRS / MODIS</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E">focos satelitales · pasada 13:47</div></div>
+              <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#5FD494">OK</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)">
+              <span style="width:7px;height:7px;border-radius:50%;background:#E8912D;flex:none"></span>
+              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">fogos.pt / ANEPC</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E">incidentes PT · datos de las 09:41</div></div>
+              <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#F0B269">DEGRADADA</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)">
+              <span style="width:7px;height:7px;border-radius:50%;background:#3DBE7A;flex:none"></span>
+              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">AEMET / IPMA</div><div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E">meteo y FWI · hace 18 min</div></div>
+              <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#5FD494">OK</span>
+            </div>
+          </div>
+          <div style="padding:14px 14px 7px"><span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#66727E">ATRIBUCIÓN Y LICENCIAS</span></div>
+          <div style="padding:0 14px 14px">
+            <div style="font-size:11.5px;line-height:1.6;color:#9AAAB8">Datos de incendios: 112 Extremadura, Plan INFOEX, ANEPC y fogos.pt. Perímetros: EFFIS © Unión Europea, Copernicus EMS. Focos térmicos: NASA FIRMS (VIIRS/MODIS), dominio público. Meteorología: AEMET e IPMA. Cartografía base: © OpenStreetMap (ODbL).</div>
+            <div style="margin-top:12px;display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid rgba(229,72,77,.4);background:rgba(229,72,77,.08);border-radius:6px">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#F09197" stroke-width="1.4" style="flex:none"><path d="M8 2 L14 13 H2 Z"></path><path d="M8 6.5 V9.5"></path><circle cx="8" cy="11.4" r=".4" fill="#F09197"></circle></svg>
+              <span style="font-size:11px;color:#F09197;line-height:1.4">Iberfuego no es un canal oficial de emergencias. Ante peligro inmediato llama al <strong>112</strong>.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ BARRA INFERIOR ============ -->
+    <div style="height:56px;display:flex;border-top:1px solid rgba(255,255,255,.1);flex:none;background:#0F151C">
+      <div onClick="{{ goMapa }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-top:{{ tabMapaB }};margin-top:-1px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{ tabMapaC }}" stroke-width="1.3"><path d="M2 4 L6 2.5 L10 4 L14 2.5 V12 L10 13.5 L6 12 L2 13.5 Z"></path><path d="M6 2.5 V12 M10 4 V13.5"></path></svg>
+        <span style="font-size:9.5px;font-weight:600;color:{{ tabMapaC }}">Mapa</span>
+      </div>
+      <div onClick="{{ goInforme }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-top:{{ tabInformeB }};margin-top:-1px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{ tabInformeC }}" stroke-width="1.3"><path d="M3 13.5 V8.5 M8 13.5 V3 M13 13.5 V6.5"></path></svg>
+        <span style="font-size:9.5px;font-weight:600;color:{{ tabInformeC }}">Informe</span>
+      </div>
+      <div onClick="{{ goNoticias }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-top:{{ tabNoticiasB }};margin-top:-1px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{ tabNoticiasC }}" stroke-width="1.3"><rect x="2" y="2.5" width="12" height="11" rx="1.5"></rect><path d="M4.5 5.5 H11.5 M4.5 8 H11.5 M4.5 10.5 H8.5"></path></svg>
+        <span style="font-size:9.5px;font-weight:600;color:{{ tabNoticiasC }}">Noticias</span>
+      </div>
+      <div onClick="{{ goFuentes }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-top:{{ tabFuentesB }};margin-top:-1px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{ tabFuentesC }}" stroke-width="1.3"><circle cx="8" cy="8" r="6"></circle><path d="M8 7 V11.2"></path><circle cx="8" cy="4.8" r=".5" fill="{{ tabFuentesC }}"></circle></svg>
+        <span style="font-size:9.5px;font-weight:600;color:{{ tabFuentesC }}">Fuentes</span>
+      </div>
+    </div>
+
+    <!-- ============ FICHA (overlay) ============ -->
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="ficha de incendio" style="position:absolute;inset:0;background:#0C1117;z-index:10;display:flex;flex-direction:column">
+        <div style="height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex:none">
+          <span style="font:600 13px 'IBM Plex Mono',monospace">14:32</span>
+          <div style="display:flex;align-items:flex-end;gap:6px">
+            <div style="display:flex;align-items:flex-end;gap:1.5px"><span style="width:2.5px;height:4px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:6px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:8px;background:#E8EDF2;border-radius:1px"></span><span style="width:2.5px;height:10px;background:rgba(232,237,242,.35);border-radius:1px"></span></div>
+            <div style="width:20px;height:9px;border:1px solid rgba(232,237,242,.5);border-radius:2.5px;padding:1px;box-sizing:border-box"><div style="width:70%;height:100%;background:#E8EDF2;border-radius:1px"></div></div>
+          </div>
+        </div>
+        <div style="height:190px;position:relative;background:radial-gradient(120% 90% at 50% 20%,#141b24 0%,#0C1117 75%);overflow:hidden;flex:none">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 47px,rgba(255,255,255,.03) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,rgba(255,255,255,.03) 47px 48px)"></div>
+          <div style="position:absolute;left:50%;top:50%"><span style="position:absolute;width:16px;height:16px;border-radius:50%;background:{{ selPulseBg }};left:-8px;top:-8px;animation:ifPulse 1.8s ease-out infinite;display:{{ selPulseDisp }}"></span><span style="position:absolute;width:11px;height:11px;background:{{ selBg }};border-radius:{{ selRad }};transform:{{ selTf }};border:{{ selBord }};left:-5.5px;top:-5.5px;box-sizing:border-box"></span></div>
+          <span style="position:absolute;left:50%;top:calc(50% + 15px);transform:translateX(-50%);font:500 10px 'IBM Plex Sans',sans-serif;color:#9AAAB8">{{ selMuni }}</span>
+          <div onClick="{{ closeFire }}" style="position:absolute;top:12px;left:12px;width:38px;height:38px;background:rgba(18,25,34,.94);border:1px solid rgba(255,255,255,.14);border-radius:8px;display:grid;place-items:center;cursor:pointer"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#C7D0D9" stroke-width="1.5"><path d="M10 3 L5 8 L10 13"></path></svg></div>
+        </div>
+        <div style="flex:1;min-height:0;background:#121922;border-top:1px solid rgba(255,255,255,.1);border-radius:14px 14px 0 0;margin-top:-14px;position:relative;display:flex;flex-direction:column;overflow:hidden">
+          <div style="width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:8px auto 6px;flex:none"></div>
+          <div style="padding:0 16px;flex:none">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:3.5px 9px;border-radius:4px;background:{{ selBadgeBg }};border:1px solid {{ selBadgeBord }};font-size:10.5px;font-weight:700;color:{{ selStColor }};letter-spacing:.04em">{{ selStTxtUp }}</span>
+              <sc-if value="{{ selN2 }}" hint-placeholder-val="{{ false }}">
+                <span style="padding:3.5px 9px;border-radius:4px;background:rgba(232,145,45,.12);border:1px solid rgba(232,145,45,.45);font:700 10.5px 'IBM Plex Mono',monospace;color:#F0B269">NIVEL 2</span>
+              </sc-if>
+              <div style="flex:1"></div>
+              <div onClick="{{ openShare }}" style="width:34px;height:30px;display:grid;place-items:center;border-radius:6px;border:1px solid rgba(255,255,255,.13);cursor:pointer"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7FA9E8" stroke-width="1.3"><circle cx="8" cy="3" r="1.6"></circle><circle cx="3" cy="9" r="1.6"></circle><circle cx="13" cy="9" r="1.6"></circle><path d="M8 4.5 L3.8 7.7 M8 4.5 L12.2 7.7"></path></svg></div>
+            </div>
+            <div style="font-size:18px;font-weight:700;margin-top:9px;letter-spacing:-.01em">Incendio de {{ selName }}</div>
+            <div style="font-size:12px;color:#9AAAB8;margin-top:1px">{{ selLugar }}</div>
+            <div style="font:400 9.5px 'IBM Plex Mono',monospace;color:#66727E;margin-top:5px">Fuente: {{ selFuente }} — Actualizado hace {{ selUpd }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);margin-top:12px;flex:none">
+            <div style="background:#121922;padding:10px 16px">
+              <div style="font:600 9px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Superficie</div>
+              <div style="font:600 20px 'IBM Plex Mono',monospace;white-space:nowrap">{{ selHa }} <span style="font-size:11px;color:#9AAAB8">ha</span></div>
+              <div style="font:500 10px 'IBM Plex Mono',monospace;color:#FF8B8E;white-space:nowrap">{{ selD24 }}</div>
+            </div>
+            <div style="background:#121922;padding:10px 16px">
+              <div style="font:600 9px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Inicio</div>
+              <div style="font:600 15px 'IBM Plex Mono',monospace;margin-top:3px">{{ selInicio }}</div>
+            </div>
+            <div style="background:#121922;padding:10px 16px">
+              <div style="font:600 9px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Medios</div>
+              <div style="font:500 12.5px 'IBM Plex Mono',monospace;margin-top:3px">{{ selMedios }}</div>
+            </div>
+            <div style="background:#121922;padding:10px 16px">
+              <div style="font:600 9px 'IBM Plex Sans',sans-serif;letter-spacing:.1em;color:#66727E;text-transform:uppercase">Meteo local</div>
+              <div style="font:500 12.5px 'IBM Plex Mono',monospace;margin-top:3px">38 °C · HR 14 %</div>
+              <div style="font:400 10px 'IBM Plex Mono',monospace;color:#9AAAB8">Viento NO 32 km/h</div>
+            </div>
+          </div>
+          <sc-if value="{{ selHasEvac }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 16px 0;flex:none">
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid rgba(229,72,77,.4);background:rgba(229,72,77,.08);border-radius:6px">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#F09197" stroke-width="1.4" style="flex:none"><path d="M8 2 L14 13 H2 Z"></path><path d="M8 6.5 V9.5"></path><circle cx="8" cy="11.4" r=".4" fill="#F09197"></circle></svg>
+                <span style="font-size:11px;color:#F09197;line-height:1.4">{{ selEvac }}</span>
+              </div>
+            </div>
+          </sc-if>
+          <div style="flex:1"></div>
+          <div style="padding:0 16px 14px;flex:none">
+            <div style="font:500 9.5px 'IBM Plex Mono',monospace;color:#66727E;text-align:center">no sustituye a los canales oficiales · emergencias 112</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ HOJA COMPARTIR (overlay) ============ -->
+    <sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ closeShare }}" style="position:absolute;inset:0;background:rgba(10,14,19,.55)"></div>
+        <div style="position:relative;background:#0F151C;border-top:1px solid rgba(255,255,255,.1);border-radius:16px 16px 0 0;padding:14px 16px 18px">
+          <div style="display:flex;justify-content:center;margin-bottom:12px"><div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.18)"></div></div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px">Compartir este incendio</div>
+          <div style="display:flex;align-items:center;gap:9px;height:42px;padding:0 12px;border-radius:8px;background:#0A0F14;border:1px solid rgba(255,255,255,.11)">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#7FA9E8" stroke-width="1.4" style="flex:none"><path d="M6.5 9.5 A3 3 0 0 0 10.7 9.3 L12.5 7.5 A3 3 0 0 0 8.3 3.3 L7.4 4.2"></path><path d="M9.5 6.5 A3 3 0 0 0 5.3 6.7 L3.5 8.5 A3 3 0 0 0 7.7 12.7 L8.6 11.8"></path></svg>
+            <span style="flex:1;font:500 12px 'IBM Plex Mono',monospace;color:#C7D0D9">{{ selUrl }}</span>
+            <span onClick="{{ copyLink }}" style="font-size:11.5px;font-weight:600;color:{{ copyColor }};flex:none;cursor:pointer">{{ copyTxt }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;margin-top:7px;padding:0 2px">
+            <span style="width:6px;height:6px;border-radius:50%;background:#3DBE7A;flex:none"></span>
+            <span style="font-size:10.5px;color:#9AAAB8;line-height:1.4">El enlace muestra siempre el estado actual, no una captura de ahora.</span>
+          </div>
+          <div style="height:42px;border-radius:8px;background:#3D7DD8;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:13px;color:#fff;margin-top:14px;cursor:pointer"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.4"><path d="M8 10 V2 M5 4.5 L8 1.5 L11 4.5"></path><path d="M3 8 V13 H13 V8"></path></svg>Compartir…</div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+  <div style="font:500 10.5px 'IBM Plex Mono',monospace;color:rgba(0,0,0,.45);text-align:center;line-height:1.6">toca un incendio en el mapa o en el informe para abrir su ficha ·<br>la leyenda se pliega · compartir desde la ficha copia el enlace real</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940},&quot;mostrarFocos&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Mapa&quot;},&quot;tabInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mapa&quot;,&quot;informe&quot;,&quot;noticias&quot;,&quot;fuentes&quot;],&quot;default&quot;:&quot;mapa&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Navegación&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, sel: null, filter: 'todos', legendOpen: false, shareOpen: false, copied: false };
+
+  fires = [
+    { id: 'las-hurdes', name: 'Las Hurdes', muni: 'Caminomorisco', prov: 'Cáceres', reg: 'Extremadura', c: 'ES', st: 'activo', nivel: 2, ha: 3241, d24: '▲ 340 / 24 h', upd: '6 min', x: 24, y: 35, evac: 'Evacuación en Riomalo de Abajo y Las Mestas · EX-204 cortada', medios: '14 aér · 42 terr', inicio: '07 jul · 14:20', fuente: '112 Extremadura · EFFIS' },
+    { id: 'tejeda', name: 'Tejeda', muni: 'Tejeda', prov: 'Las Palmas', reg: 'Canarias', c: 'ES', st: 'activo', nivel: 2, ha: 1524, d24: '▲ 120 / 24 h', upd: '11 min', x: 13, y: 86, evac: '900 evacuados en Tejeda y Artenara', medios: '9 aér · 26 terr', inicio: '08 jul · 11:05', fuente: 'Cabildo GC · EFFIS' },
+    { id: 'macao', name: 'Mação', muni: 'Mação', prov: 'Santarém', reg: 'Centro (PT)', c: 'PT', st: 'activo', nivel: 1, ha: 640, d24: '▲ 95 / 24 h', upd: '14 min', x: 11, y: 44, evac: null, medios: '6 aér · 18 terr', inicio: '09 jul · 16:40', fuente: 'ANEPC · fogos.pt' },
+    { id: 'valdeorras', name: 'O Barco', muni: 'O Barco de Valdeorras', prov: 'Ourense', reg: 'Galicia', c: 'ES', st: 'activo', nivel: 1, ha: 502, d24: '▲ 60 / 24 h', upd: '9 min', x: 17, y: 14, evac: null, medios: '4 aér · 14 terr', inicio: '09 jul · 20:15', fuente: 'Xunta · EFFIS' },
+    { id: 'odemira', name: 'Odemira', muni: 'Odemira', prov: 'Beja', reg: 'Alentejo', c: 'PT', st: 'controlado', nivel: 1, ha: 1102, d24: 'sin avance', upd: '18 min', x: 8, y: 64, evac: null, medios: '3 aér · 240 oper', inicio: '06 jul · 13:10', fuente: 'ANEPC · fogos.pt' },
+    { id: 'monfrague', name: 'Monfragüe', muni: 'Torrejón el Rubio', prov: 'Cáceres', reg: 'Extremadura', c: 'ES', st: 'controlado', nivel: 0, ha: 412, d24: 'sin avance', upd: '42 min', x: 27, y: 43, evac: null, medios: '2 aér · 8 terr', inicio: '08 jul · 17:30', fuente: 'Plan INFOEX' },
+    { id: 'gata', name: 'Sierra de Gata', muni: 'Gata', prov: 'Cáceres', reg: 'Extremadura', c: 'ES', st: 'estabilizado', nivel: 0, ha: 238, d24: 'sin avance', upd: '1 h', x: 20, y: 31, evac: null, medios: 'vigilancia', inicio: '05 jul · 12:00', fuente: 'Plan INFOEX' },
+    { id: 'bejar', name: 'Béjar', muni: 'Béjar', prov: 'Salamanca', reg: 'Castilla y León', c: 'ES', st: 'extinguido', nivel: 0, ha: 95, d24: '—', upd: '3 h', x: 31, y: 33, evac: null, medios: '—', inicio: '03 jul · 09:20', fuente: 'JCyL' }
+  ];
+
+  stMeta(st) {
+    if (st === 'activo') return { txt: 'Activo', color: '#FF8B8E', bg: '#E5484D', rad: '50%', tf: 'none', bord: 'none', glow: '0 0 8px rgba(229,72,77,.7)' };
+    if (st === 'controlado') return { txt: 'Controlado', color: '#F0B269', bg: '#E8912D', rad: '0', tf: 'rotate(45deg)', bord: 'none', glow: 'none' };
+    if (st === 'estabilizado') return { txt: 'Estabilizado', color: '#E5C337', bg: '#E5C337', rad: '0', tf: 'none', bord: 'none', glow: 'none' };
+    return { txt: 'Extinguido', color: '#9AAAB8', bg: 'transparent', rad: '50%', tf: 'none', bord: '2px solid #6E7B87', glow: 'none' };
+  }
+
+  fmt(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+  openFire(f) { this.setState({ sel: f.id, legendOpen: false }); }
+
+  renderVals() {
+    const tab = this.state.tab ?? (this.props.tabInicial ?? 'mapa');
+    const filter = this.state.filter;
+    const sel = this.fires.find(f => f.id === this.state.sel) || null;
+    const activos = this.fires.filter(f => f.st === 'activo');
+    const haTotal = this.fires.reduce((a, f) => a + f.ha, 0);
+
+    const deco = f => {
+      const m = this.stMeta(f.st);
+      return {
+        ...f,
+        left: f.x + '%', top: f.y + '%',
+        bg: m.bg, rad: m.rad, tf: m.tf, bord: m.bord, glow: m.glow,
+        stTxt: m.txt, stColor: m.color,
+        pulseBg: 'rgba(229,72,77,.5)',
+        pulseDisp: (f.st === 'activo' && f.nivel >= 2) ? 'block' : 'none',
+        nivelTxt: f.nivel >= 1 ? 'N' + f.nivel : '',
+        lugar: f.prov + ' · ' + f.reg,
+        haFmt: this.fmt(f.ha),
+        open: () => this.openFire(f)
+      };
+    };
+
+    const chip = on => ({
+      b: on ? '1px solid rgba(61,125,216,.5)' : '1px solid rgba(255,255,255,.14)',
+      bg: on ? 'rgba(61,125,216,.14)' : 'transparent',
+      c: on ? '#7FA9E8' : '#9AAAB8'
+    });
+    const cT = chip(filter === 'todos'), cE = chip(filter === 'es'), cP = chip(filter === 'pt');
+
+    const rows = this.fires
+      .filter(f => filter === 'todos' || (filter === 'es' ? f.c === 'ES' : f.c === 'PT'))
+      .slice().sort((a, b) => b.ha - a.ha).map(deco);
+
+    const tabB = on => on ? '2px solid #3D7DD8' : '2px solid transparent';
+    const tabC = on => on ? '#7FA9E8' : '#66727E';
+
+    const selM = sel ? this.stMeta(sel.st) : null;
+
+    return {
+      mostrarFocos: this.props.mostrarFocos ?? true,
+      isMapa: tab === 'mapa', isInforme: tab === 'informe', isNoticias: tab === 'noticias', isFuentes: tab === 'fuentes',
+      goMapa: () => this.setState({ tab: 'mapa' }),
+      goInforme: () => this.setState({ tab: 'informe' }),
+      goNoticias: () => this.setState({ tab: 'noticias' }),
+      goFuentes: () => this.setState({ tab: 'fuentes' }),
+      tabMapaB: tabB(tab === 'mapa'), tabMapaC: tabC(tab === 'mapa'),
+      tabInformeB: tabB(tab === 'informe'), tabInformeC: tabC(tab === 'informe'),
+      tabNoticiasB: tabB(tab === 'noticias'), tabNoticiasC: tabC(tab === 'noticias'),
+      tabFuentesB: tabB(tab === 'fuentes'), tabFuentesC: tabC(tab === 'fuentes'),
+
+      nActivos: activos.length,
+      haTotal: this.fmt(haTotal),
+      mapFires: this.fires.map(deco),
+      legendOpen: this.state.legendOpen,
+      toggleLegend: () => this.setState(s => ({ legendOpen: !s.legendOpen })),
+      openHurdes: () => this.openFire(this.fires[0]),
+
+      nTodos: this.fires.length,
+      nEs: this.fires.filter(f => f.c === 'ES').length,
+      nPt: this.fires.filter(f => f.c === 'PT').length,
+      fTodos: () => this.setState({ filter: 'todos' }),
+      fEs: () => this.setState({ filter: 'es' }),
+      fPt: () => this.setState({ filter: 'pt' }),
+      chipTodosB: cT.b, chipTodosBg: cT.bg, chipTodosC: cT.c,
+      chipEsB: cE.b, chipEsBg: cE.bg, chipEsC: cE.c,
+      chipPtB: cP.b, chipPtBg: cP.bg, chipPtC: cP.c,
+      rows,
+
+      hasSel: !!sel,
+      closeFire: () => this.setState({ sel: null, shareOpen: false }),
+      selName: sel ? sel.name : '', selMuni: sel ? sel.muni : '',
+      selLugar: sel ? (sel.muni + ' · ' + sel.prov + ' · ' + sel.reg) : '',
+      selFuente: sel ? sel.fuente : '', selUpd: sel ? sel.upd : '',
+      selHa: sel ? this.fmt(sel.ha) : '', selD24: sel ? sel.d24 : '',
+      selInicio: sel ? sel.inicio : '', selMedios: sel ? sel.medios : '',
+      selStTxtUp: selM ? selM.txt.toUpperCase() : '',
+      selStColor: selM ? selM.color : '#fff',
+      selBadgeBg: sel && sel.st === 'activo' ? 'rgba(229,72,77,.14)' : 'rgba(255,255,255,.05)',
+      selBadgeBord: sel && sel.st === 'activo' ? 'rgba(229,72,77,.45)' : 'rgba(255,255,255,.14)',
+      selBg: selM ? selM.bg : '', selRad: selM ? selM.rad : '', selTf: selM ? selM.tf : '', selBord: selM ? selM.bord : '',
+      selPulseBg: 'rgba(229,72,77,.4)',
+      selPulseDisp: sel && sel.st === 'activo' && sel.nivel >= 2 ? 'block' : 'none',
+      selN2: !!(sel && sel.nivel >= 2),
+      selHasEvac: !!(sel && sel.evac),
+      selEvac: sel && sel.evac ? sel.evac : '',
+      selUrl: sel ? ('iberfuego.com/f/' + sel.id) : '',
+
+      shareOpen: this.state.shareOpen,
+      openShare: () => this.setState({ shareOpen: true, copied: false }),
+      closeShare: () => this.setState({ shareOpen: false }),
+      copyTxt: this.state.copied ? '✓ Copiado' : 'Copiar',
+      copyColor: this.state.copied ? '#5FD494' : '#7FA9E8',
+      copyLink: () => {
+        const url = 'https://iberfuego.com/f/' + (sel ? sel.id : '');
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+        this.setState({ copied: true });
+        clearTimeout(this._ct);
+        this._ct = setTimeout(() => this.setState({ copied: false }), 1800);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
