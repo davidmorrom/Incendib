@@ -26,6 +26,7 @@ npm run dev         # desarrollo
 npm run build       # build de producción
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint (next)
+npm test            # pruebas unitarias (Vitest)
 npm run geo:gen     # regenera la máscara del mapa (ES+PT)
 ```
 
