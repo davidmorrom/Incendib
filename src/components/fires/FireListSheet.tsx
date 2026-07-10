@@ -8,10 +8,9 @@ import { interpolate } from '@/lib/i18n';
 import { cn } from '@/lib/utils/cn';
 import { mix, V } from '@/lib/design/color';
 import type { Fire } from '@/types/fire';
-import type { MapFilters } from '@/components/screens/MapaScreen';
+import type { FireFilters } from '@/lib/fires/filters';
 
-const chipBase =
-  'whitespace-nowrap rounded-chip border px-[10px] py-[5px] text-[11.5px] font-semibold';
+const chipBase = 'whitespace-nowrap rounded-chip border px-[10px] py-[5px] text-[11.5px] font-semibold';
 
 function FilterChip({
   label,
@@ -24,26 +23,21 @@ function FilterChip({
   accent?: 'action' | 'state';
   onClick?: () => void;
 }) {
-  if (!active) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        aria-pressed={false}
-        className={cn(chipBase, 'border-strong text-fg-secondary')}
-      >
-        {label}
-      </button>
-    );
-  }
   const color = accent === 'state' ? V.activo : V.action;
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-pressed={true}
-      className={cn(chipBase, accent === 'state' ? 'text-state-activo-text' : 'text-action-text')}
-      style={{ backgroundColor: mix(color, 13), borderColor: mix(color, 50) }}
+      aria-pressed={active}
+      className={cn(
+        chipBase,
+        active
+          ? accent === 'state'
+            ? 'text-state-activo-text'
+            : 'text-action-text'
+          : 'border-strong text-fg-secondary',
+      )}
+      style={active ? { backgroundColor: mix(color, 13), borderColor: mix(color, 50) } : undefined}
     >
       {label}
     </button>
@@ -51,33 +45,40 @@ function FilterChip({
 }
 
 /**
- * Bottom sheet del mapa (2a): recuento + chips de filtro rápido + lista de
- * incendios por gravedad + disclaimer. Los filtros afectan también al mapa
- * (estado en MapaScreen).
+ * Bottom sheet del mapa (2a móvil): recuento + chips de filtro rápido + lista.
+ * Los chips mapean al modelo unificado de filtros (afecta también al mapa).
  */
 export function FireListSheet({
+  className,
   fires,
   activeCount,
   filters,
-  onToggle,
+  onChange,
   onSelect,
   onHover,
   hoveredSlug,
 }: {
+  className?: string;
   fires: Fire[];
   activeCount: number;
-  filters: MapFilters;
-  onToggle: (key: keyof MapFilters) => void;
+  filters: FireFilters;
+  onChange: (patch: Partial<FireFilters>) => void;
   onSelect: (f: Fire) => void;
   onHover?: (slug: string | null) => void;
   hoveredSlug?: string | null;
 }) {
   const d = useDict();
 
+  const activos = filters.states.length === 1 && filters.states[0] === 'activo';
+  const level2 = filters.levels.includes(2);
+
   return (
     <section
       aria-label={interpolate(d.map.firesCount, { n: fires.length })}
-      className="relative -mt-[14px] flex h-[320px] flex-none flex-col rounded-t-[14px] border-t bg-bg-card"
+      className={cn(
+        'relative -mt-[14px] flex h-[320px] flex-none flex-col rounded-t-[14px] border-t bg-bg-card',
+        className,
+      )}
     >
       <div
         className="mx-auto mt-2 h-1 w-9 flex-none rounded-full"
@@ -98,13 +99,25 @@ export function FireListSheet({
       <div className="flex flex-none gap-1.5 overflow-x-auto px-screen pb-2.5">
         <FilterChip
           label={interpolate(d.map.chipActivos, { n: activeCount })}
-          active={filters.onlyActive}
+          active={activos}
           accent="state"
-          onClick={() => onToggle('onlyActive')}
+          onClick={() => onChange({ states: activos ? [] : ['activo'] })}
         />
-        <FilterChip label={d.map.chip24h} active={filters.last24h} onClick={() => onToggle('last24h')} />
-        <FilterChip label={d.map.chipLevel} active={filters.levelGE2} onClick={() => onToggle('levelGE2')} />
-        <FilterChip label={d.map.chipSpain} active={filters.spainOnly} onClick={() => onToggle('spainOnly')} />
+        <FilterChip
+          label={d.map.chip24h}
+          active={filters.period === '24h'}
+          onClick={() => onChange({ period: filters.period === '24h' ? 'todos' : '24h' })}
+        />
+        <FilterChip
+          label={d.map.chipLevel}
+          active={level2}
+          onClick={() => onChange({ levels: level2 ? [] : [2, 3] })}
+        />
+        <FilterChip
+          label={d.map.chipSpain}
+          active={filters.country === 'es'}
+          onClick={() => onChange({ country: filters.country === 'es' ? 'todos' : 'es' })}
+        />
         <span className={cn(chipBase, 'border-strong text-fg-secondary opacity-70')}>
           + {d.map.moreFilters}
         </span>
@@ -116,19 +129,13 @@ export function FireListSheet({
         ) : (
           fires.map((f) => (
             <li key={f.slug}>
-              <FireRow
-                fire={f}
-                highlighted={hoveredSlug === f.slug}
-                onSelect={onSelect}
-                onHover={onHover}
-              />
+              <FireRow fire={f} highlighted={hoveredSlug === f.slug} onSelect={onSelect} onHover={onHover} />
             </li>
           ))
         )}
       </ul>
 
       <p className="flex-none border-t px-screen py-[7px] text-[10px] text-fg-mute">
-        {/* Disclaimer 112 localizado (todas las variantes terminan en "112"). */}
         {d.disclaimer.short.split('112')[0]}
         <span className="font-mono font-semibold text-state-activo-text">112</span>
       </p>
