@@ -52,13 +52,14 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  // Oscuro por defecto (el tema claro es opt-in del usuario).
-  themeColor: '#0C1117',
+  // Claro por defecto (el tema oscuro es opt-in del usuario).
+  themeColor: '#F4F2EC',
 };
 
 /**
  * Fija data-theme antes del primer paint (evita flash al cargar la preferencia
- * guardada). Si no hay preferencia, no toca nada y manda prefers-color-scheme.
+ * guardada). Si no hay preferencia, no toca nada y manda el tema claro por
+ * defecto (:root). El tema es una decisión explícita, no sigue el sistema.
  */
 const themeInit = `(function(){try{var t=localStorage.getItem('incendib-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 

@@ -1,8 +1,9 @@
 # Arquitectura — Incendib
 
 Visor web sin ánimo de lucro de incendios forestales activos en España y
-Portugal. **Mobile-first**, modo oscuro por defecto, PWA (no instalable desde
-tiendas), con panel desktop. Este documento describe la estructura del código;
+Portugal. **Mobile-first**, modo claro por defecto (oscuro "sala de control"
+opt-in), PWA (no instalable desde tiendas), con panel desktop. Este documento
+describe la estructura del código;
 el diseño hifi vive en `docs/HANDOFF.md` y el análisis de fuentes en
 `docs/DATA-SOURCES.md`.
 
@@ -30,8 +31,9 @@ tailwind.config.ts         ← utilidades que consumen esas variables
 Regla: si cambia un color, se cambia en `tokens.ts` **y** en `globals.css` a la
 vez. Tailwind no necesita tocarse (usa `var(--…)`).
 
-- Tema oscuro por defecto (`:root`). Claro vía `[data-theme="light"]` y, sin
-  preferencia, `prefers-color-scheme`. El toggle escribe `localStorage` y un
+- Tema claro por defecto (`:root`). Oscuro (sala de control) vía
+  `[data-theme="dark"]`, opt-in del usuario. No se sigue `prefers-color-scheme`:
+  el tema es una decisión explícita. El toggle escribe `localStorage` y un
   script inline en `layout.tsx` lo aplica antes del primer paint.
 - Tipografía: IBM Plex Sans (UI) + IBM Plex Mono (cifras, timestamps,
   coordenadas) vía `next/font`. Miles separados por **espacio** (`formatNumber`).

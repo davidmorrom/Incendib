@@ -4,66 +4,26 @@
 
 /*
  * Incendib — variables de tema. Reflejan src/lib/design/tokens.ts.
- * Oscuro por defecto (:root). Claro vía [data-theme="light"] y, si el usuario
- * no ha elegido, por prefers-color-scheme. El toggle estampa data-theme y gana.
+ * Claro por defecto (:root). Oscuro (sala de control) vía [data-theme="dark"],
+ * opt-in del usuario. NO se sigue prefers-color-scheme: el tema es una decisión
+ * explícita. El toggle estampa data-theme y persiste en localStorage.
  */
-:root {
-  /* fondos */
-  --bg-base: #0c1117;
-  --bg-raised: #0f151c;
-  --bg-sunken: #0a0f14;
-  --bg-card: #121922;
-  --bg-map: #0c1117;
-
-  /* texto */
-  --text-primary: #e8edf2;
-  --text-secondary: #9aaab8;
-  --text-mute: #66727e;
-  --text-body: #c7d0d9;
-
-  /* estados de incendio */
-  --state-activo: #e5484d;
-  --state-activo-text: #ff8b8e;
-  --state-controlado: #e8912d;
-  --state-controlado-text: #f0b269;
-  --state-estabilizado: #e5c337;
-  --state-estabilizado-text: #e5c337;
-  --state-extinguido: #6e7b87;
-  --state-extinguido-text: #9aaab8;
-  --state-foco: #ff6a3d;
-  --state-foco-text: #ffb59a;
-
-  /* UI */
-  --action: #3d7dd8;
-  --action-text: #7fa9e8;
-  --ok: #3dbe7a;
-  --ok-text: #5fd494;
-  --error-text: #f09197;
-  --warn: #e8b36b;
-
-  /* bordes */
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.14);
-
-  /* marcadores: sin borde en oscuro */
-  --marker-outline: none;
-
-  color-scheme: dark;
-}
-
+:root,
 :root[data-theme='light'] {
+  /* fondos */
   --bg-base: #f4f2ec;
   --bg-raised: #ffffff;
   --bg-sunken: #eae7dd;
   --bg-card: #ffffff;
   --bg-map: #eae7dd;
 
+  /* texto */
   --text-primary: #1c222a;
   --text-secondary: #6b7480;
   --text-mute: #6b7480;
   --text-body: #1c222a;
 
+  /* estados de incendio */
   --state-activo: #c1272d;
   --state-activo-text: #c1272d;
   --state-controlado: #c4761b;
@@ -75,6 +35,7 @@
   --state-foco: #d9531e;
   --state-foco-text: #d9531e;
 
+  /* UI */
   --action: #2a5fa8;
   --action-text: #2a5fa8;
   --ok: #2c9a61;
@@ -82,18 +43,56 @@
   --error-text: #c1272d;
   --warn: #b5822f;
 
+  /* bordes */
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-default: rgba(0, 0, 0, 0.12);
   --border-strong: rgba(0, 0, 0, 0.18);
 
+  /* marcadores: borde blanco 1.5px sobre el mapa claro */
   --marker-outline: 1.5px solid #ffffff;
 
   color-scheme: light;
 }
 
-/* Modo oscuro por defecto (sala de control): NO se sigue prefers-color-scheme.
- * El claro es opt-in del usuario vía el toggle (data-theme="light"), pensado
- * para uso en exteriores. */
+:root[data-theme='dark'] {
+  --bg-base: #0c1117;
+  --bg-raised: #0f151c;
+  --bg-sunken: #0a0f14;
+  --bg-card: #121922;
+  --bg-map: #0c1117;
+
+  --text-primary: #e8edf2;
+  --text-secondary: #9aaab8;
+  --text-mute: #66727e;
+  --text-body: #c7d0d9;
+
+  --state-activo: #e5484d;
+  --state-activo-text: #ff8b8e;
+  --state-controlado: #e8912d;
+  --state-controlado-text: #f0b269;
+  --state-estabilizado: #e5c337;
+  --state-estabilizado-text: #e5c337;
+  --state-extinguido: #6e7b87;
+  --state-extinguido-text: #9aaab8;
+  --state-foco: #ff6a3d;
+  --state-foco-text: #ffb59a;
+
+  --action: #3d7dd8;
+  --action-text: #7fa9e8;
+  --ok: #3dbe7a;
+  --ok-text: #5fd494;
+  --error-text: #f09197;
+  --warn: #e8b36b;
+
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* marcadores: sin borde en oscuro */
+  --marker-outline: none;
+
+  color-scheme: dark;
+}
 
 html,
 body {
@@ -118,10 +117,10 @@ body {
   .if-overlay {
     background: color-mix(in srgb, var(--bg-card) 94%, transparent);
     border: 1px solid var(--border-strong);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  }
-  :root[data-theme='light'] .if-overlay {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+  :root[data-theme='dark'] .if-overlay {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
   }
 }
 
