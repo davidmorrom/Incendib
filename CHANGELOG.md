@@ -5,6 +5,23 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.4.0] - 2026-07-10
+
+### Añadido
+
+- **Panel desktop profesional (1d)**: en `lg:` el Mapa pasa a un layout de tres
+  columnas — barra lateral de **filtros** (estado, país, nivel, periodo
+  funcionales; superficie/sensor/FWI visuales), **mapa** compartido con tarjetas
+  KPI superpuestas, y **lista** de incendios a la derecha.
+- **Navegación desktop**: barra superior con marca, buscador, pestañas, idioma y
+  tema; la barra inferior se oculta en `lg:`.
+- **Modelo de filtros unificado** que comparten el sheet móvil y la barra desktop.
+
+### Cambiado
+
+- Atribución del mapa propia y responsive (móvil arriba-izq., desktop
+  abajo-centro), sin solaparse con controles ni KPIs.
+
 ## [0.3.7] - 2026-07-10
 
 ### Añadido
@@ -147,6 +164,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.4.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.0
 [0.3.7]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.7
 [0.3.6]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.6
 [0.3.5]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.5

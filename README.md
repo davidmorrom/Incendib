@@ -11,7 +11,7 @@ serio y usable — pensada como panel de sala de emergencias, no como landing.
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![MapLibre](https://img.shields.io/badge/MapLibre-GL-295DAA?logo=maplibre&logoColor=white)](https://maplibre.org)
-![Version](https://img.shields.io/badge/version-0.3.6-E5484D)
+![Version](https://img.shields.io/badge/version-0.4.0-E5484D)
 
 </div>
 
@@ -139,8 +139,9 @@ Todas las fuentes son de reutilización libre con atribución:
   y perímetros de área quemada (EFFIS).
 - [x] **v0.3** — Pantallas **Informe**, **Fuentes**, **Ficha** y **Noticias**;
   estados de red (offline/reconexión), error y carga (skeleton).
-- [ ] **v0.4** — Fuentes de datos en vivo (FIRMS/EFFIS/fogos.pt) con caché en backend.
-- [ ] **v0.5** — Panel desktop (1d), Web Push (alertas por zona) e histórico de campaña.
+- [x] **v0.4** — **Panel desktop** (1d): filtros, mapa y lista en tres columnas.
+- [ ] **v0.5** — Fuentes de datos en vivo (FIRMS/EFFIS/fogos.pt) con caché en backend.
+- [ ] **v0.6** — Web Push (alertas por zona) e histórico de campaña.
 
 ## Licencia
 

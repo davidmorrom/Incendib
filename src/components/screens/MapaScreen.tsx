@@ -5,79 +5,86 @@ import { useRouter } from 'next/navigation';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { KpiStrip } from '@/components/ui/KpiStrip';
 import { MapCanvasClient } from '@/components/map/MapCanvasClient';
+import { DesktopKpiOverlay } from '@/components/map/DesktopKpiOverlay';
+import { FiltersSidebar } from '@/components/map/FiltersSidebar';
 import { FireListSheet } from '@/components/fires/FireListSheet';
+import { DesktopFireList } from '@/components/fires/DesktopFireList';
 import { computeKpis, sortByGravity } from '@/lib/fires/derive';
+import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
 import { getNow } from '@/lib/time';
 import type { Fire } from '@/types/fire';
 
-export interface MapFilters {
-  onlyActive: boolean;
-  last24h: boolean;
-  levelGE2: boolean;
-  spainOnly: boolean;
-}
-
-const NO_FILTERS: MapFilters = {
-  onlyActive: false,
-  last24h: false,
-  levelGE2: false,
-  spainOnly: false,
-};
-
-function applyFilters(fires: Fire[], f: MapFilters, now: number): Fire[] {
-  const dayMs = 24 * 3600 * 1000;
-  return fires.filter((x) => {
-    if (f.onlyActive && x.state !== 'activo') return false;
-    if (f.levelGE2 && (x.level ?? 0) < 2) return false;
-    if (f.spainOnly && x.country !== 'ES') return false;
-    if (f.last24h && now - Date.parse(x.updatedAt) > dayMs) return false;
-    return true;
-  });
-}
-
 /**
- * Pantalla Mapa (home, 2a). Isla cliente: mantiene filtros y hover; los filtros
- * rápidos afectan a mapa y lista a la vez. Tocar un incendio abre su ficha
- * (/f/{slug}), la URL propia y compartible.
+ * Pantalla Mapa (home, 2a móvil / 1d desktop). Un único mapa compartido; el
+ * layout es una pila en móvil y un panel de 3 columnas (filtros · mapa · lista)
+ * en `lg:`. Filtros unificados que afectan a mapa y lista.
  */
 export function MapaScreen({ fires, focos24h }: { fires: Fire[]; focos24h: number }) {
   const router = useRouter();
-  const [filters, setFilters] = useState<MapFilters>(NO_FILTERS);
+  const [filters, setFilters] = useState<FireFilters>(DEFAULT_FILTERS);
   const [hovered, setHovered] = useState<string | null>(null);
 
   const kpis = useMemo(() => computeKpis(fires), [fires]);
+  const activeCount = kpis.activos;
   const visible = useMemo(
     () => sortByGravity(applyFilters(fires, filters, getNow())),
     [fires, filters],
   );
 
-  const toggle = useCallback(
-    (key: keyof MapFilters) => setFilters((f) => ({ ...f, [key]: !f[key] })),
-    [],
-  );
+  const patch = useCallback((p: Partial<FireFilters>) => setFilters((f) => ({ ...f, ...p })), []);
+  const reset = useCallback(() => setFilters(DEFAULT_FILTERS), []);
   const select = useCallback((f: Fire) => router.push(`/f/${f.slug}`), [router]);
 
   return (
-    <>
-      <AppHeader />
-      <KpiStrip activos={kpis.activos} hectares={kpis.hectares} focos24h={focos24h} />
-      <div className="relative min-h-0 flex-1 bg-bg-map">
-        <MapCanvasClient
-          fires={visible}
-          onSelect={select}
-          hoveredSlug={hovered}
-          onHover={setHovered}
+    <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[264px_1fr_340px] lg:grid-rows-1">
+      {/* Móvil: cabecera + KPIs */}
+      <div className="flex-none lg:hidden">
+        <AppHeader />
+        <KpiStrip activos={kpis.activos} hectares={kpis.hectares} focos24h={focos24h} />
+      </div>
+
+      {/* Desktop: barra lateral de filtros */}
+      <FiltersSidebar
+        className="hidden lg:flex lg:col-start-1"
+        fires={fires}
+        filters={filters}
+        onChange={patch}
+        onReset={reset}
+        visible={visible.length}
+        total={fires.length}
+      />
+
+      {/* Mapa compartido */}
+      <div className="relative min-h-0 flex-1 bg-bg-map lg:col-start-2">
+        <MapCanvasClient fires={visible} onSelect={select} hoveredSlug={hovered} onHover={setHovered} />
+        <DesktopKpiOverlay
+          className="hidden lg:flex lg:flex-col"
+          activos={kpis.activos}
+          hectares={kpis.hectares}
+          focos24h={focos24h}
         />
       </div>
+
+      {/* Móvil: bottom sheet */}
       <FireListSheet
+        className="lg:hidden"
         fires={visible}
-        activeCount={kpis.activos}
+        activeCount={activeCount}
         filters={filters}
-        onToggle={toggle}
+        onChange={patch}
         onSelect={select}
         onHover={setHovered}
         hoveredSlug={hovered}
       />
-    </>
+
+      {/* Desktop: lista derecha */}
+      <DesktopFireList
+        className="hidden lg:flex lg:col-start-3"
+        fires={visible}
+        onSelect={select}
+        onHover={setHovered}
+        hoveredSlug={hovered}
+      />
+    </div>
   );
 }

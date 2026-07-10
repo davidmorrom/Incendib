@@ -2,15 +2,7 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Map,
-  Marker,
-  Popup,
-  Source,
-  Layer,
-  AttributionControl,
-  type MapRef,
-} from 'react-map-gl/maplibre';
+import { Map, Marker, Popup, Source, Layer, type MapRef } from 'react-map-gl/maplibre';
 import { FireMarker } from './FireMarker';
 import { MapControls } from './MapControls';
 import { MapLegend } from './MapLegend';
@@ -120,9 +112,11 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
       attributionControl={false}
       style={{ width: '100%', height: '100%' }}
     >
-      {/* Atribución obligatoria (OpenFreeMap/OSM), compacta y arriba-izquierda
-          para no chocar con inset ni leyenda. */}
-      <AttributionControl compact position="top-left" />
+      {/* Atribución obligatoria (OpenFreeMap/OSM), propia y discreta: arriba-izq
+          en móvil, abajo-centro en desktop (sin chocar con KPIs/leyenda/inset). */}
+      <div className="pointer-events-none absolute left-2 top-2 z-[1] font-mono text-[8px] leading-none text-fg-mute lg:left-1/2 lg:top-auto lg:bottom-1.5 lg:-translate-x-1/2">
+        © OpenStreetMap · OpenFreeMap
+      </div>
       {/* Máscara: mundo atenuado, España+Portugal recortados */}
       <Source id="dim" type="geojson" data={GEO.mask}>
         <Layer

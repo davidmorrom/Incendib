@@ -39,14 +39,14 @@ const ITEMS = [
   { href: '/fuentes', key: 'fuentes', Icon: FuentesIcon },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const d = useDict();
 
   return (
     <nav
       aria-label="Navegación principal"
-      className="flex h-14 flex-none border-t bg-bg-raised"
+      className={cn('flex h-14 flex-none border-t bg-bg-raised', className)}
     >
       {ITEMS.map(({ href, key, Icon }) => {
         const active = pathname === href;

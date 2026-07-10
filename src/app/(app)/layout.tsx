@@ -1,5 +1,6 @@
 import { I18nProvider } from '@/components/i18n/I18nProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DesktopTopNav } from '@/components/layout/DesktopTopNav';
 import { NetworkStatus } from '@/components/layout/NetworkStatus';
 
 /**
@@ -13,10 +14,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <I18nProvider>
       <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg">
         <NetworkStatus />
+        <DesktopTopNav className="hidden lg:flex" />
         <div id="contenido" className="flex min-h-0 flex-1 flex-col">
           {children}
         </div>
-        <BottomNav />
+        <BottomNav className="lg:hidden" />
       </div>
     </I18nProvider>
   );

@@ -2,7 +2,7 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMemo } from 'react';
-import { Map, Marker, Source, Layer, AttributionControl } from 'react-map-gl/maplibre';
+import { Map, Marker, Source, Layer } from 'react-map-gl/maplibre';
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
 import { MAP_STYLE, MIN_ZOOM, MAX_ZOOM } from '@/lib/map/config';
@@ -39,7 +39,9 @@ export function FireMiniMap({ fire }: { fire: Fire }) {
       attributionControl={false}
       style={{ width: '100%', height: '100%' }}
     >
-      <AttributionControl compact position="bottom-right" />
+      <div className="pointer-events-none absolute bottom-1 left-2 z-[1] font-mono text-[8px] leading-none text-fg-mute">
+        © OpenStreetMap · OpenFreeMap
+      </div>
       {perimeter && (
         <Source id="fp" type="geojson" data={perimeter}>
           <Layer id="fp-fill" type="fill" paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.16 }} />
