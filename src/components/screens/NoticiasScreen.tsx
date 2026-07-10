@@ -27,7 +27,7 @@ export function NoticiasScreen() {
     <>
       <ScreenHeader title={d.news.title} right={<LangButton />} />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto pb-4 lg:mx-auto lg:w-full lg:max-w-2xl lg:border-x">
         <div className="px-screen pt-3">
           <LiveEmbed />
         </div>
