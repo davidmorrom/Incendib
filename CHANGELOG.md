@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.2.1] - 2026-07-10
+
+### Añadido
+
+- Capa de **perímetros de área quemada** (EFFIS) en el mapa: polígono con
+  relleno traslúcido y borde definido, coloreado por estado, visible al ampliar.
+  Se muestra solo cuando el dato está disponible ("metro a metro" con Sentinel-2
+  en modo live). Alternable desde el control de capas.
+- Entrada de perímetro en la leyenda del mapa.
+- Hook de pruebas E2E del mapa (activado con `?e2e`) para verificación visual.
+
+### Corregido
+
+- Las marcas de tiempo con desfase de zona horaria dejan de mostrarse como
+  futuras ("dentro de N min") y se normalizan a "ahora mismo".
+
 ## [0.2.0] - 2026-07-10
 
 ### Añadido
@@ -42,5 +58,6 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.2.1]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.1
 [0.2.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.0
 [0.1.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.1.0
