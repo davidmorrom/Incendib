@@ -69,7 +69,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
-[0.2.2]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.2
-[0.2.1]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.1
-[0.2.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.2.0
-[0.1.0]: https://github.com/davidmorrom/Iberfuego/releases/tag/v0.1.0
+[0.2.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.2
+[0.2.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.1
+[0.2.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.0
+[0.1.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.1.0
