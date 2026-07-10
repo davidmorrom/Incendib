@@ -43,3 +43,10 @@ yarn-error.log*
 
 # design reference package (kept locally, not part of the app build)
 *.zip
+
+# Vercel
+.vercel
+
+# ficheros de entorno locales (la plantilla .env.example sí se versiona)
+.env*
+!.env.example
