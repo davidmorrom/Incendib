@@ -1,0 +1,5 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iberfuego">
+  <rect width="512" height="512" rx="123" ry="123" fill="#E5484D"/>
+  <!-- Gota de retardante (no llama), en negativo sobre el rojo de marca -->
+  <path d="M256 150 C 316 232, 344 284, 344 328 A 88 88 0 1 1 168 328 C 168 284, 196 232, 256 150 Z" fill="#0C1117"/>
+</svg>

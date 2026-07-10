@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Iberfuego — variables de tema. Reflejan src/lib/design/tokens.ts.
+ * Oscuro por defecto (:root). Claro vía [data-theme="light"] y, si el usuario
+ * no ha elegido, por prefers-color-scheme. El toggle estampa data-theme y gana.
+ */
+:root {
+  /* fondos */
+  --bg-base: #0c1117;
+  --bg-raised: #0f151c;
+  --bg-sunken: #0a0f14;
+  --bg-card: #121922;
+  --bg-map: #0c1117;
+
+  /* texto */
+  --text-primary: #e8edf2;
+  --text-secondary: #9aaab8;
+  --text-mute: #66727e;
+  --text-body: #c7d0d9;
+
+  /* estados de incendio */
+  --state-activo: #e5484d;
+  --state-activo-text: #ff8b8e;
+  --state-controlado: #e8912d;
+  --state-controlado-text: #f0b269;
+  --state-estabilizado: #e5c337;
+  --state-estabilizado-text: #e5c337;
+  --state-extinguido: #6e7b87;
+  --state-extinguido-text: #9aaab8;
+  --state-foco: #ff6a3d;
+  --state-foco-text: #ffb59a;
+
+  /* UI */
+  --action: #3d7dd8;
+  --action-text: #7fa9e8;
+  --ok: #3dbe7a;
+  --ok-text: #5fd494;
+  --error-text: #f09197;
+  --warn: #e8b36b;
+
+  /* bordes */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* marcadores: sin borde en oscuro */
+  --marker-outline: none;
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg-base: #f4f2ec;
+  --bg-raised: #ffffff;
+  --bg-sunken: #eae7dd;
+  --bg-card: #ffffff;
+  --bg-map: #eae7dd;
+
+  --text-primary: #1c222a;
+  --text-secondary: #6b7480;
+  --text-mute: #6b7480;
+  --text-body: #1c222a;
+
+  --state-activo: #c1272d;
+  --state-activo-text: #c1272d;
+  --state-controlado: #c4761b;
+  --state-controlado-text: #c4761b;
+  --state-estabilizado: #a98f12;
+  --state-estabilizado-text: #a98f12;
+  --state-extinguido: #6e7b87;
+  --state-extinguido-text: #6b7480;
+  --state-foco: #d9531e;
+  --state-foco-text: #d9531e;
+
+  --action: #2a5fa8;
+  --action-text: #2a5fa8;
+  --ok: #2c9a61;
+  --ok-text: #2c9a61;
+  --error-text: #c1272d;
+  --warn: #b5822f;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-default: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.18);
+
+  --marker-outline: 1.5px solid #ffffff;
+
+  color-scheme: light;
+}
+
+/* Modo oscuro por defecto (sala de control): NO se sigue prefers-color-scheme.
+ * El claro es opt-in del usuario vía el toggle (data-theme="light"), pensado
+ * para uso en exteriores. */
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Cifras tabulares por defecto en la familia mono (métricas alineadas). */
+.font-mono,
+[class*='font-mono'] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Superficie flotante translúcida sobre el mapa (leyenda, controles, tooltip,
+ * inset). Sigue el tema vía --bg-card. */
+@layer components {
+  .if-overlay {
+    background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  }
+  :root[data-theme='light'] .if-overlay {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Tooltip del mapa: quitamos el chrome por defecto del Popup de MapLibre y
+ * dibujamos nuestra propia tarjeta (.if-overlay) dentro. */
+.maplibregl-popup.if-tooltip .maplibregl-popup-content {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.maplibregl-popup.if-tooltip .maplibregl-popup-tip {
+  display: none;
+}
+
+/* Atribución: por defecto solo el botón ⓘ; el texto (obligatorio, OpenFreeMap/
+ * OSM) se expande al pulsar. Garantiza aspecto compacto sin colisiones. */
+.maplibregl-ctrl-attrib-inner {
+  display: none;
+  font-size: 10px;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-inner {
+  display: block;
+}
+
+/* ── Foco visible accesible (WCAG 2.2) ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--action-text);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Animaciones ────────────────────────────────────────────────────────────── */
+@keyframes ifPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ifShimmer {
+  0% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes ifSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Respeta la preferencia de movimiento reducido: el pulso se vuelve anillo
+ * estático, el resto de animaciones se detienen. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
