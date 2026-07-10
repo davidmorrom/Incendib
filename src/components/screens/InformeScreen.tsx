@@ -8,7 +8,7 @@ import { ReportTable } from '@/components/fires/ReportTable';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { computeKpis } from '@/lib/fires/derive';
-import { getNow } from '@/lib/time';
+import { useNow } from '@/components/time/NowProvider';
 import { formatClock } from '@/lib/utils/format';
 import { interpolate } from '@/lib/i18n';
 import { mix, V } from '@/lib/design/color';
@@ -28,6 +28,7 @@ export function InformeScreen({
 }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const filter = useUIStore((s) => s.filter);
   const setFilter = useUIStore((s) => s.setFilter);
   const [dismissed, setDismissed] = useState(false);
@@ -61,7 +62,7 @@ export function InformeScreen({
     day: '2-digit',
     month: 'short',
     timeZone: 'Europe/Madrid',
-  }).format(getNow());
+  }).format(now);
 
   const chip = (key: 'todos' | 'es' | 'pt', label: string, n: number) => {
     const on = filter === key;
@@ -88,7 +89,7 @@ export function InformeScreen({
         right={
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] text-fg-mute">
-              {dateLabel} · {formatClock(getNow())}
+              {dateLabel} · {formatClock(now)}
             </span>
             <LangButton />
           </div>

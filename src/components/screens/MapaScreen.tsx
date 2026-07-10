@@ -11,7 +11,7 @@ import { FireListSheet } from '@/components/fires/FireListSheet';
 import { DesktopFireList } from '@/components/fires/DesktopFireList';
 import { computeKpis, sortByGravity } from '@/lib/fires/derive';
 import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
-import { getNow } from '@/lib/time';
+import { useNow } from '@/components/time/NowProvider';
 import type { Fire } from '@/types/fire';
 
 /**
@@ -21,14 +21,15 @@ import type { Fire } from '@/types/fire';
  */
 export function MapaScreen({ fires, focos24h }: { fires: Fire[]; focos24h: number }) {
   const router = useRouter();
+  const now = useNow();
   const [filters, setFilters] = useState<FireFilters>(DEFAULT_FILTERS);
   const [hovered, setHovered] = useState<string | null>(null);
 
   const kpis = useMemo(() => computeKpis(fires), [fires]);
   const activeCount = kpis.activos;
   const visible = useMemo(
-    () => sortByGravity(applyFilters(fires, filters, getNow())),
-    [fires, filters],
+    () => sortByGravity(applyFilters(fires, filters, now)),
+    [fires, filters, now],
   );
 
   const patch = useCallback((p: Partial<FireFilters>) => setFilters((f) => ({ ...f, ...p })), []);

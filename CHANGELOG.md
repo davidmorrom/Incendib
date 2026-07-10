@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.4.3] - 2026-07-10
+
+### Corregido
+
+- **Reloj determinista en modo live**: los tiempos relativos ("hace 6 min"), el
+  reloj de cabecera ("Actualizado 14:32") y el filtro por periodo dejaban de
+  coincidir entre el HTML del servidor y la hidratación del cliente, provocando
+  un desajuste de hidratación (React #418) en el Mapa. Ahora el servidor calcula
+  el "ahora" una sola vez y lo inyecta vía `NowProvider`; el cliente parte de ese
+  mismo valor y lo refresca cada minuto. En modo mock sigue siendo un instante
+  fijo (fidelidad de diseño y tests deterministas).
+
 ## [0.4.2] - 2026-07-10
 
 ### Cambiado
@@ -180,6 +192,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.4.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.3
 [0.4.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.2
 [0.4.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.1
 [0.4.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.4.0

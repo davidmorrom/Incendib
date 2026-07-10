@@ -7,8 +7,8 @@ import { StateGlyph } from '@/components/ui/StateGlyph';
 import { LevelBadge } from '@/components/ui/LevelBadge';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
-import { formatNumber } from '@/lib/utils/format';
-import { elapsedShortNow } from '@/lib/time';
+import { formatNumber, elapsedShort } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import { STATE_RANK } from '@/lib/fires/derive';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
 import { PT_TEXT, reportSubtitle } from '@/lib/fires/labels';
@@ -29,6 +29,7 @@ const TH = 'font-mono text-label font-semibold uppercase tracking-[0.1em]';
 export function ReportTable({ fires, empty }: { fires: Fire[]; empty?: React.ReactNode }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const router = useRouter();
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'ha', dir: 'desc' });
 
@@ -125,7 +126,7 @@ export function ReportTable({ fires, empty }: { fires: Fire[]; empty?: React.Rea
                 {formatNumber(f.hectares)}
               </td>
               <td className="pr-screen text-right font-mono text-[10px] text-fg-mute">
-                {elapsedShortNow(f.updatedAt)}
+                {elapsedShort(f.updatedAt, now)}
               </td>
             </tr>
           ))}

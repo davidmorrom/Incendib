@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { NowProvider } from '@/components/time/NowProvider';
+import { getNow } from '@/lib/time';
 import './globals.css';
 
 const sans = IBM_Plex_Sans({
@@ -73,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Saltar al contenido
         </a>
-        {children}
+        <NowProvider initialNow={getNow()}>{children}</NowProvider>
         <Analytics />
         <SpeedInsights />
       </body>

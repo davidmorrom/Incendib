@@ -9,7 +9,7 @@ import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
 import { formatClock } from '@/lib/utils/format';
-import { getNow } from '@/lib/time';
+import { useNow } from '@/components/time/NowProvider';
 import { interpolate } from '@/lib/i18n';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
@@ -26,6 +26,7 @@ const TABS = [
 export function DesktopTopNav({ className }: { className?: string }) {
   const d = useDict();
   const pathname = usePathname();
+  const now = useNow();
   const setTheme = useUIStore((s) => s.setTheme);
   const effective = useEffectiveTheme();
 
@@ -66,7 +67,7 @@ export function DesktopTopNav({ className }: { className?: string }) {
 
       <div className="flex-1" />
       <span className="hidden font-mono text-[11px] text-fg-mute xl:inline">
-        {interpolate(d.map.updated, { time: formatClock(getNow()) })}
+        {interpolate(d.map.updated, { time: formatClock(now) })}
       </span>
       <LangButton />
       <button

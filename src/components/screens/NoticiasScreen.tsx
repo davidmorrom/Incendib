@@ -5,7 +5,8 @@ import { LangButton } from '@/components/layout/LangButton';
 import { LiveEmbed } from '@/components/news/LiveEmbed';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
-import { timeAgoNow } from '@/lib/time';
+import { timeAgo } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import { MOCK_NEWS, MOCK_CAMERAS, MOCK_ACCOUNTS } from '@/lib/data/news';
 import { cn } from '@/lib/utils/cn';
 
@@ -22,6 +23,7 @@ const DOT: Record<'action' | 'activo' | 'ok', string> = {
 export function NoticiasScreen() {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
 
   return (
     <>
@@ -52,7 +54,7 @@ export function NoticiasScreen() {
                       {n.region}
                     </span>
                     <span className="font-mono text-[9px] text-fg-mute">
-                      · {timeAgoNow(n.at, locale)} · {n.source}
+                      · {timeAgo(n.at, now, locale)} · {n.source}
                     </span>
                   </div>
                   <div className="text-[12.5px] font-semibold leading-snug text-fg">{n.title}</div>
