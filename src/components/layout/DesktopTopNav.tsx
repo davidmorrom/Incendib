@@ -7,6 +7,9 @@ import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
+import { formatClock } from '@/lib/utils/format';
+import { getNow } from '@/lib/time';
+import { interpolate } from '@/lib/i18n';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
 
@@ -61,6 +64,9 @@ export function DesktopTopNav({ className }: { className?: string }) {
       </nav>
 
       <div className="flex-1" />
+      <span className="hidden font-mono text-[11px] text-fg-mute xl:inline">
+        {interpolate(d.map.updated, { time: formatClock(getNow()) })}
+      </span>
       <LangButton />
       <button
         type="button"

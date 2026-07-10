@@ -33,7 +33,7 @@ export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
     <>
       <ScreenHeader title={d.sources.title} right={<LangButton />} />
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto lg:mx-auto lg:w-full lg:max-w-2xl lg:border-x">
         {/* Disclaimer destacado */}
         <div
           className="mx-screen mt-3 flex items-start gap-2.5 rounded-card border p-3"

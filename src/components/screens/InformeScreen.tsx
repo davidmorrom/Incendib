@@ -95,6 +95,7 @@ export function InformeScreen({
         }
       />
 
+      <div className="flex min-h-0 flex-1 flex-col lg:mx-auto lg:w-full lg:max-w-4xl lg:border-x">
       <ReportKpis
         activos={kpis.activos}
         hectares={kpis.hectares}
@@ -156,6 +157,7 @@ export function InformeScreen({
         {d.disclaimer.short.split('112')[0]}
         <span className="font-mono font-semibold text-state-activo-text">112</span>
       </p>
+      </div>
     </>
   );
 }
