@@ -47,6 +47,7 @@ const en: Dictionary = {
     colUpdated: 'UPD.',
     empty: 'No fires match the current filters',
     clearFilters: 'Clear filters',
+    degraded: '{source} is not responding — data from {time}',
   },
   fire: {
     surface: 'Area',
@@ -112,6 +113,7 @@ const en: Dictionary = {
     skipToContent: 'Skip to content',
     openFire: 'Open fire details',
     back: 'Back',
+    dismiss: 'Dismiss notice',
   },
 };
 

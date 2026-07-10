@@ -42,6 +42,18 @@ export function timeAgo(iso: string, now: number = Date.now(), locale: Locale = 
 }
 
 /**
+ * Antigüedad compacta sin prefijo, para columnas densas: "6 min", "1 h 12".
+ * Unidades neutras (min/h) válidas en ES/PT/EN.
+ */
+export function elapsedShort(iso: string, now: number = Date.now()): string {
+  const m = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h} h ${r.toString().padStart(2, '0')}` : `${h} h`;
+}
+
+/**
  * Hora HH:MM en zona horaria peninsular fija (Europe/Madrid), determinista en
  * server y cliente (no depende de la TZ del entorno). Para "Actualizado 14:32".
  */

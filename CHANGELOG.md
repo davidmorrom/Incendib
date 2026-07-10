@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.0] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Informe de situación** (2b): KPIs 2×2 (activos, hectáreas, focos
+  24 h, nivel máximo), filtros por país (Todos/España/Portugal) y **tabla
+  ordenable** por columna. Accesible: `<table>` semántica con `aria-sort` y
+  cabeceras que ordenan.
+- Banner de **fuente degradada** (p. ej. fogos.pt) con hora del último dato.
+- Formato de tiempo compacto ("6 min", "1 h 12") para columnas densas.
+- Componentes reutilizables: `ScreenHeader`, `LangButton`.
+
 ## [0.2.2] - 2026-07-10
 
 ### Cambiado
@@ -69,6 +81,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.3.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.0
 [0.2.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.2
 [0.2.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.1
 [0.2.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.2.0

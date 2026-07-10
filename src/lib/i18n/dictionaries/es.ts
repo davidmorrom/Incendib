@@ -46,6 +46,7 @@ const es = {
     colUpdated: 'ACT.',
     empty: 'Sin incendios con los filtros actuales',
     clearFilters: 'Limpiar filtros',
+    degraded: '{source} no responde — datos de las {time}',
   },
   fire: {
     surface: 'Superficie',
@@ -111,6 +112,7 @@ const es = {
     skipToContent: 'Saltar al contenido',
     openFire: 'Abrir ficha del incendio',
     back: 'Volver',
+    dismiss: 'Descartar aviso',
   },
 };
 

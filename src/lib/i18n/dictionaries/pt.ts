@@ -47,6 +47,7 @@ const pt: Dictionary = {
     colUpdated: 'ATUAL.',
     empty: 'Sem incêndios com os filtros atuais',
     clearFilters: 'Limpar filtros',
+    degraded: '{source} não responde — dados das {time}',
   },
   fire: {
     surface: 'Área',
@@ -112,6 +113,7 @@ const pt: Dictionary = {
     skipToContent: 'Ir para o conteúdo',
     openFire: 'Abrir ficha do incêndio',
     back: 'Voltar',
+    dismiss: 'Dispensar aviso',
   },
 };
 
