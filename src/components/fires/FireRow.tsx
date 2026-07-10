@@ -2,8 +2,8 @@
 
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { LevelBadge } from '@/components/ui/LevelBadge';
-import { formatNumber } from '@/lib/utils/format';
-import { timeAgoNow } from '@/lib/time';
+import { formatNumber, timeAgo } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import { cn } from '@/lib/utils/cn';
 import { mix, V } from '@/lib/design/color';
 import { useDict } from '@/components/i18n/I18nProvider';
@@ -35,6 +35,7 @@ export function FireRow({
 }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const stateLabel = d.states[STATE_LABEL_KEY[fire.state]];
 
   return (
@@ -73,7 +74,7 @@ export function FireRow({
           {formatNumber(fire.hectares)} ha
         </span>
         <span className="block font-mono text-[9.5px] text-fg-mute">
-          {timeAgoNow(fire.updatedAt, locale)}
+          {timeAgo(fire.updatedAt, now, locale)}
         </span>
       </span>
     </button>

@@ -3,7 +3,7 @@
 import { FireRow } from './FireRow';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { formatClock } from '@/lib/utils/format';
-import { getNow } from '@/lib/time';
+import { useNow } from '@/components/time/NowProvider';
 import { interpolate } from '@/lib/i18n';
 import { cn } from '@/lib/utils/cn';
 import { mix, V } from '@/lib/design/color';
@@ -68,6 +68,7 @@ export function FireListSheet({
   hoveredSlug?: string | null;
 }) {
   const d = useDict();
+  const now = useNow();
 
   const activos = filters.states.length === 1 && filters.states[0] === 'activo';
   const level2 = filters.levels.includes(2);
@@ -92,7 +93,7 @@ export function FireListSheet({
           <span className="font-normal text-fg-mute">· {d.map.bySeverity}</span>
         </span>
         <span className="font-mono text-meta text-fg-mute">
-          {interpolate(d.map.updated, { time: formatClock(getNow()) })}
+          {interpolate(d.map.updated, { time: formatClock(now) })}
         </span>
       </div>
 

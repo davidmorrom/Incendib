@@ -4,7 +4,8 @@ import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
-import { timeAgoNow } from '@/lib/time';
+import { timeAgo } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import { FULL_ATTRIBUTION } from '@/lib/data/sources';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
@@ -27,6 +28,7 @@ const SECTION = 'font-mono text-label font-semibold uppercase tracking-[0.12em] 
 export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const [pre, post] = d.sources.disclaimerBody.split('112');
 
   return (
@@ -95,7 +97,7 @@ export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
                   ? d.sources.degraded
                   : s.status === 'down'
                     ? d.sources.down
-                    : timeAgoNow(s.lastUpdate, locale)}
+                    : timeAgo(s.lastUpdate, now, locale)}
               </span>
             </li>
           ))}

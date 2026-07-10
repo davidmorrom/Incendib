@@ -6,8 +6,8 @@ import { StateGlyph } from '@/components/ui/StateGlyph';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
-import { formatNumber, formatClock } from '@/lib/utils/format';
-import { timeAgoNow } from '@/lib/time';
+import { formatNumber, formatClock, timeAgo } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import { interpolate } from '@/lib/i18n';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
 import { PT_TEXT } from '@/lib/fires/labels';
@@ -25,6 +25,7 @@ function stateVar(s: FireState): string {
 export function FichaScreen({ fire }: { fire: Fire }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const router = useRouter();
   const [following, setFollowing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -152,7 +153,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </p>
           <p className="mt-1.5 font-mono text-[9.5px] text-fg-mute">
             {d.fire.source}: {fire.sources.map((s) => SOURCES[s].label).join(' · ')} —{' '}
-            {interpolate(d.status.updatedAgo, { when: timeAgoNow(fire.updatedAt, locale) })}
+            {interpolate(d.status.updatedAgo, { when: timeAgo(fire.updatedAt, now, locale) })}
           </p>
         </div>
 
@@ -175,7 +176,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.start}</div>
             <div className="mt-1 font-mono text-[15px] font-semibold">{dateFmt(fire.startedAt)}</div>
-            <div className="font-mono text-[9.5px] text-fg-mute">{timeAgoNow(fire.startedAt, locale)}</div>
+            <div className="font-mono text-[9.5px] text-fg-mute">{timeAgo(fire.startedAt, now, locale)}</div>
           </div>
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.resources}</div>

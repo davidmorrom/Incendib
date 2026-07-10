@@ -14,8 +14,8 @@ import { isIslandFire } from '@/lib/fires/derive';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
 import { statePalette } from '@/lib/design/tokens';
 import type { FeatureCollection, Polygon } from 'geojson';
-import { formatNumber } from '@/lib/utils/format';
-import { timeAgoNow } from '@/lib/time';
+import { formatNumber, timeAgo } from '@/lib/utils/format';
+import { useNow } from '@/components/time/NowProvider';
 import {
   GEO,
   INITIAL_VIEW,
@@ -43,6 +43,7 @@ export interface MapCanvasProps {
 export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasProps) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
+  const now = useNow();
   const perimetersVisible = useUIStore((s) => s.perimetersVisible);
   const togglePerimeters = useUIStore((s) => s.togglePerimeters);
   const theme = useEffectiveTheme();
@@ -192,7 +193,7 @@ export function MapCanvas({ fires, onSelect, hoveredSlug, onHover }: MapCanvasPr
               <span className="font-mono">{formatNumber(tipFire.hectares)} ha</span>
             </div>
             <div className="mt-[3px] font-mono text-[9px] text-fg-mute">
-              {d.status.updatedAgo.replace('{when}', timeAgoNow(tipFire.updatedAt, locale))} ·{' '}
+              {d.status.updatedAgo.replace('{when}', timeAgo(tipFire.updatedAt, now, locale))} ·{' '}
               {SOURCES[tipFire.sources[0] ?? 'nacional'].label.split(' · ')[0]}
             </div>
           </div>
