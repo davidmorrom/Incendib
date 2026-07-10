@@ -9,21 +9,13 @@ import { mix, V } from '@/lib/design/color';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { STATE_LABEL_KEY } from '@/lib/fires/style';
-import type { Fire, PtState } from '@/types/fire';
-
-/** Estado PT en su idioma original (dato bilingüe, no se traduce). */
-const PT_TEXT: Record<PtState, string> = {
-  'em-curso': 'em curso',
-  'em-resolucao': 'em resolução',
-  'em-conclusao': 'em conclusão',
-  vigilancia: 'vigilância',
-  encerrada: 'encerrada',
-};
+import { PT_TEXT } from '@/lib/fires/labels';
+import type { Fire } from '@/types/fire';
 
 function subtitle(f: Fire): string {
   const region = f.region.replace(/\s*\(PT\)/, '');
   if (f.country === 'PT') {
-    const st = f.ptState ? ` — ${PT_TEXT[f.ptState]}` : '';
+    const st = f.ptState ? ` — ${PT_TEXT[f.ptState].toLowerCase()}` : '';
     return `${f.province} · ${region}${st}`;
   }
   return `${f.municipality} · ${f.province}`;

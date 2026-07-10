@@ -1,5 +1,5 @@
 /**
- * Iberfuego — Design tokens (fuente única de verdad)
+ * Incendib — Design tokens (fuente única de verdad)
  * ---------------------------------------------------
  * Valores literales tomados del handoff hifi (docs/HANDOFF.md). Estos hex se usan
  * en JS/canvas/mapa (marcadores MapLibre, imágenes OG, leyenda). El CSS

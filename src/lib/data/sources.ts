@@ -111,3 +111,9 @@ export const BASEMAP_ATTRIBUTION = '© OpenStreetMap (ODbL) · OpenFreeMap';
 /** Disclaimer legal permanente. Nunca se oculta. */
 export const DISCLAIMER_112 =
   'No sustituye a los canales oficiales de emergencia. Emergencias: 112';
+
+/** Texto de atribución agregada (pantalla Fuentes). Nombres propios, no se traduce. */
+export const FULL_ATTRIBUTION =
+  'European Forest Fire Information System — EFFIS (© European Union, 1995–2026), CC BY 4.0 · ' +
+  'LANCE FIRMS, NASA EOSDIS (dominio público) · fogos.pt / VOST Portugal · ICNF · AEMET · IPMA · ' +
+  'Cartografía base © OpenStreetMap (ODbL) / OpenFreeMap';

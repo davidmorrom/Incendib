@@ -27,9 +27,27 @@ const RAW_FIRES: Fire[] = [
     coordinates: [-6.29, 40.36],
     startedAt: '2026-07-07T14:20:00+02:00',
     updatedAt: '2026-07-10T14:26:00+02:00',
-    resources: { aerial: 14, ground: 42 },
+    resources: { aerial: 14, ground: 42, personnel: 310, note: 'UME' },
     evacuation: 'Evacuación en Riomalo de Abajo y Las Mestas · EX-204 cortada',
     sources: ['nacional', 'effis'],
+    fwi: 'Extremo',
+    weather: { tempC: 38, humidity: 14, wind: 'NO 32 km/h' },
+    timeline: [
+      {
+        at: '2026-07-10T09:12:00+02:00',
+        label: 'Declarado nivel 2. Solicitada la intervención de la UME.',
+        state: 'activo',
+      },
+      {
+        at: '2026-07-09T18:40:00+02:00',
+        label: 'El frente norte cruza la EX-204; nuevas evacuaciones preventivas.',
+        state: 'activo',
+      },
+      {
+        at: '2026-07-07T14:20:00+02:00',
+        label: 'Primera detección satelital VIIRS · FRP 86 MW — no confirmada.',
+      },
+    ],
   },
   {
     slug: 'tejeda',
@@ -173,41 +191,54 @@ export const MOCK_FIRES: Fire[] = RAW_FIRES.map((f) =>
     : f,
 );
 
-/** Estado de fuentes mock (pantalla Fuentes). */
+/** Estado de fuentes mock (pantalla Fuentes 3b). */
 export const MOCK_SOURCE_STATUS: SourceStatus[] = [
   {
-    id: 'nacional',
-    label: '112 Extremadura / INFOEX',
-    description: 'incidentes ES',
+    id: 'firms',
+    label: 'NASA FIRMS',
+    description: 'focos VIIRS/MODIS',
+    note: 'Dominio público · latencia ~3 h',
     status: 'ok',
-    lastUpdate: '2026-07-10T14:26:00+02:00',
+    lastUpdate: '2026-07-10T14:20:00+02:00',
   },
   {
     id: 'effis',
     label: 'EFFIS / Copernicus EMS',
-    description: 'perímetros',
+    description: 'perímetros + FWI',
+    note: 'CC BY 4.0 · © European Union',
     status: 'ok',
-    lastUpdate: '2026-07-10T13:50:00+02:00',
-  },
-  {
-    id: 'firms',
-    label: 'NASA FIRMS · VIIRS / MODIS',
-    description: 'focos satelitales · pasada 13:47',
-    status: 'ok',
-    lastUpdate: '2026-07-10T13:47:00+02:00',
+    lastUpdate: '2026-07-10T13:51:00+02:00',
   },
   {
     id: 'fogos',
-    label: 'fogos.pt / ANEPC',
-    description: 'incidentes PT',
+    label: 'fogos.pt',
+    description: 'estado PT (ANEPC)',
+    note: 'Sin respuesta · último dato 10:41',
     status: 'degraded',
     lastUpdate: '2026-07-10T09:41:00+01:00',
   },
   {
-    id: 'aemet',
-    label: 'AEMET / IPMA',
-    description: 'meteo y FWI',
+    id: 'icnf',
+    label: 'ICNF',
+    description: 'áreas ardidas PT',
+    note: 'ArcGIS REST oficial',
     status: 'ok',
-    lastUpdate: '2026-07-10T14:14:00+02:00',
+    lastUpdate: '2026-07-10T13:32:00+02:00',
+  },
+  {
+    id: 'jcyl',
+    label: 'JCyL · Bombers CAT',
+    description: 'estado ES',
+    note: 'Datos abiertos · 2×/día',
+    status: 'ok',
+    lastUpdate: '2026-07-10T11:32:00+02:00',
+  },
+  {
+    id: 'aemet',
+    label: 'AEMET · IPMA',
+    description: 'riesgo IPIF/RCM',
+    note: 'Actualización diaria',
+    status: 'ok',
+    lastUpdate: '2026-07-10T08:00:00+02:00',
   },
 ];

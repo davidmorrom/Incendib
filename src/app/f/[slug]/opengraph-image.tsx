@@ -5,7 +5,7 @@ import { formatNumber } from '@/lib/utils/format';
 
 // Imagen OG por incendio: estado + superficie + hora estampados en servidor.
 // Paleta oscura de la marca (misma que la UI). Se regenera con cada request.
-export const alt = 'Ficha de incendio · Iberfuego';
+export const alt = 'Ficha de incendio · Incendib';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -50,7 +50,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
               borderRadius: 14,
             }}
           />
-          <span style={{ fontSize: 34, fontWeight: 700 }}>Iberfuego</span>
+          <span style={{ fontSize: 34, fontWeight: 700 }}>Incendib</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

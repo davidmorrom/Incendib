@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔥 Iberfuego
+# 🔥 Incendib
 
 **Visor en tiempo real de incendios forestales activos en España y Portugal**
 
@@ -16,7 +16,7 @@ serio y usable — pensada como panel de sala de emergencias, no como landing.
 </div>
 
 > [!WARNING]
-> **Iberfuego no es un canal oficial de emergencias.** Los datos pueden tener
+> **Incendib no es un canal oficial de emergencias.** Los datos pueden tener
 > latencia y las detecciones satelitales no equivalen a incendios confirmados.
 > Ante peligro inmediato, llama al **112**.
 
@@ -30,7 +30,7 @@ serio y usable — pensada como panel de sala de emergencias, no como landing.
 
 ## Qué es
 
-Iberfuego es una **web app mobile-first** (PWA, no requiere tienda de apps) que
+Incendib es una **web app mobile-first** (PWA, no requiere tienda de apps) que
 reúne información de incendios de la Península Ibérica, Canarias, Baleares,
 Azores, Madeira, Ceuta y Melilla. Combina tres capas de precisión creciente:
 

@@ -29,7 +29,7 @@ export function AppHeader() {
   return (
     <header className="flex h-[50px] flex-none items-center gap-[10px] border-b px-screen">
       <Logo size={24} />
-      <span className="text-title font-bold tracking-[-0.01em] text-fg">Iberfuego</span>
+      <span className="text-title font-bold tracking-[-0.01em] text-fg">{d.app.name}</span>
       <div className="flex-1" />
 
       <button type="button" className={btn} aria-label={d.map.searchAria}>

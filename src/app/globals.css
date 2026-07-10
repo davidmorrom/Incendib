@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * Iberfuego — variables de tema. Reflejan src/lib/design/tokens.ts.
+ * Incendib — variables de tema. Reflejan src/lib/design/tokens.ts.
  * Oscuro por defecto (:root). Claro vía [data-theme="light"] y, si el usuario
  * no ha elegido, por prefers-color-scheme. El toggle estampa data-theme y gana.
  */
@@ -137,14 +137,10 @@ body {
   display: none;
 }
 
-/* Atribución: por defecto solo el botón ⓘ; el texto (obligatorio, OpenFreeMap/
- * OSM) se expande al pulsar. Garantiza aspecto compacto sin colisiones. */
-.maplibregl-ctrl-attrib-inner {
-  display: none;
-  font-size: 10px;
-}
-.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-inner {
-  display: block;
+/* Atribución obligatoria (OpenFreeMap/OSM): la mantenemos visible como pie
+ * legible pero discreto (react-map-gl no aplica el modo compacto de MapLibre). */
+.maplibregl-ctrl-attrib {
+  font-size: 9.5px;
 }
 
 /* ── Foco visible accesible (WCAG 2.2) ──────────────────────────────────────── */

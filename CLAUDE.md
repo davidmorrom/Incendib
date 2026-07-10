@@ -1,4 +1,4 @@
-# CLAUDE.md — Iberfuego
+# CLAUDE.md — Incendib
 
 Guía de trabajo para agentes en este repositorio.
 
@@ -65,10 +65,37 @@ El agente **siempre** mantiene el repositorio bajo control de versiones:
 - **Versionado SemVer**: etiquetar releases (`vX.Y.Z`) y mantener
   `CHANGELOG.md` al día.
 
+## Modo de trabajo autónomo
+
+El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
+
+- **Avanza sin esperar aprobación** por la hoja de ruta (abajo). Elige la
+  siguiente tarea pendiente, impleméntala, verifícala y ciérrala.
+- **Commit + versión sobre la marcha**: una pantalla/feature = un commit (o
+  pocos) + bump SemVer + entrada en `CHANGELOG.md` + tag + `git push` (Vercel
+  despliega solo). No acumules trabajo sin versionar.
+- **Producción es desechable** (proyecto personal): no te bloquees por miedo a
+  romperla. Aun así, mantén `main` **construible** (typecheck + lint + build en
+  verde antes de cada push) por higiene del historial.
+- **Verifica** cada pantalla de forma real cuando sea posible (captura headless
+  con el hook `?e2e`, revisando claro y oscuro).
+- Trabaja de forma continua hasta agotar el presupuesto; deja siempre `main`
+  estable para que el propietario lo revise a la vuelta.
+
+### Hoja de ruta (orden sugerido)
+
+1. Pantallas restantes: **Informe (2b)** → **Fuentes (3b)** → **Ficha (1c)** →
+   **Noticias (3a)**.
+2. Estados de la UI: carga/skeleton (4a), vacío (4b), error (4c), offline (4d),
+   toast reconexión (5b), informe sin resultados (5a).
+3. Datos en vivo (FIRMS/EFFIS/fogos.pt) con caché en backend (fase 0.4).
+4. Web Push + ajustes de alertas (7a–7c), histórico (10a–10b).
+5. Panel desktop (1d, 6a).
+
 ## Estado actual
 
 - ✅ Estructura, sistema de diseño, PWA, i18n y capa de datos (v0.1).
 - ✅ Pantalla **Mapa** (home, 2a) con MapLibre, máscara, marcadores y filtros (v0.2).
-- ⏳ Pendiente: Informe (2b), Noticias (3a), Fuentes (3b), ficha (1c), datos en
-  vivo, Web Push, histórico y panel desktop.
+- ✅ Perímetros de área quemada (v0.2.1) · rebranding a Incendib (v0.2.2).
+- ⏳ En curso (modo autónomo): Informe (2b), Fuentes (3b), ficha (1c), Noticias (3a).
 - Datos en modo `mock` por defecto.

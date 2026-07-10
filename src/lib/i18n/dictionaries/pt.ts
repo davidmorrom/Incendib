@@ -2,7 +2,7 @@ import type { Dictionary } from '../index';
 
 const pt: Dictionary = {
   app: {
-    name: 'Iberfuego',
+    name: 'Incendib',
     tagline: 'Incêndios florestais ativos · Espanha e Portugal',
   },
   tabs: {
@@ -47,6 +47,7 @@ const pt: Dictionary = {
     colUpdated: 'ATUAL.',
     empty: 'Sem incêndios com os filtros atuais',
     clearFilters: 'Limpar filtros',
+    degraded: '{source} não responde — dados das {time}',
   },
   fire: {
     surface: 'Área',
@@ -60,6 +61,13 @@ const pt: Dictionary = {
     copied: '✓ Copiado',
     shareNote: 'A ligação mostra sempre o estado atual, não uma captura de agora.',
     satelliteUnconfirmed: 'Deteção de satélite {sensor} — não confirmada',
+    follow: 'Seguir este incêndio',
+    evolution: 'Evolução',
+    viewFull: 'Ver evolução completa ({n})',
+    fwi: 'FWI {level}',
+    hotspots: '{n} focos VIIRS · última passagem {time}',
+    delta24h: '▲ {n} / 24 h',
+    noProgress: 'sem avanço 24 h',
   },
   legend: {
     title: 'Legenda',
@@ -75,12 +83,17 @@ const pt: Dictionary = {
     statusHeading: 'ESTADO DAS FONTES',
     attributionHeading: 'ATRIBUIÇÃO E LICENÇAS',
     ok: 'OK',
-    degraded: 'DEGRADADA',
-    down: 'EM BAIXO',
+    degraded: 'degradada',
+    down: 'em baixo',
+    disclaimerTitle: 'Não substitui os canais oficiais',
+    disclaimerBody:
+      'Este site é informativo e agrega dados com atraso. Em caso de emergência, ligue 112.',
+    about: 'Sobre o projeto',
+    methodology: 'Metodologia',
   },
   disclaimer: {
     short: 'Não substitui os canais oficiais de emergência. Emergências: 112',
-    full: 'O Iberfuego não é um canal oficial de emergência. Perante perigo imediato, ligue 112.',
+    full: 'O Incendib não é um canal oficial de emergência. Perante perigo imediato, ligue 112.',
   },
   empty: {
     good: 'Sem incêndios ativos na sua zona',
@@ -112,6 +125,7 @@ const pt: Dictionary = {
     skipToContent: 'Ir para o conteúdo',
     openFire: 'Abrir ficha do incêndio',
     back: 'Voltar',
+    dismiss: 'Dispensar aviso',
   },
 };
 

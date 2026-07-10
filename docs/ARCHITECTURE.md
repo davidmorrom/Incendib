@@ -1,4 +1,4 @@
-# Arquitectura — Iberfuego
+# Arquitectura — Incendib
 
 Visor web sin ánimo de lucro de incendios forestales activos en España y
 Portugal. **Mobile-first**, modo oscuro por defecto, PWA (no instalable desde

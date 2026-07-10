@@ -6,8 +6,8 @@ import { useUIStore } from '@/lib/store';
 
 const DictContext = createContext<Dictionary>(es);
 
-const THEME_KEY = 'iberfuego-theme';
-const LOCALE_KEY = 'iberfuego-locale';
+const THEME_KEY = 'incendib-theme';
+const LOCALE_KEY = 'incendib-locale';
 
 /**
  * Provee el diccionario del idioma activo a los componentes cliente y
