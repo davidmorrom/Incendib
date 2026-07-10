@@ -17,10 +17,10 @@
   --bg-card: #ffffff;
   --bg-map: #eae7dd;
 
-  /* texto */
+  /* texto (secondary/mute #5c6470: contraste AA sobre fondos claros) */
   --text-primary: #1c222a;
-  --text-secondary: #6b7480;
-  --text-mute: #6b7480;
+  --text-secondary: #5c6470;
+  --text-mute: #5c6470;
   --text-body: #1c222a;
 
   /* estados de incendio */

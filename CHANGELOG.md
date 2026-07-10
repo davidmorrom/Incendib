@@ -5,6 +5,40 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.7.1] - 2026-07-11
+
+### Corregido
+
+Hallazgos de una revisión adversarial multidimensional del conjunto de cambios
+anterior:
+
+- **Recorte de focos a España + Portugal**: el filtro por bounding box dejaba
+  dentro focos de Francia, Andorra y el golfo de Vizcaya. Ahora se recorta con
+  un test punto-en-polígono contra el contorno real de ES+PT (excluye Francia,
+  Andorra y mar sin recortar la costa ibérica). Con pruebas unitarias.
+- **Parpadeo de tema** al cargar con el modo oscuro guardado: el efecto que
+  aplica el tema se ejecutaba en el primer render (con el tema aún sin resolver)
+  y quitaba `data-theme`, provocando un destello oscuro→claro→oscuro. El guard
+  pasa a estado (re-render) y ya no toca el DOM hasta hidratar.
+- **Popup de foco satelital**: quedaba flotando al apagar la capa o al vaciarse
+  los datos (ahora se oculta con la capa) y exigía doble clic para saltar de un
+  foco a otro (`closeOnClick` desactivado).
+- **Contraste WCAG AA** del texto secundario/atenuado en tema claro (ahora por
+  defecto): de #6B7480 (4.23:1) a #5C6470 (≥4.5:1 en todos los fondos claros).
+- **Cursor** en focos/cúmulos del mapa (puntero al pasar por encima).
+- **`theme-color`** del navegador y del manifiesto alineados con el tema activo
+  (claro por defecto, oscuro al activarlo).
+- Coherencia de datos mock (medios terrestres de Odemira) y limpieza de un
+  export muerto (`MOCK_HOTSPOTS_24H`).
+
+### Cambiado
+
+- Los valores de entorno con URL usan `||` (no `??`) para que una variable vacía
+  caiga a su valor por defecto en vez de romper el build o dejar el mapa sin
+  estilo.
+- `src/lib/time.ts` deja de importar la capa de datos: el reloj compartido ya no
+  arrastra el dataset mock ni los adaptadores al bundle de cliente.
+
 ## [0.7.0] - 2026-07-10
 
 ### Añadido
@@ -238,6 +272,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.7.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.1
 [0.7.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.0
 [0.6.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.6.0
 [0.5.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.5.0
