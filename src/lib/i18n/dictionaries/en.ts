@@ -18,6 +18,7 @@ const en: Dictionary = {
     loading: 'Loading…',
     offline: 'Offline — showing cached data',
     reconnected: '+{n} new hotspots · View changes',
+    online: 'Connection restored',
     sourceDegraded: 'Source degraded',
     retry: 'Retry',
   },
@@ -50,6 +51,7 @@ const en: Dictionary = {
     degraded: '{source} is not responding — data from {time}',
   },
   fire: {
+    incidentOf: '{name} wildfire',
     surface: 'Area',
     start: 'Started',
     resources: 'Resources',
