@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.3.3] - 2026-07-10
+
+### Añadido
+
+- Pantalla **Noticias y directos** (3a): directo 24 h (embed YouTube nocookie
+  con carga al pulsar y conmutador de canal), titulares filtrados por incendio,
+  cámaras DGT cercanas y cuentas oficiales.
+- Con esto se completan las **cinco pantallas principales** (Mapa, Informe,
+  Fuentes, Ficha y Noticias).
+
 ## [0.3.2] - 2026-07-10
 
 ### Añadido
@@ -103,6 +113,7 @@ proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.3.3]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.3
 [0.3.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.2
 [0.3.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.1
 [0.3.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.3.0
