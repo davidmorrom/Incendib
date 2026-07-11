@@ -374,6 +374,9 @@ interface InforcylEmergencia {
   emergencia_num1?: number;
   emergencia_num2?: number;
   medios?: InforcylMedio[];
+  // Superficie afectada oficial (ha): arbolado + pasto.
+  sup_arbolado?: number;
+  sup_pasto?: number;
 }
 
 /** "DD/MM/YYYY HH:MM:SS" (hora peninsular) → ISO 8601. */
@@ -448,7 +451,8 @@ function inforcylToFire(e: InforcylEmergencia): Fire | null {
     state: esStateFromSituacion(e.estado?.NOMBRE),
     level,
     type: 'forestal',
-    hectares: 0, // INFORCYL no publica superficie en tiempo real
+    // Superficie oficial INFORCYL = arbolado + pasto (ha).
+    hectares: Math.round((num(e.sup_arbolado) + num(e.sup_pasto)) * 10) / 10,
     coordinates: [lon, lat],
     startedAt: started ?? updated,
     updatedAt: updated,
@@ -833,15 +837,19 @@ function ringCentroid(ring: [number, number][]): [number, number] {
 }
 
 /**
- * Adjunta a cada incendio el perímetro EFFIS más cercano (≤ 25 km), sin crear
- * entradas propias para las áreas EFFIS no emparejadas (evita duplicar/ensuciar).
+ * Adjunta a cada incendio el perímetro EFFIS más cercano (≤ 10 km) para darle
+ * forma en mapa/ficha. Radio corto a propósito: un área quemada muy cercana es
+ * casi con seguridad el mismo incendio; con radios amplios se emparejaban focos
+ * distintos. **No** se toca la superficie: las hectáreas deben venir de la fuente
+ * oficial (EFFIS/MODIS a 250 m subestima y va con retraso en incendios activos).
+ * Las áreas quemadas se muestran además como capa propia (getBurnedAreas).
  */
 export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   if (!perimeters.length) return fires;
   return fires.map((f) => {
     if (f.perimeter) return f;
     let best: Fire | undefined;
-    let bestKm = 25;
+    let bestKm = 10;
     for (const p of perimeters) {
       const km = haversineKm(f.coordinates, p.coordinates);
       if (km < bestKm) {
@@ -849,9 +857,7 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
         best = p;
       }
     }
-    return best?.perimeter
-      ? { ...f, perimeter: best.perimeter, hectares: f.hectares || best.hectares }
-      : f;
+    return best?.perimeter ? { ...f, perimeter: best.perimeter } : f;
   });
 }
 
