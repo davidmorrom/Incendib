@@ -19,7 +19,12 @@ import {
 export type DataMode = 'mock' | 'live';
 
 export function getDataMode(): DataMode {
-  return process.env.NEXT_PUBLIC_DATA_MODE === 'live' ? 'live' : 'mock';
+  const explicit = process.env.NEXT_PUBLIC_DATA_MODE;
+  if (explicit === 'live') return 'live';
+  if (explicit === 'mock') return 'mock';
+  // Sin señal explícita legible (p. ej. la env var pública no se inyectó en el
+  // build): en Vercel (producción/preview) servimos datos reales; en local, mock.
+  return process.env.VERCEL === '1' ? 'live' : 'mock';
 }
 
 /**

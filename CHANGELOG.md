@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.8.1] - 2026-07-11
+
+### Corregido
+
+- **El modo de datos en producción quedaba en `mock`**: la variable
+  `NEXT_PUBLIC_DATA_MODE` estaba marcada como *Sensitive* en Vercel y las
+  variables sensibles no se inyectan en la sustitución `NEXT_PUBLIC_` del build,
+  así que `getDataMode()` la leía como `undefined` y servía datos de
+  demostración. Se corrige la variable (no sensible) y, como refuerzo,
+  `getDataMode()` ahora usa datos reales por defecto en Vercel
+  (producción/preview) salvo que se fije explícitamente `mock`.
+
 ## [0.8.0] - 2026-07-11
 
 ### Añadido
@@ -300,6 +312,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.8.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.1
 [0.8.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.0
 [0.7.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.1
 [0.7.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.0
