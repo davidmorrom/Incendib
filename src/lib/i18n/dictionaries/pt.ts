@@ -133,6 +133,8 @@ const pt: Dictionary = {
     cameras: 'CÂMARAS DGT · PRÓXIMAS',
     refreshed: 'imagem atualizada',
     accounts: 'CONTAS OFICIAIS',
+    chronology: 'Cronologia',
+    liveHeading: 'Direto e manchetes',
   },
   disclaimer: {
     short: 'Não substitui os canais oficiais de emergência. Emergências: 112',
