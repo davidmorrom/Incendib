@@ -5,6 +5,28 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.12.0] - 2026-07-11
+
+### Añadido
+
+- **Web Push + Ajustes de alertas (7a)**. Nueva pantalla de alertas (icono de
+  campana en la cabecera, móvil y desktop) con:
+  - **permiso de notificaciones** con soft-ask propio antes del diálogo nativo,
+  - **preferencias**: nivel mínimo de aviso, **radio de alerta** con "usar mi
+    ubicación", y silenciar avisos no críticos (las **evacuaciones siempre
+    suenan**),
+  - **notificación de prueba** que confirma la entrega de extremo a extremo.
+- Se **registra de verdad el service worker** (offline + push), que hasta ahora
+  no se invocaba. Claves VAPID generadas y configuradas; envío en servidor con
+  `web-push`.
+
+### Notas
+
+- Las **alertas automáticas por zona** (avisar cuando aparece un incendio cerca)
+  necesitan un almacén persistente de suscripciones + un cron de comprobación;
+  es el siguiente paso (requiere elegir almacenamiento). Ya funciona activar,
+  configurar y probar las notificaciones.
+
 ## [0.11.0] - 2026-07-11
 
 ### Añadido
@@ -375,6 +397,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.12.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.12.0
 [0.11.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.11.0
 [0.10.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.10.0
 [0.9.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.9.0
