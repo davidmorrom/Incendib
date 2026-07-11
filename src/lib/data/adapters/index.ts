@@ -15,7 +15,16 @@
  * devuelve vacío y deja que la UI señalice la degradación por capa.
  */
 
-import type { Fire, Hotspot } from '@/types/fire';
+import type {
+  Fire,
+  FireState,
+  Hotspot,
+  PtState,
+  ResourceUnit,
+  AerialKind,
+  GroundKind,
+  SeverityLevel,
+} from '@/types/fire';
 import { inEsPt } from '@/lib/geo/point-in-region';
 
 export interface FetchOptions {
@@ -169,21 +178,380 @@ function dedupeHotspots(list: Hotspot[]): Hotspot[] {
   return [...seen.values()];
 }
 
-// ── Pendientes (fases posteriores) ──────────────────────────────────────────
+// ── Utilidades de normalización ──────────────────────────────────────────────
 
-export async function fetchEffisPerimeters(_opts: FetchOptions = {}): Promise<Fire[]> {
-  return [];
+function slugify(s: string): string {
+  const base = s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  return base || 'x';
 }
 
-export async function fetchFogosActive(_opts: FetchOptions = {}): Promise<Fire[]> {
-  return [];
+function titleCase(s: string): string {
+  // Solo la primera letra de cada palabra; `\b` de JS es ASCII y rompería con
+  // acentos (LEÓN → LeÓN), así que delimitamos por inicio/espacio/guion.
+  return s
+    .toLowerCase()
+    .replace(/(^|[\s'’-])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase());
 }
+
+/** Distancia aproximada en km (haversine) entre dos puntos [lon,lat]. */
+function haversineKm(a: [number, number], b: [number, number]): number {
+  const R = 6371;
+  const dLat = ((b[1] - a[1]) * Math.PI) / 180;
+  const dLon = ((b[0] - a[0]) * Math.PI) / 180;
+  const la1 = (a[1] * Math.PI) / 180;
+  const la2 = (b[1] * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+// ── Portugal: fogos.pt (ANEPC) ───────────────────────────────────────────────
+
+const FOGOS_URL = 'https://api.fogos.pt/v2/incidents/active';
+
+interface FogosRaw {
+  id?: number | string;
+  lat?: number;
+  lng?: number;
+  man?: number;
+  aerial?: number;
+  terrain?: number;
+  meios_aquaticos?: number;
+  planeFight?: number;
+  heliFight?: number;
+  heliCoord?: number;
+  status?: string;
+  concelho?: string;
+  district?: string;
+  regiao?: string;
+  sub_regiao?: string;
+  localidade?: string;
+  freguesia?: string;
+  dateTime?: { sec?: number };
+  updated?: { sec?: number };
+  isFire?: boolean;
+}
+
+/** {sec: unix} → ISO 8601, o undefined. */
+function secToIso(o?: { sec?: number }): string | undefined {
+  return typeof o?.sec === 'number' ? new Date(o.sec * 1000).toISOString() : undefined;
+}
+
+/** Colapsa "Tourelhe 2 Tourelhe 2" → "Tourelhe 2" (duplicación típica de fogos). */
+function collapseDup(s: string): string {
+  const t = s.trim();
+  const mid = Math.floor(t.length / 2);
+  if (t.length % 2 === 1 && t[mid] === ' ') {
+    const a = t.slice(0, mid).trim();
+    const b = t.slice(mid + 1).trim();
+    if (a && a === b) return a;
+  }
+  return t;
+}
+
+/** Estado SADO/ANEPC (texto) → FireState + ptState. */
+function ptStateFromStatus(status: string): { state: FireState; ptState: PtState } {
+  const s = status
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
+  if (s.includes('resolu')) return { state: 'controlado', ptState: 'em-resolucao' };
+  if (s.includes('conclus')) return { state: 'estabilizado', ptState: 'em-conclusao' };
+  if (s.includes('vigil')) return { state: 'estabilizado', ptState: 'vigilancia' };
+  if (s.includes('encerr') || s.includes('extint')) return { state: 'extinguido', ptState: 'encerrada' };
+  return { state: 'activo', ptState: 'em-curso' };
+}
+
+function fogosToFire(d: FogosRaw): Fire | null {
+  const lat = d.lat;
+  const lng = d.lng;
+  if (typeof lat !== 'number' || typeof lng !== 'number' || !Number.isFinite(lat)) return null;
+
+  const man = Number(d.man) || 0;
+  const aerialTotal = Number(d.aerial) || 0;
+  const terrain = Number(d.terrain) || 0;
+  const plane = Number(d.planeFight) || 0;
+  const heli = Number(d.heliFight) || 0;
+  const heliCoord = Number(d.heliCoord) || 0;
+
+  const aerialUnits: ResourceUnit<AerialKind>[] = [];
+  if (plane > 0) aerialUnits.push({ kind: 'anfibio', count: plane });
+  if (heli > 0) aerialUnits.push({ kind: 'helicoptero', count: heli });
+  if (heliCoord > 0) aerialUnits.push({ kind: 'helicoptero-coord', count: heliCoord });
+  const groundUnits: ResourceUnit<GroundKind>[] = terrain > 0 ? [{ kind: 'autobomba', count: terrain }] : [];
+
+  const { state, ptState } = ptStateFromStatus(d.status ?? '');
+  const region = (d.sub_regiao || d.regiao || 'Portugal').trim();
+  const name = collapseDup(d.localidade || d.freguesia || d.concelho || 'Incendio');
+  const updated = secToIso(d.updated);
+  const started = secToIso(d.dateTime);
+
+  return {
+    slug: `pt-${slugify(d.concelho || name)}-${d.id ?? slugify(name)}`,
+    name,
+    municipality: d.concelho || '—',
+    province: d.district || '—',
+    region: `${region} (PT)`,
+    country: 'PT',
+    state,
+    ptState,
+    level: null,
+    type: 'forestal',
+    hectares: 0, // el endpoint de activos no publica superficie
+    coordinates: [lng, lat],
+    startedAt: started ?? updated ?? new Date().toISOString(),
+    updatedAt: updated ?? new Date().toISOString(),
+    resources: {
+      aerial: aerialTotal || (plane + heli + heliCoord) || undefined,
+      ground: terrain || undefined,
+      personnel: man || undefined,
+      aerialUnits: aerialUnits.length ? aerialUnits : undefined,
+      groundUnits: groundUnits.length ? groundUnits : undefined,
+    },
+    sources: ['fogos'],
+  };
+}
+
+/** Incendios activos de Portugal (fogos.pt / ANEPC). Resiliente: [] si falla. */
+export async function fetchFogosActive(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    const res = await fetch(FOGOS_URL, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      next: { revalidate: 120 }, // fogos refresca ~cada 2 min
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { data?: FogosRaw[] };
+    const data = Array.isArray(json.data) ? json.data : [];
+    return data
+      .filter((d) => d.isFire !== false)
+      .map(fogosToFire)
+      .filter((f): f is Fire => f !== null);
+  } catch {
+    return [];
+  }
+}
+
+// ── España: Castilla y León (JCyL, Opendatasoft) ─────────────────────────────
+
+const JCYL_URL =
+  'https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/incendios-forestales/records';
+
+interface JcylRaw {
+  posicion?: { lon?: number; lat?: number };
+  situacion_actual?: string;
+  nivel?: string;
+  termino_municipal?: string;
+  provincia?: string[];
+  fecha_de_inicio?: string;
+  hora_de_inicio?: string;
+  fecha_del_parte?: string;
+  hora_del_parte?: string;
+  tipo_y_has_de_superficie_afectada?: string;
+  medios_de_extincion?: string | null;
+  codigo_ine?: string;
+}
+
+function esStateFromSituacion(s?: string): FireState {
+  const t = (s ?? '').toUpperCase();
+  if (t.includes('CONTROL')) return 'controlado';
+  if (t.includes('ESTABIL')) return 'estabilizado';
+  if (t.includes('EXTINGU')) return 'extinguido';
+  return 'activo';
+}
+
+/** "MATORRAL:414,30 HA.; OTRAS:3.266,33 HA.;" → 3681 (suma, decimales ES). */
+function parseHectaresEs(s?: string): number {
+  if (!s) return 0;
+  const nums = s.match(/\d{1,3}(?:\.\d{3})*(?:,\d+)?/g) ?? [];
+  let total = 0;
+  for (const n of nums) {
+    const v = parseFloat(n.replace(/\./g, '').replace(',', '.'));
+    if (Number.isFinite(v)) total += v;
+  }
+  return Math.round(total);
+}
+
+/** ISO en hora peninsular (CEST, temporada de incendios). */
+function madridIso(date?: string, time?: string): string | undefined {
+  if (!date) return undefined;
+  const t = time && /^\d{1,2}:\d{2}/.test(time) ? time.slice(0, 5) : '00:00';
+  const iso = Date.parse(`${date}T${t}:00+02:00`);
+  return Number.isNaN(iso) ? undefined : new Date(iso).toISOString();
+}
+
+function jcylToFire(r: JcylRaw): Fire | null {
+  const pos = r.posicion;
+  if (!pos || typeof pos.lat !== 'number' || typeof pos.lon !== 'number') return null;
+
+  const raw = r.termino_municipal ?? 'Incendio';
+  const m = raw.match(/^(.*?)\s*\((.*)\)\s*$/);
+  const name = titleCase((m ? m[1]! : raw).trim());
+  const municipality = titleCase((m ? m[2]! : raw).trim());
+  const levelNum = Number(r.nivel);
+  const level = (Number.isFinite(levelNum) ? Math.max(0, Math.min(3, levelNum)) : null) as SeverityLevel;
+  const updated = madridIso(r.fecha_del_parte, r.hora_del_parte);
+  const medios = (r.medios_de_extincion ?? '').trim();
+
+  return {
+    slug: `cyl-${slugify(name)}-${r.codigo_ine ?? ''}-${(r.fecha_de_inicio ?? '').replace(/-/g, '')}`,
+    name,
+    municipality,
+    province: titleCase((r.provincia?.[0] ?? '').trim()) || '—',
+    region: 'Castilla y León',
+    country: 'ES',
+    state: esStateFromSituacion(r.situacion_actual),
+    level,
+    type: 'forestal',
+    hectares: parseHectaresEs(r.tipo_y_has_de_superficie_afectada),
+    coordinates: [pos.lon, pos.lat],
+    startedAt: madridIso(r.fecha_de_inicio, r.hora_de_inicio) ?? updated ?? new Date().toISOString(),
+    updatedAt: updated ?? new Date().toISOString(),
+    resources: medios ? { raw: medios } : undefined,
+    sources: ['jcyl'],
+  };
+}
+
+/** Incendios de Castilla y León (dataset de partes; se filtra a recientes y no
+ * extinguidos, deduplicando por incendio quedándose con el parte más reciente). */
+export async function fetchJcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    const cutoff = new Date(Date.now() - 8 * 86400e3).toISOString().slice(0, 10);
+    const where = `situacion_actual != "EXTINGUIDO" AND fecha_del_parte >= "${cutoff}"`;
+    const url =
+      `${JCYL_URL}?limit=100&order_by=${encodeURIComponent('fecha_del_parte desc')}` +
+      `&where=${encodeURIComponent(where)}`;
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      next: { revalidate: 600 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { results?: JcylRaw[] };
+    const results = Array.isArray(json.results) ? json.results : [];
+    const seen = new Set<string>();
+    const out: Fire[] = [];
+    for (const r of results) {
+      const key = `${r.codigo_ine ?? ''}|${r.termino_municipal ?? ''}|${r.fecha_de_inicio ?? ''}`;
+      if (seen.has(key)) continue; // orden desc → nos quedamos con el parte más reciente
+      seen.add(key);
+      const f = jcylToFire(r);
+      if (f) out.push(f);
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+// ── EFFIS: perímetros de área quemada (Copernicus, CC BY 4.0) ─────────────────
+
+const EFFIS_WFS = 'https://maps.effis.emergency.copernicus.eu/effis';
+
+/** Área quemada EFFIS como Fire con perímetro + centroide, para enriquecer los
+ * incendios oficiales cercanos. Best-effort: [] si el WFS/TLS falla. */
+export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fire[]> {
+  const [minLon, minLat, maxLon, maxLat] = opts.bbox ?? IBERIA_BBOX;
+  const url =
+    `${EFFIS_WFS}?service=WFS&version=2.0.0&request=GetFeature&typeName=ms:modis.ba.poly` +
+    `&outputFormat=application/json&srsName=EPSG:4326&count=300` +
+    `&bbox=${minLat},${minLon},${maxLat},${maxLon},EPSG:4326`;
+  try {
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(20_000),
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return [];
+    const gj = (await res.json()) as {
+      features?: { properties?: Record<string, unknown>; geometry?: { type?: string; coordinates?: unknown } }[];
+    };
+    const feats = Array.isArray(gj.features) ? gj.features : [];
+    const out: Fire[] = [];
+    for (let i = 0; i < feats.length; i++) {
+      const ring = outerRing(feats[i]?.geometry);
+      if (!ring || ring.length < 4) continue;
+      const centroid = ringCentroid(ring);
+      const props = feats[i]?.properties ?? {};
+      const area = Number(props.area_ha ?? props.AREA_HA ?? props.area ?? props.gross_ha) || 0;
+      out.push({
+        slug: `effis-${i}`,
+        name: 'Área quemada',
+        municipality: '—',
+        province: '—',
+        region: 'EFFIS',
+        country: 'ES',
+        state: 'extinguido',
+        level: null,
+        hectares: Math.round(area),
+        coordinates: centroid,
+        startedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sources: ['effis'],
+        perimeter: ring,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Anillo exterior [lon,lat][] de un Polygon o MultiPolygon GeoJSON. */
+function outerRing(geom?: { type?: string; coordinates?: unknown }): [number, number][] | null {
+  if (!geom) return null;
+  const c = geom.coordinates;
+  try {
+    if (geom.type === 'Polygon') return (c as number[][][])[0] as [number, number][];
+    if (geom.type === 'MultiPolygon') return (c as number[][][][])[0]![0] as [number, number][];
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function ringCentroid(ring: [number, number][]): [number, number] {
+  let x = 0;
+  let y = 0;
+  for (const p of ring) {
+    x += p[0];
+    y += p[1];
+  }
+  return [x / ring.length, y / ring.length];
+}
+
+/**
+ * Adjunta a cada incendio el perímetro EFFIS más cercano (≤ 25 km), sin crear
+ * entradas propias para las áreas EFFIS no emparejadas (evita duplicar/ensuciar).
+ */
+export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
+  if (!perimeters.length) return fires;
+  return fires.map((f) => {
+    if (f.perimeter) return f;
+    let best: Fire | undefined;
+    let bestKm = 25;
+    for (const p of perimeters) {
+      const km = haversineKm(f.coordinates, p.coordinates);
+      if (km < bestKm) {
+        bestKm = km;
+        best = p;
+      }
+    }
+    return best?.perimeter
+      ? { ...f, perimeter: best.perimeter, hectares: f.hectares || best.hectares }
+      : f;
+  });
+}
+
+// ── Pendientes (fases posteriores) ───────────────────────────────────────────
+// ICNF (áreas ardidas PT) y Cataluña quedan pendientes: el dataset abierto de
+// actuaciones de Bombers (g2ay-3vnj) no trae coordenadas ni estado operativo en
+// vivo, así que no sirve para el mapa; hay que buscar una fuente con geometría.
 
 export async function fetchIcnfBurntAreas(_opts: FetchOptions = {}): Promise<Fire[]> {
-  return [];
-}
-
-export async function fetchJcylFires(_opts: FetchOptions = {}): Promise<Fire[]> {
   return [];
 }
 

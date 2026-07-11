@@ -5,6 +5,34 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.8.0] - 2026-07-11
+
+### Añadido
+
+- **Incidentes en vivo (reales)**. En modo live `getFires()` deja de servir los
+  incendios de demostración y agrega fuentes oficiales reales:
+  - **fogos.pt / ANEPC (Portugal)**: incidentes activos con estado del SADO
+    (em curso / em resolução / em conclusão / vigilância) y **desglose real de
+    medios** (personal, medios aéreos por tipo, medios terrestres).
+  - **Castilla y León (JCyL)**: incendios recientes no extinguidos (nivel de
+    gravedad, superficie afectada, coordenadas), deduplicando por el parte más
+    reciente de cada incendio.
+  - **EFFIS**: perímetros de área quemada adjuntados al incidente oficial más
+    cercano (best-effort; si el WFS no responde, no rompe nada).
+- Pruebas unitarias de los adaptadores fogos.pt y JCyL (mapeo de estado, medios,
+  nivel y superficie con decimales españoles).
+
+### Notas
+
+- **El resto de España** no tiene API nacional de incendios activos en tiempo
+  real, así que fuera de Castilla y León se muestran solo **focos satelitales**
+  (NASA FIRMS). Es una limitación de las fuentes, no de la app.
+- **Cataluña** queda pendiente: el dataset abierto de actuaciones de Bombers no
+  incluye coordenadas ni estado operativo en vivo, así que no es apto para el
+  mapa; hay que localizar una fuente con geometría.
+- Los focos FIRMS dependen de las pasadas de satélite: en ventanas nocturnas o
+  con poca actividad el recuento puede ser 0 y se repuebla solo (revalidación).
+
 ## [0.7.1] - 2026-07-11
 
 ### Corregido
@@ -272,6 +300,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.8.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.0
 [0.7.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.1
 [0.7.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.0
 [0.6.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.6.0

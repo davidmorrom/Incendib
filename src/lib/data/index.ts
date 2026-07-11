@@ -8,7 +8,13 @@
 
 import type { Fire, Hotspot, SourceStatus } from '@/types/fire';
 import { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS } from './mock';
-import { fetchFirmsHotspots } from './adapters';
+import {
+  fetchFirmsHotspots,
+  fetchFogosActive,
+  fetchJcylFires,
+  fetchEffisPerimeters,
+  attachPerimeters,
+} from './adapters';
 
 export type DataMode = 'mock' | 'live';
 
@@ -16,13 +22,37 @@ export function getDataMode(): DataMode {
   return process.env.NEXT_PUBLIC_DATA_MODE === 'live' ? 'live' : 'mock';
 }
 
-/** Devuelve los incendios agregados. TODO(fase-2): rama "live". */
+/**
+ * Incendios agregados y normalizados.
+ *
+ * En live combina las fuentes con datos reales usables: fogos.pt (Portugal) y
+ * Castilla y León (JCyL). El resto de España no tiene API nacional de incendios
+ * activos, así que ahí solo hay focos satelitales (getHotspots). Los perímetros
+ * de EFFIS se adjuntan al incendio oficial más cercano. Nunca lanza: si todas
+ * las fuentes fallan, devuelve [] (estado vacío = buena noticia).
+ */
 export async function getFires(): Promise<Fire[]> {
   if (getDataMode() === 'live') {
-    // TODO: agregar adaptadores (./adapters) + dedup + normalización.
-    return MOCK_FIRES;
+    const [pt, cyl, perimeters] = await Promise.all([
+      fetchFogosActive(),
+      fetchJcylFires(),
+      fetchEffisPerimeters(),
+    ]);
+    return attachPerimeters(dedupeFires([...pt, ...cyl]), perimeters);
   }
   return MOCK_FIRES;
+}
+
+/** Dedup por slug (las fuentes PT/ES no se solapan, pero por seguridad). */
+function dedupeFires(fires: Fire[]): Fire[] {
+  const seen = new Set<string>();
+  const out: Fire[] = [];
+  for (const f of fires) {
+    if (seen.has(f.slug)) continue;
+    seen.add(f.slug);
+    out.push(f);
+  }
+  return out;
 }
 
 export async function getFire(slug: string): Promise<Fire | null> {
