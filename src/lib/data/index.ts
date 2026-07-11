@@ -122,14 +122,16 @@ const plural = (n: number, s: string) => `${n} ${s}${n === 1 ? '' : 's'}`;
 export async function getSourceStatus(): Promise<SourceStatus[]> {
   if (getDataMode() !== 'live') return MOCK_SOURCE_STATUS;
 
-  const [fires, hotspots] = await Promise.all([getFires(), getHotspots()]);
+  const [fires, hotspots, burned] = await Promise.all([getFires(), getHotspots(), getBurnedAreas()]);
   const now = new Date().toISOString();
   const bySrc = (id: SourceId) => fires.filter((f) => f.sources.includes(id));
   const pt = bySrc('fogos');
   const cyl = bySrc('jcyl');
   const and = bySrc('infoca');
   const cat = bySrc('catalunya');
-  const perims = fires.filter((f) => f.perimeter).length;
+  // EFFIS: nº de áreas quemadas recientes recuperadas (independiente de si se
+  // adjuntan a un incidente), para reflejar fielmente si la fuente responde.
+  const perims = burned.length;
 
   return [
     {

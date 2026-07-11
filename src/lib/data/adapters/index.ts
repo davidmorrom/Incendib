@@ -760,11 +760,11 @@ export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fir
   // campaña en curso; el filtro por fecha de abajo afina a la ventana reciente.
   const url =
     `${EFFIS_WFS}?service=WFS&version=2.0.0&request=GetFeature&typeName=ms:modis.ba.poly` +
-    `&outputFormat=geojson&srsName=EPSG:4326&sortBy=LASTUPDATE+D&count=200` +
+    `&outputFormat=geojson&srsName=EPSG:4326&sortBy=LASTUPDATE+D&count=80` +
     `&bbox=${minLat},${minLon},${maxLat},${maxLon},EPSG:4326`;
   try {
     const res = await fetch(url, {
-      signal: opts.signal ?? AbortSignal.timeout(25_000),
+      signal: opts.signal ?? AbortSignal.timeout(30_000),
       next: { revalidate: 1800 },
     });
     if (!res.ok) return [];
