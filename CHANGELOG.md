@@ -5,6 +5,24 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.15.3] - 2026-07-12
+
+### Añadido
+
+- **Iconos PWA y de notificación** generados desde el logo de marca
+  (`scripts/gen-icons.mjs`, `npm run icons:gen`): `icon-192`, `icon-512`,
+  `maskable-512`, `badge-72` (monocromo para Android) y `apple-touch-icon`.
+  Antes faltaban y devolvían 404, lo que impedía instalar la PWA correctamente
+  (requisito para las notificaciones en iOS).
+
+### Corregido
+
+- **Service Worker resistente**: el manejador `push` ahora hace un parseo
+  defensivo del payload y **siempre** muestra una notificación (con textos por
+  defecto) aunque el mensaje llegue vacío o malformado. Caché a `incendib-v2`
+  para forzar la recarga del SW y de los iconos en clientes existentes.
+- Icono `apple-touch-icon` declarado en metadatos para «Añadir a inicio» en iOS.
+
 ## [0.15.2] - 2026-07-11
 
 ### Cambiado
