@@ -26,6 +26,7 @@ import type {
   SeverityLevel,
 } from '@/types/fire';
 import { inEsPt } from '@/lib/geo/point-in-region';
+import { utmToLonLat } from '@/lib/geo/utm';
 
 export interface FetchOptions {
   /** Bounding box [minLon, minLat, maxLon, maxLat]. */
@@ -337,7 +338,140 @@ export async function fetchFogosActive(opts: FetchOptions = {}): Promise<Fire[]>
   }
 }
 
-// ── España: Castilla y León (JCyL, Opendatasoft) ─────────────────────────────
+// ── España: Castilla y León ──────────────────────────────────────────────────
+// Fuente primaria: INFORCYL (sistema operativo de la JCyL, actualización casi en
+// tiempo real, con estado, nivel InfoCal y desglose real de medios). Respaldo:
+// el dataset de partes de Opendatasoft (2×/día) si INFORCYL no responde.
+
+const INFORCYL_URL = 'https://servicios.jcyl.es/incyl/json/emergencias';
+const INFORCYL_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (compatible; Incendib/1.0; +https://incendib.es)',
+  Referer: 'https://servicios.jcyl.es/incyl/incyl',
+  Accept: 'application/json, text/plain, */*',
+};
+
+interface InforcylMedio {
+  TIPO?: { CATEGORIA?: string; NOMBRE?: string };
+}
+interface InforcylEmergencia {
+  causa?: string;
+  estado?: { NOMBRE?: string };
+  falsa_alarma?: boolean;
+  fecha_inicio?: string;
+  fecha_estabilizado?: string;
+  fecha_control?: string;
+  huso?: number;
+  latitud?: number; // UTM northing
+  longitud?: number; // UTM easting
+  localidad?: { nombre?: string; municipio?: { nombre?: string } };
+  municipio?: { nombre?: string };
+  provincia?: { nombre?: string };
+  nivel_infocal?: number;
+  nivel_maximo?: number;
+  emergencia_cpm?: number;
+  emergencia_num1?: number;
+  emergencia_num2?: number;
+  medios?: InforcylMedio[];
+}
+
+/** "DD/MM/YYYY HH:MM:SS" (hora peninsular) → ISO 8601. */
+function parseCylDateTime(s?: string): string | undefined {
+  if (!s) return undefined;
+  const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+  if (!m) return undefined;
+  const t = Date.parse(`${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:00+02:00`);
+  return Number.isNaN(t) ? undefined : new Date(t).toISOString();
+}
+
+/** Agrega la lista de medios de INFORCYL al modelo de recursos. */
+function inforcylMedios(medios: InforcylMedio[]): Fire['resources'] {
+  let aerial = 0;
+  let personnel = 0;
+  const g = { autobomba: 0, maquinaria: 0, brigada: 0, gc: 0 };
+  for (const m of medios) {
+    const cat = m.TIPO?.CATEGORIA ?? '';
+    const nom = m.TIPO?.NOMBRE ?? '';
+    if (cat === 'Aereo') aerial++;
+    else if (cat === 'Personal') personnel++;
+    else if (cat === 'Terrestre') {
+      if (/autobomba/i.test(nom)) g.autobomba++;
+      else if (/bulldozer|maquinaria/i.test(nom)) g.maquinaria++;
+      else g.brigada++; // cuadrillas, BRIF, ELIF
+    } else if (cat === 'Otros' && /administracion|guardia/i.test(nom)) g.gc++;
+  }
+  const groundUnits: ResourceUnit<GroundKind>[] = [];
+  if (g.brigada) groundUnits.push({ kind: 'brigada', count: g.brigada });
+  if (g.autobomba) groundUnits.push({ kind: 'autobomba', count: g.autobomba });
+  if (g.maquinaria) groundUnits.push({ kind: 'maquinaria', count: g.maquinaria });
+  if (g.gc) groundUnits.push({ kind: 'gc', count: g.gc });
+  const groundTotal = g.autobomba + g.maquinaria + g.brigada + g.gc;
+  if (!aerial && !personnel && !groundTotal) return undefined;
+  // "Medios Aéreos" no distingue avión/helicóptero, así que damos el total aéreo
+  // en el resumen sin inventar un desglose de tipos.
+  return {
+    aerial: aerial || undefined,
+    ground: groundTotal || undefined,
+    personnel: personnel || undefined,
+    groundUnits: groundUnits.length ? groundUnits : undefined,
+  };
+}
+
+function inforcylToFire(e: InforcylEmergencia): Fire | null {
+  if (e.falsa_alarma) return null;
+  const east = e.longitud;
+  const north = e.latitud;
+  const zone = e.huso ?? 30;
+  if (typeof east !== 'number' || typeof north !== 'number') return null;
+  const [lon, lat] = utmToLonLat(east, north, zone);
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+
+  const muni = e.municipio?.nombre ?? e.localidad?.municipio?.nombre ?? '';
+  const name = titleCase(e.localidad?.nombre || muni || 'Incendio');
+  const levelNum = Number(e.nivel_infocal);
+  const level = (Number.isFinite(levelNum) ? Math.max(0, Math.min(3, levelNum)) : null) as SeverityLevel;
+  const started = parseCylDateTime(e.fecha_inicio);
+  const updated =
+    parseCylDateTime(e.fecha_control) ??
+    parseCylDateTime(e.fecha_estabilizado) ??
+    started ??
+    new Date().toISOString();
+  const id = `${e.emergencia_cpm ?? ''}-${e.emergencia_num1 ?? ''}-${e.emergencia_num2 ?? ''}`;
+
+  return {
+    slug: `cyl-${slugify(name)}-${id}`,
+    name,
+    municipality: titleCase(muni) || '—',
+    province: titleCase(e.provincia?.nombre ?? '') || '—',
+    region: 'Castilla y León',
+    country: 'ES',
+    state: esStateFromSituacion(e.estado?.NOMBRE),
+    level,
+    type: 'forestal',
+    hectares: 0, // INFORCYL no publica superficie en tiempo real
+    coordinates: [lon, lat],
+    startedAt: started ?? updated,
+    updatedAt: updated,
+    resources: inforcylMedios(e.medios ?? []),
+    sources: ['jcyl'],
+  };
+}
+
+/** Incendios de Castilla y León en tiempo real (INFORCYL). [] si falla. */
+async function fetchInforcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    const res = await fetch(INFORCYL_URL, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      headers: INFORCYL_HEADERS,
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { listaEmergencias?: InforcylEmergencia[] };
+    const list = Array.isArray(json.listaEmergencias) ? json.listaEmergencias : [];
+    return list.map(inforcylToFire).filter((f): f is Fire => f !== null);
+  } catch {
+    return [];
+  }
+}
 
 const JCYL_URL =
   'https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/incendios-forestales/records';
@@ -417,9 +551,9 @@ function jcylToFire(r: JcylRaw): Fire | null {
   };
 }
 
-/** Incendios de Castilla y León (dataset de partes; se filtra a recientes y no
- * extinguidos, deduplicando por incendio quedándose con el parte más reciente). */
-export async function fetchJcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
+/** Respaldo: dataset de partes de Opendatasoft (2×/día; se filtra a recientes y
+ * no extinguidos, deduplicando por incendio con el parte más reciente). */
+async function fetchJcylOpendatasoft(opts: FetchOptions = {}): Promise<Fire[]> {
   try {
     const cutoff = new Date(Date.now() - 8 * 86400e3).toISOString().slice(0, 10);
     const where = `situacion_actual != "EXTINGUIDO" AND fecha_del_parte >= "${cutoff}"`;
@@ -446,6 +580,14 @@ export async function fetchJcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
   } catch {
     return [];
   }
+}
+
+/** Incendios de Castilla y León: INFORCYL en tiempo real; si no responde, cae
+ * al dataset de partes de Opendatasoft. */
+export async function fetchJcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  const live = await fetchInforcylFires(opts);
+  if (live.length) return live;
+  return fetchJcylOpendatasoft(opts);
 }
 
 // ── EFFIS: perímetros de área quemada (Copernicus, CC BY 4.0) ─────────────────

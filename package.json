@@ -1,6 +1,6 @@
 {
   "name": "incendib",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "description": "Visor web sin ánimo de lucro de incendios forestales activos en España y Portugal",
   "type": "module",
