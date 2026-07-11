@@ -5,6 +5,32 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.14.0] - 2026-07-11
+
+### Añadido
+
+- **Backend de alertas automáticas Web Push** (listo para activar):
+  - **Persistencia de suscripciones + preferencias** en Upstash Redis
+    (`@upstash/redis`), *privacy-first*: solo la suscripción y preferencias
+    mínimas; se **borran** al darse de baja y cuando el servicio de push las da
+    por caducadas (410).
+  - **Cron `/api/push/cron`** que detecta incendios **nuevos o agravados** (nuevo,
+    sube de nivel o aparece evacuación) y envía avisos a cada suscriptor según
+    sus preferencias (nivel mínimo, radio de zona); **las evacuaciones siempre
+    suenan**. Protegible con `CRON_SECRET`.
+  - La **baja** y los **cambios de preferencias** se sincronizan con el servidor.
+  - Rutas de push en **región europea** (`fra1`) para tratar los datos en la UE.
+
+### Notas / Activación
+
+- Requiere provisionar **Upstash Redis** (panel de Vercel → Storage → Upstash,
+  ~2 min), que fija `UPSTASH_REDIS_REST_URL`/`TOKEN` automáticamente. Sin
+  credenciales, el sistema queda **inactivo sin romper nada** (el cron responde
+  "no configurado").
+- `vercel.json` incluye un cron **diario** (límite del plan Hobby); para tiempo
+  casi real, disparar `/api/push/cron` cada ~15 min con **Upstash QStash** (free
+  tier) o un cron externo.
+
 ## [0.13.0] - 2026-07-11
 
 ### Añadido
@@ -409,6 +435,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.14.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.14.0
 [0.13.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.13.0
 [0.12.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.12.0
 [0.11.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.11.0

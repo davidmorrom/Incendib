@@ -3,6 +3,7 @@ import type { PushSubscription } from 'web-push';
 import { sendPush, pushConfigured } from '@/lib/push/server';
 
 export const runtime = 'nodejs';
+export const preferredRegion = 'fra1';
 
 /**
  * POST /api/push/test — envía una notificación de prueba a la suscripción dada.
