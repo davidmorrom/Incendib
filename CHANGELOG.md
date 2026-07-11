@@ -5,6 +5,30 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.9.0] - 2026-07-11
+
+### Añadido / Cambiado
+
+- **Castilla y León en tiempo real (INFORCYL)**. La fuente principal de CyL pasa
+  a ser el sistema operativo público de la JCyL (INFORCYL,
+  `servicios.jcyl.es/incyl`), que se actualiza casi al instante y aporta:
+  - **estado operativo** real (activo / controlado / estabilizado / extinguido),
+  - **nivel InfoCal** de gravedad,
+  - **desglose real de medios** (autobombas, cuadrillas de tierra, BRIF, ELIF,
+    bulldozer, medios aéreos y personal),
+  - filtrado de falsas alarmas.
+
+  Da una lista de incendios actuales limpia (frente a los partes retardados de
+  Opendatasoft, 2×/día, que quedan como **respaldo** si INFORCYL no responde).
+- **Conversión UTM→WGS84** (husos 29/30, ETRS89) para las coordenadas de
+  INFORCYL, con pruebas unitarias (punto conocido de Ávila) y del mapeo INFORCYL.
+
+### Notas
+
+- INFORCYL no publica la superficie (hectáreas) de los incendios en curso, así
+  que el KPI "Ha afectadas" refleja solo lo disponible; la evolución de área es
+  un dato posterior.
+
 ## [0.8.1] - 2026-07-11
 
 ### Corregido
@@ -312,6 +336,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.9.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.9.0
 [0.8.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.1
 [0.8.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.0
 [0.7.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.7.1

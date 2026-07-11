@@ -69,7 +69,78 @@ describe('fetchFogosActive (Portugal)', () => {
   });
 });
 
-describe('fetchJcylFires (Castilla y León)', () => {
+describe('fetchJcylFires (INFORCYL, tiempo real)', () => {
+  it('normaliza estado, nivel InfoCal, coordenadas UTM y medios', async () => {
+    mockJson({
+      listaEmergencias: [
+        {
+          causa: 'Rayos',
+          estado: { NOMBRE: 'Activo' },
+          falsa_alarma: false,
+          fecha_inicio: '06/07/2026 16:35:00',
+          fecha_control: '06/07/2026 21:45:00',
+          huso: 30,
+          latitud: 4465547.0, // UTM northing
+          longitud: 316098.0, // UTM easting
+          localidad: { nombre: 'HOYOS DEL ESPINO', municipio: { nombre: 'HOYOS DEL ESPINO' } },
+          municipio: { nombre: 'HOYOS DEL ESPINO' },
+          provincia: { nombre: 'AVILA' },
+          nivel_infocal: 2,
+          emergencia_cpm: 5,
+          emergencia_num1: 133,
+          emergencia_num2: 26,
+          medios: [
+            { TIPO: { CATEGORIA: 'Terrestre', NOMBRE: 'Autobombas' } },
+            { TIPO: { CATEGORIA: 'Terrestre', NOMBRE: 'Cuadrillas de tierra' } },
+            { TIPO: { CATEGORIA: 'Terrestre', NOMBRE: 'BRIF' } },
+            { TIPO: { CATEGORIA: 'Terrestre', NOMBRE: 'Bulldozer' } },
+            { TIPO: { CATEGORIA: 'Aereo', NOMBRE: 'Medios Aéreos' } },
+            { TIPO: { CATEGORIA: 'Aereo', NOMBRE: 'Medios Aéreos' } },
+            { TIPO: { CATEGORIA: 'Personal', NOMBRE: 'Técnicos' } },
+            { TIPO: { CATEGORIA: 'Otros', NOMBRE: 'Otras Administraciones' } },
+          ],
+        },
+      ],
+    });
+    const fires = await fetchJcylFires();
+    expect(fires).toHaveLength(1);
+    const f = fires[0]!;
+    expect(f.country).toBe('ES');
+    expect(f.state).toBe('activo');
+    expect(f.level).toBe(2);
+    expect(f.name).toBe('Hoyos Del Espino');
+    expect(f.coordinates[0]).toBeCloseTo(-5.1645, 2);
+    expect(f.coordinates[1]).toBeCloseTo(40.3202, 2);
+    expect(f.resources?.aerial).toBe(2);
+    expect(f.resources?.personnel).toBe(1);
+    // brigada = Cuadrillas + BRIF = 2; autobomba = 1; maquinaria(Bulldozer) = 1
+    const brig = f.resources?.groundUnits?.find((u) => u.kind === 'brigada');
+    expect(brig?.count).toBe(2);
+    expect(f.resources?.groundUnits?.find((u) => u.kind === 'autobomba')?.count).toBe(1);
+    expect(f.resources?.groundUnits?.find((u) => u.kind === 'maquinaria')?.count).toBe(1);
+    expect(f.sources).toEqual(['jcyl']);
+  });
+
+  it('descarta falsas alarmas', async () => {
+    mockJson({
+      listaEmergencias: [
+        {
+          estado: { NOMBRE: 'Extinguido' },
+          falsa_alarma: true,
+          huso: 30,
+          latitud: 4465547.0,
+          longitud: 316098.0,
+          municipio: { nombre: 'X' },
+          provincia: { nombre: 'AVILA' },
+          medios: [],
+        },
+      ],
+    });
+    expect(await fetchJcylFires()).toEqual([]);
+  });
+});
+
+describe('fetchJcylFires Opendatasoft (respaldo)', () => {
   it('normaliza nivel, hectáreas (decimales ES) y nombre/municipio', async () => {
     mockJson({
       results: [
