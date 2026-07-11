@@ -13,6 +13,7 @@ import {
   fetchFogosActive,
   fetchJcylFires,
   fetchInfocaFires,
+  fetchCatalunyaFires,
   fetchEffisPerimeters,
   attachPerimeters,
 } from './adapters';
@@ -32,21 +33,22 @@ export function getDataMode(): DataMode {
  * Incendios agregados y normalizados.
  *
  * En live combina las fuentes con datos reales usables: fogos.pt (Portugal),
- * Castilla y León (INFORCYL) y Andalucía (INFOCA). El resto de España no tiene
- * API de incendios activos en tiempo real, así que ahí solo hay focos
- * satelitales (getHotspots). Los perímetros de EFFIS se adjuntan al incendio
- * oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío = buena
- * noticia).
+ * Castilla y León (INFORCYL), Andalucía (INFOCA) y Cataluña (Bombers). El resto
+ * de España no tiene API de incendios activos en tiempo real, así que ahí solo
+ * hay focos satelitales (getHotspots). Los perímetros de EFFIS se adjuntan al
+ * incendio oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío =
+ * buena noticia).
  */
 export async function getFires(): Promise<Fire[]> {
   if (getDataMode() === 'live') {
-    const [pt, cyl, and, perimeters] = await Promise.all([
+    const [pt, cyl, and, cat, perimeters] = await Promise.all([
       fetchFogosActive(),
       fetchJcylFires(),
       fetchInfocaFires(),
+      fetchCatalunyaFires(),
       fetchEffisPerimeters(),
     ]);
-    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and]), perimeters);
+    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
   }
   return MOCK_FIRES;
 }
@@ -113,6 +115,7 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
   const pt = bySrc('fogos');
   const cyl = bySrc('jcyl');
   const and = bySrc('infoca');
+  const cat = bySrc('catalunya');
   const perims = fires.filter((f) => f.perimeter).length;
 
   return [
@@ -147,6 +150,14 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
       status: 'ok',
       note: plural(and.length, 'incidente'),
       lastUpdate: latestIso(and.map((f) => f.updatedAt), now),
+    },
+    {
+      id: 'catalunya',
+      label: 'Bombers · Catalunya',
+      description: 'incendis de vegetació',
+      status: 'ok',
+      note: plural(cat.length, 'incidente'),
+      lastUpdate: latestIso(cat.map((f) => f.updatedAt), now),
     },
     {
       id: 'effis',

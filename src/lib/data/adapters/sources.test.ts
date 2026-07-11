@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fetchFogosActive, fetchJcylFires, fetchInfocaFires } from './index';
+import { fetchFogosActive, fetchJcylFires, fetchInfocaFires, fetchCatalunyaFires } from './index';
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -186,6 +186,49 @@ describe('fetchInfocaFires (Andalucía)', () => {
   it('descarta features sin geometría', async () => {
     mockJson({ features: [{ attributes: { TERMINO_MUNICIPAL: 'X', ESTADO: 'ACTIVO' } }] });
     expect(await fetchInfocaFires()).toEqual([]);
+  });
+});
+
+describe('fetchCatalunyaFires (Bombers)', () => {
+  it('normaliza fase/tipo/vehículos y descarta extinguidos', async () => {
+    const now = Date.now();
+    mockJson({
+      features: [
+        {
+          attributes: {
+            ACT_NUM_ACTUACIO: '260313130',
+            MUNICIPI_DPX: 'Oliana',
+            TAL_COD_ALARMA1: 'IV',
+            TAL_DESC_ALARMA2: 'Incendi vegetació agrícola',
+            COM_FASE: 'Controlat',
+            ACT_DAT_INICI: now - 3600e3,
+            ACT_DAT_ACTUAL: now,
+            ACT_NUM_VEH: 5,
+          },
+          geometry: { x: 1.33, y: 42.08 },
+        },
+        {
+          attributes: {
+            ACT_NUM_ACTUACIO: '999',
+            MUNICIPI_DPX: 'X',
+            TAL_COD_ALARMA1: 'IV',
+            COM_FASE: 'Extingit',
+            ACT_DAT_ACTUAL: now,
+          },
+          geometry: { x: 1, y: 41 },
+        },
+      ],
+    });
+    const fires = await fetchCatalunyaFires();
+    expect(fires).toHaveLength(1); // el extinguido se descarta
+    const f = fires[0]!;
+    expect(f.region).toBe('Cataluña');
+    expect(f.state).toBe('controlado');
+    expect(f.type).toBe('agricola');
+    expect(f.name).toBe('Oliana');
+    expect(f.coordinates).toEqual([1.33, 42.08]);
+    expect(f.resources?.groundUnits?.[0]).toEqual({ kind: 'autobomba', count: 5 });
+    expect(f.sources).toEqual(['catalunya']);
   });
 });
 
