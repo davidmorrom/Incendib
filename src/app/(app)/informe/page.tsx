@@ -1,4 +1,5 @@
-import { getFires, getHotspots, getSourceStatus } from '@/lib/data';
+import { getFires, getHotspots, getSourceStatus, countHotspots24h } from '@/lib/data';
+import { getNow } from '@/lib/time';
 import { InformeScreen } from '@/components/screens/InformeScreen';
 
 // Pantalla canónica 2b: KPIs 2×2 + filtros Todos/España/Portugal + tabla densa.
@@ -10,5 +11,7 @@ export default async function InformePage() {
     getHotspots(),
     getSourceStatus(),
   ]);
-  return <InformeScreen fires={fires} focos24h={hotspots.length} sources={sources} />;
+  return (
+    <InformeScreen fires={fires} focos24h={countHotspots24h(hotspots, getNow())} sources={sources} />
+  );
 }

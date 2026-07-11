@@ -5,6 +5,28 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.10.0] - 2026-07-11
+
+### Añadido
+
+- **Andalucía en vivo (INFOCA)**. Incendios del Plan INFOCA (FeatureServer ArcGIS
+  público, descubierto desde el visor oficial) con estado operativo y **desglose
+  real de medios** (medios aéreos, ACO de coordinación, BRICAS/brigadas,
+  vehículos, técnicos). Andalucía se suma a Portugal y Castilla y León.
+- **Focos FIRMS más robustos**: se añade **MODIS** a VIIRS y se amplía la ventana
+  a **48 h**, de modo que las ventanas nocturnas ya no salen vacías. En el mapa,
+  los focos se **atenúan por antigüedad** (los recientes, más intensos); el KPI
+  "Focos 24 h" cuenta solo las últimas 24 h.
+- **Estado real de las fuentes** en la pantalla "Fuentes": refleja las fuentes
+  integradas (NASA FIRMS, fogos.pt, INFORCYL, INFOCA, EFFIS), su frescura y el
+  recuento de incidentes por fuente, en vez de datos de demostración.
+
+### Notas
+
+- **Cataluña y Galicia** siguen pendientes: sus datos abiertos de incendios son
+  agregados por municipio/comarca **sin geometría de punto**, así que no se
+  pueden situar en el mapa sin geocodificar o localizar un visor con API propia.
+
 ## [0.9.0] - 2026-07-11
 
 ### Añadido / Cambiado
@@ -336,6 +358,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.10.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.10.0
 [0.9.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.9.0
 [0.8.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.1
 [0.8.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.0
