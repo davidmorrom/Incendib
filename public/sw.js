@@ -12,7 +12,7 @@
  * reales. Este archivo se registra desde src/lib/pwa/register-sw.ts.
  */
 
-const CACHE = 'incendib-v1';
+const CACHE = 'incendib-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -45,20 +45,29 @@ self.addEventListener('fetch', (event) => {
 
 // ── Web Push ─────────────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
-  const data = event.data.json();
+  // Parseo defensivo: nunca dejar de mostrar notificación por un payload raro.
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    try {
+      data = { body: event.data.text() };
+    } catch {
+      data = {};
+    }
+  }
   const isEvacuation = data.severity === 'evacuation';
 
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Incendib', {
-      body: data.body,
+    self.registration.showNotification(data.title || 'Incendib', {
+      body: data.body || 'Novedad en un incendio de tu zona.',
       icon: '/icons/icon-192.png',
       badge: '/icons/badge-72.png',
-      tag: data.tag,
+      tag: data.tag || 'incendib',
       // Evacuaciones: persistente y con vibración; ignoran "No molestar".
       requireInteraction: isEvacuation,
       vibrate: isEvacuation ? [200, 100, 200, 100, 200] : undefined,
-      data: { url: data.url ?? '/' },
+      data: { url: data.url || '/' },
     }),
   );
 });

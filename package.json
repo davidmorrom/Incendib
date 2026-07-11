@@ -1,6 +1,6 @@
 {
   "name": "incendib",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "private": true,
   "description": "Visor web sin ánimo de lucro de incendios forestales activos en España y Portugal",
   "type": "module",
@@ -11,7 +11,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "geo:gen": "node scripts/gen-mask.mjs"
+    "geo:gen": "node scripts/gen-mask.mjs",
+    "icons:gen": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.38.0",

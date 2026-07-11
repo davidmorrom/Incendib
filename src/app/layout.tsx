@@ -43,6 +43,14 @@ export const metadata: Metadata = {
   applicationName: 'Incendib',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Incendib' },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    // iOS usa este icono al "Añadir a pantalla de inicio" (requisito para push en iOS).
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   formatDetection: { telephone: false },
   openGraph: {
     type: 'website',
