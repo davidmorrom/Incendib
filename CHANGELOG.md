@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.13.0] - 2026-07-11
+
+### Añadido
+
+- **Aviso legal y política de privacidad** (`/legal`), en ES/PT/EN: responsable
+  y contacto, datos que se tratan (notificaciones push, ubicación local,
+  preferencias, datos técnicos), nota de cookies/almacenamiento (solo técnico,
+  **sin banner** porque no hay rastreo ni analítica con cookies), encargados
+  (Vercel, servicios de push), conservación, derechos (RGPD, AEPD/CNPD) y
+  fuentes. Enlazado desde **Fuentes** y desde la pantalla de **Alertas**. Proyecto
+  sin ánimo de lucro: no vende datos ni hace marketing.
+
 ## [0.12.0] - 2026-07-11
 
 ### Añadido
@@ -397,6 +409,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.13.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.13.0
 [0.12.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.12.0
 [0.11.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.11.0
 [0.10.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.10.0

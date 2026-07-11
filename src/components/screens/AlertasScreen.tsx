@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
+import { useUIStore } from '@/lib/store';
+import { LEGAL } from '@/lib/legal';
 import {
   notificationPermission,
   getExistingSubscription,
@@ -50,6 +53,7 @@ const SECTION = 'font-mono text-label font-semibold uppercase tracking-[0.12em] 
 /** Pantalla Ajustes de alertas (7a): permiso Web Push + preferencias por zona. */
 export function AlertasScreen() {
   const d = useDict();
+  const locale = useUIStore((s) => s.locale);
   const [perm, setPerm] = useState<PermissionState>('default');
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -148,6 +152,10 @@ export function AlertasScreen() {
           </svg>
           <p className="text-[12px] leading-relaxed text-fg-body">{d.alerts.softAsk}</p>
         </div>
+
+        <Link href="/legal" className="mx-screen mt-2 block text-[11px] font-semibold text-action-text">
+          {(LEGAL[locale] ?? LEGAL.es).title} →
+        </Link>
 
         {unsupported ? (
           <p className="mx-screen mt-3 rounded-card border border-strong px-3 py-2.5 text-[12px] text-fg-secondary">

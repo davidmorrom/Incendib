@@ -1,9 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { LEGAL } from '@/lib/legal';
 import { timeAgo } from '@/lib/utils/format';
 import { useNow } from '@/components/time/NowProvider';
 import { FULL_ATTRIBUTION } from '@/lib/data/sources';
@@ -121,6 +123,13 @@ export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
               {d.sources.methodology}
             </button>
           </div>
+          <Link
+            href="/legal"
+            className="mt-2.5 flex items-center justify-between rounded-btn border border-strong px-3 py-[9px] text-[11.5px] font-semibold text-action-text"
+          >
+            {(LEGAL[locale] ?? LEGAL.es).title}
+            <span aria-hidden>→</span>
+          </Link>
         </div>
       </div>
     </>
