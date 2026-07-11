@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.15.1] - 2026-07-11
+
+### Corregido
+
+- **Medios aéreos en incendios de Castilla y León (INFORCYL)**: no aparecían en
+  el desglose de la ficha (INFORCYL no separa avión/helicóptero). Ahora se
+  muestran como «Medios aéreos» con su recuento.
+- **«Actualizado» erróneo** en fichas de INFORCYL e INFOCA: cuando los campos de
+  fecha de control/estabilización venían vacíos, se caía a la fecha de inicio y
+  mostraba «hace 1 día» pese a ser un dato fresco. Ahora refleja la frescura real
+  del dato (que se refresca cada ~2 min), coherente con la pantalla «Fuentes».
+
 ## [0.15.0] - 2026-07-11
 
 ### Añadido
@@ -445,6 +457,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.15.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.1
 [0.15.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.0
 [0.14.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.14.0
 [0.13.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.13.0

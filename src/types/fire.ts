@@ -49,7 +49,8 @@ export type AerialKind =
   | 'helicoptero' // helicóptero bombardero
   | 'helicoptero-coord' // helicóptero de coordinación
   | 'coordinacion' // avión de coordinación y observación (ACO)
-  | 'dron'; // UAS / dron
+  | 'dron' // UAS / dron
+  | 'aereo'; // medios aéreos sin desglosar (la fuente no distingue tipo)
 
 /** Tipos de medio terrestre. */
 export type GroundKind =

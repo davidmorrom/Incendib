@@ -88,6 +88,7 @@ const en: Dictionary = {
       'helicoptero-coord': 'Coordination helicopters',
       coordinacion: 'Coordination aircraft',
       dron: 'Drones',
+      aereo: 'Aerial means',
     },
     groundKind: {
       bomberos: 'Wildland firefighters',

@@ -87,6 +87,7 @@ const es = {
       'helicoptero-coord': 'Helicópteros de coordinación',
       coordinacion: 'Avión de coordinación',
       dron: 'Drones',
+      aereo: 'Medios aéreos',
     },
     groundKind: {
       bomberos: 'Bomberos forestales',
