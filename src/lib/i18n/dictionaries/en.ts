@@ -133,6 +133,8 @@ const en: Dictionary = {
     cameras: 'DGT CAMERAS · NEARBY',
     refreshed: 'refreshed image',
     accounts: 'OFFICIAL ACCOUNTS',
+    chronology: 'Timeline',
+    liveHeading: 'Live & headlines',
   },
   disclaimer: {
     short: 'Not a substitute for official emergency channels. Emergencies: 112',

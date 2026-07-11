@@ -132,6 +132,8 @@ const es = {
     cameras: 'CÁMARAS DGT · CERCANAS',
     refreshed: 'imagen refrescada',
     accounts: 'CUENTAS OFICIALES',
+    chronology: 'Cronología',
+    liveHeading: 'Directo y titulares',
   },
   disclaimer: {
     short: 'No sustituye a los canales oficiales de emergencia. Emergencias: 112',

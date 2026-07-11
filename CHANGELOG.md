@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.15.0] - 2026-07-11
+
+### Añadido
+
+- **Noticias en desktop (6a)**: en pantallas grandes la pestaña Noticias pasa a
+  un **panel de tres columnas** — **cronología en vivo** (mezcla, por hora, de los
+  incendios reales de las cuatro regiones y los titulares), **directo 24 h +
+  titulares**, y **cámaras DGT + cuentas oficiales**. En móvil se mantiene la
+  pila (3a). Con esto, el Mapa y Noticias tienen ya su versión desktop dedicada.
+
 ## [0.14.0] - 2026-07-11
 
 ### Añadido
@@ -435,6 +445,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.15.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.0
 [0.14.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.14.0
 [0.13.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.13.0
 [0.12.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.12.0
