@@ -807,15 +807,113 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   });
 }
 
-// ── Pendientes (fases posteriores) ───────────────────────────────────────────
-// ICNF (áreas ardidas PT) y Cataluña quedan pendientes: el dataset abierto de
-// actuaciones de Bombers (g2ay-3vnj) no trae coordenadas ni estado operativo en
-// vivo, así que no sirve para el mapa; hay que buscar una fuente con geometría.
+// ── Cataluña: Bombers de la Generalitat (ArcGIS FeatureServer público) ────────
+// Capa de actuaciones urgentes con fase, descubierta desde el visor oficial
+// (experience.arcgis.com embebido en interior.gencat.cat). Trae fase, municipio,
+// tipo de vegetación, fechas y nº de vehículos, con geometría (outSR=4326).
 
-export async function fetchIcnfBurntAreas(_opts: FetchOptions = {}): Promise<Fire[]> {
-  return [];
+const CATALUNYA_QUERY =
+  'https://services7.arcgis.com/ZCqVt1fRXwwK6GF4/arcgis/rest/services' +
+  '/ACTUACIONS_URGENTS_online_PRO_AMB_FASE_VIEW/FeatureServer/0/query';
+
+interface CatalunyaAttrs {
+  ACT_NUM_ACTUACIO?: string;
+  ACT_DAT_INICI?: number;
+  ACT_DAT_ACTUACIO?: number;
+  ACT_DAT_ACTUAL?: number;
+  DATA_ACT?: number;
+  COM_FASE?: string | null;
+  TAL_DESC_ALARMA2?: string;
+  MUNICIPI_DPX?: string;
+  MUNICIPI_SIG?: string;
+  ACT_NUM_VEH?: number;
 }
 
-export async function fetchCatalunyaFires(_opts: FetchOptions = {}): Promise<Fire[]> {
+/** Fase de Bombers (catalán) → FireState. null = en curso sin fase → activo. */
+function catStateFromFase(fase?: string | null): FireState {
+  const f = (fase ?? '').toLowerCase();
+  if (f.includes('control')) return 'controlado';
+  if (f.includes('estabil')) return 'estabilizado';
+  if (f.includes('exting')) return 'extinguido';
+  return 'activo';
+}
+
+function epochToIso(n?: number): string | undefined {
+  return typeof n === 'number' && Number.isFinite(n) ? new Date(n).toISOString() : undefined;
+}
+
+function catalunyaToFire(f: {
+  attributes?: CatalunyaAttrs;
+  geometry?: { x?: number; y?: number };
+}): Fire | null {
+  const a = f.attributes ?? {};
+  const g = f.geometry;
+  if (!g || typeof g.x !== 'number' || typeof g.y !== 'number') return null;
+
+  const muni = titleCase(a.MUNICIPI_DPX || a.MUNICIPI_SIG || 'Incendi');
+  const desc = (a.TAL_DESC_ALARMA2 ?? '').toLowerCase();
+  const type: Fire['type'] = desc.includes('agr')
+    ? 'agricola'
+    : desc.includes('urban')
+      ? 'urbano-forestal'
+      : 'forestal';
+  const veh = Number(a.ACT_NUM_VEH) || 0;
+  const started = epochToIso(a.ACT_DAT_INICI) ?? epochToIso(a.ACT_DAT_ACTUACIO);
+  const updated = epochToIso(a.ACT_DAT_ACTUAL) ?? epochToIso(a.DATA_ACT) ?? started ?? new Date().toISOString();
+
+  return {
+    slug: `cat-${slugify(muni)}-${a.ACT_NUM_ACTUACIO ?? slugify(muni)}`,
+    name: muni,
+    municipality: muni,
+    province: '—', // la capa solo da municipio
+    region: 'Cataluña',
+    country: 'ES',
+    state: catStateFromFase(a.COM_FASE),
+    level: null,
+    type,
+    hectares: 0,
+    coordinates: [g.x, g.y],
+    startedAt: started ?? updated,
+    updatedAt: updated,
+    resources: veh > 0 ? { ground: veh, groundUnits: [{ kind: 'autobomba', count: veh }] } : undefined,
+    sources: ['catalunya'],
+  };
+}
+
+/** Incendios de vegetación de Cataluña (Bombers), no extinguidos y recientes. */
+export async function fetchCatalunyaFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    const url =
+      `${CATALUNYA_QUERY}?where=${encodeURIComponent("TAL_COD_ALARMA1 = 'IV'")}` +
+      `&outFields=*&returnGeometry=true&outSR=4326&resultRecordCount=200&f=json`;
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      headers: { 'User-Agent': INFORCYL_HEADERS['User-Agent'] },
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      features?: { attributes?: CatalunyaAttrs; geometry?: { x?: number; y?: number } }[];
+    };
+    const feats = Array.isArray(json.features) ? json.features : [];
+    const recent = Date.now() - 3 * 86400e3;
+    return feats
+      .filter((f) => {
+        const fase = (f.attributes?.COM_FASE ?? '').toLowerCase();
+        if (fase.includes('exting')) return false; // fuera extinguidos (ruido agrícola)
+        const upd = f.attributes?.ACT_DAT_ACTUAL ?? f.attributes?.DATA_ACT;
+        return typeof upd !== 'number' || upd >= recent;
+      })
+      .map(catalunyaToFire)
+      .filter((x): x is Fire => x !== null);
+  } catch {
+    return [];
+  }
+}
+
+// ── Pendientes (fases posteriores) ───────────────────────────────────────────
+// ICNF (áreas ardidas PT) queda pendiente.
+
+export async function fetchIcnfBurntAreas(_opts: FetchOptions = {}): Promise<Fire[]> {
   return [];
 }

@@ -5,6 +5,23 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.11.0] - 2026-07-11
+
+### Añadido
+
+- **Cataluña en vivo (Bombers de la Generalitat)**. Incendios de vegetación
+  (FeatureServer ArcGIS público, descubierto desde el visor oficial embebido en
+  `interior.gencat.cat`) con **fase operativa** (activo/controlado/estabilizado),
+  municipio, **tipo** (forestal/agrícola/urbano-forestal) y nº de vehículos.
+  Cataluña se suma a Portugal, Castilla y León y Andalucía: **4 regiones con
+  datos reales** de incidentes.
+
+### Notas
+
+- **Galicia**: la Xunta no expone una API pública de incendios activos en tiempo
+  real (solo el índice de riesgo IRDI y estadística histórica), así que sigue
+  cubierta únicamente por los focos satelitales de NASA FIRMS.
+
 ## [0.10.0] - 2026-07-11
 
 ### Añadido
@@ -358,6 +375,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.11.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.11.0
 [0.10.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.10.0
 [0.9.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.9.0
 [0.8.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.8.1
