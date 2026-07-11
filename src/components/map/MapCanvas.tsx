@@ -45,6 +45,9 @@ import type { Fire, Hotspot } from '@/types/fire';
 export interface MapCanvasProps {
   fires: Fire[];
   hotspots?: Hotspot[];
+  /** Áreas quemadas recientes (EFFIS) para la capa de perímetros, aparte de los
+   * marcadores de incidentes. Se dibujan en color "extinguido". */
+  burnedAreas?: Fire[];
   onSelect: (fire: Fire) => void;
   hoveredSlug?: string | null;
   onHover?: (slug: string | null) => void;
@@ -58,7 +61,7 @@ interface HotspotTip {
   sensor: string;
 }
 
-export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover }: MapCanvasProps) {
+export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, hoveredSlug, onHover }: MapCanvasProps) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
@@ -75,12 +78,14 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
   const islands = useMemo(() => fires.filter(isIslandFire), [fires]);
   const tipFire = tip ? fires.find((f) => f.slug === tip) : null;
 
-  // Perímetros de área quemada (EFFIS): color por estado, según tema.
+  // Perímetros de área quemada (EFFIS): color por estado, según tema. Se pintan
+  // primero las áreas quemadas (extinguido) y encima los incendios activos, para
+  // que el perímetro del incidente en curso destaque sobre lo ya quemado.
   const perimeters = useMemo<FeatureCollection<Polygon>>(() => {
     const palette = statePalette(theme);
     return {
       type: 'FeatureCollection',
-      features: fires
+      features: [...burnedAreas, ...fires]
         .filter((f) => f.perimeter && f.perimeter.length > 2)
         .map((f) => ({
           type: 'Feature',
@@ -88,7 +93,7 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
           geometry: { type: 'Polygon', coordinates: [f.perimeter!] },
         })),
     };
-  }, [fires, theme]);
+  }, [fires, burnedAreas, theme]);
   const hasPerimeters = perimeters.features.length > 0;
 
   // Focos satelitales (FIRMS): puntos naranja con glow, tamaño por FRP, con

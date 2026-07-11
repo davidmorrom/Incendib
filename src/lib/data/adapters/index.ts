@@ -24,6 +24,7 @@ import type {
   AerialKind,
   GroundKind,
   SeverityLevel,
+  Country,
 } from '@/types/fire';
 import { inEsPt } from '@/lib/geo/point-in-region';
 import { utmToLonLat } from '@/lib/geo/utm';
@@ -712,17 +713,58 @@ export async function fetchInfocaFires(opts: FetchOptions = {}): Promise<Fire[]>
 
 const EFFIS_WFS = 'https://maps.effis.emergency.copernicus.eu/effis';
 
-/** Área quemada EFFIS como Fire con perímetro + centroide, para enriquecer los
- * incendios oficiales cercanos. Best-effort: [] si el WFS/TLS falla. */
+/**
+ * Ventana de campaña: la capa `modis.ba.poly` es MULTI-ANUAL (contiene áreas
+ * quemadas de años pasados). Solo nos interesan las recientes, para (a) enriquecer
+ * incendios activos con su superficie/perímetro y (b) dibujar el área quemada de
+ * la campaña. Filtramos por FIREDATE dentro de esta ventana.
+ */
+const EFFIS_RECENT_DAYS = 45;
+
+/** Claves en minúscula para leer propiedades sin depender de mayúsculas. */
+function lowerKeys(p?: Record<string, unknown>): Record<string, unknown> {
+  const o: Record<string, unknown> = {};
+  if (p) for (const k of Object.keys(p)) o[k.toLowerCase()] = p[k];
+  return o;
+}
+
+function str(v: unknown): string {
+  return v == null ? '' : String(v);
+}
+
+/** "2026-07-08 11:51:00[.micros]" → ISO UTC; null si no parsea. */
+function parseEffisDate(v: unknown): string | null {
+  const s = typeof v === 'string' ? v : '';
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/.exec(s);
+  if (m) return `${m[1]}T${m[2]}Z`;
+  const d = /^(\d{4}-\d{2}-\d{2})$/.exec(s);
+  return d ? `${d[1]}T00:00:00Z` : null;
+}
+
+/**
+ * Áreas quemadas EFFIS (Copernicus, CC BY 4.0) recientes como `Fire` con
+ * perímetro real + centroide. Sirven para adjuntar superficie/perímetro a los
+ * incendios oficiales cercanos y para la capa de área quemada del mapa.
+ *
+ * Detalles del WFS de EFFIS (MapServer): hay que pedir `outputFormat=geojson`
+ * (ignora `application/json` y devolvería GML → fallo silencioso), y ordenar por
+ * `LASTUPDATE` desc para quedarnos con la campaña en curso de una capa multi-anual.
+ * Best-effort: [] ante cualquier fallo (nunca rompe el mapa).
+ */
 export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fire[]> {
   const [minLon, minLat, maxLon, maxLat] = opts.bbox ?? IBERIA_BBOX;
+  // WFS 2.0.0 + EPSG:4326 ⇒ orden de ejes lat,lon en el bbox.
+  // `count` acotado: la respuesta trae geometría a resolución nativa (MODIS) y
+  // 1000 polígonos son ~9 MB (supera el límite de caché de Next y agota el
+  // tiempo). Ordenado por actualización reciente, los primeros ~200 son la
+  // campaña en curso; el filtro por fecha de abajo afina a la ventana reciente.
   const url =
     `${EFFIS_WFS}?service=WFS&version=2.0.0&request=GetFeature&typeName=ms:modis.ba.poly` +
-    `&outputFormat=application/json&srsName=EPSG:4326&count=300` +
+    `&outputFormat=geojson&srsName=EPSG:4326&sortBy=LASTUPDATE+D&count=200` +
     `&bbox=${minLat},${minLon},${maxLat},${maxLon},EPSG:4326`;
   try {
     const res = await fetch(url, {
-      signal: opts.signal ?? AbortSignal.timeout(20_000),
+      signal: opts.signal ?? AbortSignal.timeout(25_000),
       next: { revalidate: 1800 },
     });
     if (!res.ok) return [];
@@ -730,26 +772,33 @@ export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fir
       features?: { properties?: Record<string, unknown>; geometry?: { type?: string; coordinates?: unknown } }[];
     };
     const feats = Array.isArray(gj.features) ? gj.features : [];
+    const cutoff = Date.now() - EFFIS_RECENT_DAYS * 86_400_000;
     const out: Fire[] = [];
-    for (let i = 0; i < feats.length; i++) {
-      const ring = outerRing(feats[i]?.geometry);
+    for (const feat of feats) {
+      const ring = outerRing(feat?.geometry);
       if (!ring || ring.length < 4) continue;
-      const centroid = ringCentroid(ring);
-      const props = feats[i]?.properties ?? {};
-      const area = Number(props.area_ha ?? props.AREA_HA ?? props.area ?? props.gross_ha) || 0;
+      const props = lowerKeys(feat?.properties);
+      const started = parseEffisDate(props.firedate);
+      // Solo campaña reciente (capa multi-anual): descarta áreas de años previos.
+      if (started && Date.parse(started) < cutoff) continue;
+      const updated = parseEffisDate(props.lastupdate) ?? started ?? new Date().toISOString();
+      const commune = str(props.commune).trim();
+      const province = str(props.province).trim();
+      const country: Country = str(props.country).toUpperCase() === 'PT' ? 'PT' : 'ES';
+      const area = num(props.area_ha ?? props.area ?? props.gross_ha);
       out.push({
-        slug: `effis-${i}`,
-        name: 'Área quemada',
-        municipality: '—',
-        province: '—',
+        slug: `effis-${str(props.id) || out.length}`,
+        name: commune || 'Área quemada',
+        municipality: commune || '—',
+        province: province || '—',
         region: 'EFFIS',
-        country: 'ES',
+        country,
         state: 'extinguido',
         level: null,
         hectares: Math.round(area),
-        coordinates: centroid,
-        startedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        coordinates: ringCentroid(ring),
+        startedAt: started ?? updated,
+        updatedAt: updated,
         sources: ['effis'],
         perimeter: ring,
       });
