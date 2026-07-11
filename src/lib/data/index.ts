@@ -84,6 +84,19 @@ export async function getHotspots(): Promise<Hotspot[]> {
   return MOCK_HOTSPOTS;
 }
 
+/**
+ * Áreas quemadas recientes (EFFIS) para la capa de perímetros del mapa. Son
+ * incendios pasados/mapeados por satélite (no incidentes activos): se dibujan
+ * como perímetro real de área quemada, aparte de los marcadores de incidentes.
+ * En mock ya vienen perímetros en los propios incendios, así que devuelve [].
+ */
+export async function getBurnedAreas(): Promise<Fire[]> {
+  if (getDataMode() !== 'live') return [];
+  const areas = await fetchEffisPerimeters();
+  // Cap por higiene visual/perf; ya vienen ordenadas por actualización reciente.
+  return areas.slice(0, 250);
+}
+
 /** Recuento de focos de las últimas 24 h (KPI), relativo a `now` (ms). */
 export function countHotspots24h(hotspots: Hotspot[], now: number): number {
   const cutoff = now - 24 * 3600e3;

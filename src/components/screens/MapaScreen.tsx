@@ -22,10 +22,12 @@ import type { Fire, Hotspot } from '@/types/fire';
 export function MapaScreen({
   fires,
   hotspots,
+  burnedAreas = [],
   focos24h,
 }: {
   fires: Fire[];
   hotspots: Hotspot[];
+  burnedAreas?: Fire[];
   focos24h: number;
 }) {
   const router = useRouter();
@@ -68,6 +70,7 @@ export function MapaScreen({
         <MapCanvasClient
           fires={visible}
           hotspots={hotspots}
+          burnedAreas={burnedAreas}
           onSelect={select}
           hoveredSlug={hovered}
           onHover={setHovered}
