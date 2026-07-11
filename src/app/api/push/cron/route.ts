@@ -68,11 +68,12 @@ function payloadFor(f: Fire): PushPayload {
 }
 
 /**
- * GET /api/push/cron — comprueba incendios nuevos/agravados y envía alertas Web
- * Push a los suscriptores según sus preferencias. Pensado para un scheduler
- * (Vercel Cron o Upstash QStash). Protegido con CRON_SECRET si está definido.
+ * /api/push/cron — comprueba incendios nuevos/agravados y envía alertas Web Push
+ * a los suscriptores según sus preferencias. Pensado para un scheduler (Vercel
+ * Cron usa GET; Upstash QStash usa POST por defecto → aceptamos ambos).
+ * Protegido con CRON_SECRET si está definido.
  */
-export async function GET(req: Request) {
+async function handle(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ ok: false, error: 'no autorizado' }, { status: 401 });
@@ -110,3 +111,6 @@ export async function GET(req: Request) {
   }
   return NextResponse.json({ ok: true, alerts: alerts.length, subs: subs.length, sent });
 }
+
+export const GET = handle;
+export const POST = handle;

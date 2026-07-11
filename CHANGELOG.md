@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.15.2] - 2026-07-11
+
+### Cambiado
+
+- El endpoint `/api/push/cron` acepta también **POST** (además de GET), para que
+  **Upstash QStash** pueda dispararlo con su método por defecto sin
+  configuración extra (Vercel Cron sigue usando GET).
+
 ## [0.15.1] - 2026-07-11
 
 ### Corregido
@@ -457,6 +465,7 @@ anterior:
 - Andamiaje PWA: manifest, service worker (offline + Web Push) e iconos.
 - Documentación de arquitectura y guía del proyecto.
 
+[0.15.2]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.2
 [0.15.1]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.1
 [0.15.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.15.0
 [0.14.0]: https://github.com/davidmorrom/Incendib/releases/tag/v0.14.0
