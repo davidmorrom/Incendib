@@ -191,6 +191,32 @@ const es = {
     back: 'Volver',
     dismiss: 'Descartar aviso',
   },
+  alerts: {
+    title: 'Alertas',
+    aria: 'Ajustes de alertas',
+    softAsk:
+      'Activa las notificaciones para recibir avisos de incendios y evacuaciones en las zonas que elijas. Las alertas de evacuación siempre suenan.',
+    enable: 'Activar notificaciones',
+    enabled: 'Notificaciones activas',
+    disable: 'Desactivar',
+    denied:
+      'Has bloqueado las notificaciones en el navegador. Actívalas en los ajustes del sitio para recibir alertas.',
+    unsupported: 'Tu navegador no admite notificaciones push.',
+    prefsHeading: 'Preferencias',
+    levels: 'Avisarme desde el nivel',
+    radius: 'Radio de alerta',
+    useLocation: 'Usar mi ubicación',
+    locationSet: 'Zona fijada en tu ubicación',
+    locationError: 'No se pudo obtener tu ubicación',
+    evacuationAlways: 'Las evacuaciones siempre suenan',
+    silence: 'Silenciar avisos no críticos',
+    test: 'Enviar notificación de prueba',
+    testSent: '✓ Notificación enviada',
+    testFail: 'No se pudo enviar. Revisa el permiso.',
+    autoNote:
+      'Ya puedes activar y probar las notificaciones. Las alertas automáticas por zona llegarán muy pronto.',
+    entry: 'Alertas',
+  },
 };
 
 export default es;

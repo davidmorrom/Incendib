@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { Wordmark } from '@/components/ui/Wordmark';
 import { useDict } from '@/components/i18n/I18nProvider';
@@ -39,6 +40,13 @@ export function AppHeader() {
           <path d="M12 12 L16 16" />
         </svg>
       </button>
+
+      <Link href="/alertas" className={btn} aria-label={d.alerts.aria}>
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M9 2.5a4 4 0 0 0-4 4c0 3.2-1.4 4.8-1.4 4.8h10.8S14 9.7 14 6.5a4 4 0 0 0-4-4Z" />
+          <path d="M7.4 14a1.6 1.6 0 0 0 3.2 0" />
+        </svg>
+      </Link>
 
       <button
         type="button"

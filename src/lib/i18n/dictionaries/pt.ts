@@ -192,6 +192,32 @@ const pt: Dictionary = {
     back: 'Voltar',
     dismiss: 'Dispensar aviso',
   },
+  alerts: {
+    title: 'Alertas',
+    aria: 'Definições de alertas',
+    softAsk:
+      'Ativa as notificações para receber avisos de incêndios e evacuações nas zonas que escolheres. Os alertas de evacuação tocam sempre.',
+    enable: 'Ativar notificações',
+    enabled: 'Notificações ativas',
+    disable: 'Desativar',
+    denied:
+      'Bloqueaste as notificações no navegador. Ativa-as nas definições do site para receber alertas.',
+    unsupported: 'O teu navegador não suporta notificações push.',
+    prefsHeading: 'Preferências',
+    levels: 'Avisar a partir do nível',
+    radius: 'Raio de alerta',
+    useLocation: 'Usar a minha localização',
+    locationSet: 'Zona fixada na tua localização',
+    locationError: 'Não foi possível obter a tua localização',
+    evacuationAlways: 'As evacuações tocam sempre',
+    silence: 'Silenciar avisos não críticos',
+    test: 'Enviar notificação de teste',
+    testSent: '✓ Notificação enviada',
+    testFail: 'Não foi possível enviar. Verifica a permissão.',
+    autoNote:
+      'Já podes ativar e testar as notificações. Os alertas automáticos por zona chegam muito em breve.',
+    entry: 'Alertas',
+  },
 };
 
 export default pt;

@@ -69,6 +69,16 @@ export function DesktopTopNav({ className }: { className?: string }) {
       <span className="hidden font-mono text-[11px] text-fg-mute xl:inline">
         {interpolate(d.map.updated, { time: formatClock(now) })}
       </span>
+      <Link
+        href="/alertas"
+        aria-label={d.alerts.aria}
+        className="grid h-8 w-8 flex-none place-items-center rounded-[6px] border border-default text-fg-secondary"
+      >
+        <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M9 2.5a4 4 0 0 0-4 4c0 3.2-1.4 4.8-1.4 4.8h10.8S14 9.7 14 6.5a4 4 0 0 0-4-4Z" />
+          <path d="M7.4 14a1.6 1.6 0 0 0 3.2 0" />
+        </svg>
+      </Link>
       <LangButton />
       <button
         type="button"

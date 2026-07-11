@@ -192,6 +192,32 @@ const en: Dictionary = {
     back: 'Back',
     dismiss: 'Dismiss notice',
   },
+  alerts: {
+    title: 'Alerts',
+    aria: 'Alert settings',
+    softAsk:
+      'Turn on notifications to get alerts about fires and evacuations in the zones you choose. Evacuation alerts always sound.',
+    enable: 'Enable notifications',
+    enabled: 'Notifications on',
+    disable: 'Turn off',
+    denied:
+      'You have blocked notifications in the browser. Enable them in the site settings to receive alerts.',
+    unsupported: 'Your browser does not support push notifications.',
+    prefsHeading: 'Preferences',
+    levels: 'Alert me from level',
+    radius: 'Alert radius',
+    useLocation: 'Use my location',
+    locationSet: 'Zone set to your location',
+    locationError: 'Could not get your location',
+    evacuationAlways: 'Evacuations always sound',
+    silence: 'Silence non-critical alerts',
+    test: 'Send a test notification',
+    testSent: '✓ Notification sent',
+    testFail: 'Could not send. Check the permission.',
+    autoNote:
+      'You can already enable and test notifications. Automatic zone alerts are coming very soon.',
+    entry: 'Alerts',
+  },
 };
 
 export default en;
