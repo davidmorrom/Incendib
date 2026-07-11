@@ -11,6 +11,7 @@ const en: Dictionary = {
     noticias: 'News',
     fuentes: 'Sources',
     historico: 'History',
+    boletines: 'Bulletins',
   },
   status: {
     live: 'live',
@@ -220,6 +221,35 @@ const en: Dictionary = {
     autoNote:
       'You can already enable and test notifications. Automatic zone alerts are coming very soon.',
     entry: 'Alerts',
+  },
+  boletin: {
+    title: 'Weekly bulletins',
+    subtitle: 'A weekly snapshot of the wildfire situation in Spain and Portugal.',
+    empty: 'No bulletin published yet. The first one will arrive at the close of the week.',
+    edition: 'Edition',
+    week: 'Week {n}',
+    status: { cerrado: 'Closed', provisional: 'Provisional' },
+    published: 'Published {when}',
+    kpiFirms: 'FIRMS detections',
+    kpiActive: 'Tracked',
+    kpiHectares: 'Area',
+    kpiPerimeters: 'Perimeters',
+    kpiMaxLevel: 'Max. level',
+    vsPrev: 'vs. previous',
+    rankingHeading: 'Territorial ranking',
+    colRegion: 'TERRITORY',
+    colFires: 'FIRES',
+    colHa: 'HA',
+    highlightsHeading: 'Notable fires',
+    noHighlights: 'A week with no major fires recorded.',
+    methodHeading: 'Notes and method',
+    method:
+      'Figures aggregated from official and satellite sources, with delay. Satellite detection does not equal a confirmed fire. Source: FIRMS/NASA, EFFIS/Copernicus, fogos.pt and regional agencies.',
+    seeEdition: 'View edition',
+    latest: 'Latest bulletin',
+    viewAll: 'View all bulletins',
+    print: 'Print / PDF',
+    level: 'Level {n}',
   },
 };
 

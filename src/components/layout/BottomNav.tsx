@@ -31,10 +31,17 @@ const FuentesIcon = ({ className }: IconProps) => (
     <circle cx="8" cy="4.8" r=".5" fill="currentColor" stroke="none" />
   </svg>
 );
+const BoletinIcon = ({ className }: IconProps) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" className={className}>
+    <rect x="2.5" y="3" width="11" height="10.5" rx="1.5" />
+    <path d="M2.5 6 H13.5 M5 2 V4 M11 2 V4 M5 9 H9" />
+  </svg>
+);
 
 const ITEMS = [
   { href: '/', key: 'mapa', Icon: MapaIcon },
   { href: '/informe', key: 'informe', Icon: InformeIcon },
+  { href: '/boletines', key: 'boletines', Icon: BoletinIcon },
   { href: '/noticias', key: 'noticias', Icon: NoticiasIcon },
   { href: '/fuentes', key: 'fuentes', Icon: FuentesIcon },
 ] as const;
@@ -46,7 +53,7 @@ export function BottomNav({ className }: { className?: string }) {
   return (
     <nav
       aria-label="Navegación principal"
-      className={cn('flex h-14 flex-none border-t bg-bg-raised', className)}
+      className={cn('flex h-14 flex-none border-t bg-bg-raised print:hidden', className)}
     >
       {ITEMS.map(({ href, key, Icon }) => {
         const active = pathname === href;

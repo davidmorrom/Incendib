@@ -10,6 +10,7 @@ const es = {
     noticias: 'Noticias',
     fuentes: 'Fuentes',
     historico: 'Histórico',
+    boletines: 'Boletines',
   },
   status: {
     live: 'en vivo',
@@ -219,6 +220,35 @@ const es = {
     autoNote:
       'Ya puedes activar y probar las notificaciones. Las alertas automáticas por zona llegarán muy pronto.',
     entry: 'Alertas',
+  },
+  boletin: {
+    title: 'Boletines semanales',
+    subtitle: 'Foto fija semanal de la situación de incendios en España y Portugal.',
+    empty: 'Aún no se ha publicado ningún boletín. El primero llegará al cierre de la semana.',
+    edition: 'Edición',
+    week: 'Semana {n}',
+    status: { cerrado: 'Cerrado', provisional: 'Provisional' },
+    published: 'Publicado {when}',
+    kpiFirms: 'Detecciones FIRMS',
+    kpiActive: 'En seguimiento',
+    kpiHectares: 'Superficie',
+    kpiPerimeters: 'Perímetros',
+    kpiMaxLevel: 'Nivel máx.',
+    vsPrev: 'vs. anterior',
+    rankingHeading: 'Ranking territorial',
+    colRegion: 'TERRITORIO',
+    colFires: 'INCEND.',
+    colHa: 'HA',
+    highlightsHeading: 'Incendios destacados',
+    noHighlights: 'Semana sin grandes incendios registrados.',
+    methodHeading: 'Notas y método',
+    method:
+      'Cifras agregadas de fuentes oficiales y satelitales, con demora. La detección satelital no equivale a incendio confirmado. Fuente FIRMS/NASA, EFFIS/Copernicus, fogos.pt y organismos autonómicos.',
+    seeEdition: 'Ver edición',
+    latest: 'Último boletín',
+    viewAll: 'Ver todos los boletines',
+    print: 'Imprimir / PDF',
+    level: 'Nivel {n}',
   },
 };
 
