@@ -112,6 +112,7 @@ describe('fetchJcylFires (INFORCYL, tiempo real)', () => {
     expect(f.coordinates[0]).toBeCloseTo(-5.1645, 2);
     expect(f.coordinates[1]).toBeCloseTo(40.3202, 2);
     expect(f.resources?.aerial).toBe(2);
+    expect(f.resources?.aerialUnits?.[0]).toEqual({ kind: 'aereo', count: 2 }); // aéreo genérico
     expect(f.resources?.personnel).toBe(1);
     // brigada = Cuadrillas + BRIF = 2; autobomba = 1; maquinaria(Bulldozer) = 1
     const brig = f.resources?.groundUnits?.find((u) => u.kind === 'brigada');

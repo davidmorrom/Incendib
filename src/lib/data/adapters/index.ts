@@ -407,12 +407,12 @@ function inforcylMedios(medios: InforcylMedio[]): Fire['resources'] {
   if (g.gc) groundUnits.push({ kind: 'gc', count: g.gc });
   const groundTotal = g.autobomba + g.maquinaria + g.brigada + g.gc;
   if (!aerial && !personnel && !groundTotal) return undefined;
-  // "Medios Aéreos" no distingue avión/helicóptero, así que damos el total aéreo
-  // en el resumen sin inventar un desglose de tipos.
+  // "Medios Aéreos" no distingue avión/helicóptero: lo damos como aéreo genérico.
   return {
     aerial: aerial || undefined,
     ground: groundTotal || undefined,
     personnel: personnel || undefined,
+    aerialUnits: aerial > 0 ? [{ kind: 'aereo', count: aerial }] : undefined,
     groundUnits: groundUnits.length ? groundUnits : undefined,
   };
 }
@@ -431,11 +431,10 @@ function inforcylToFire(e: InforcylEmergencia): Fire | null {
   const levelNum = Number(e.nivel_infocal);
   const level = (Number.isFinite(levelNum) ? Math.max(0, Math.min(3, levelNum)) : null) as SeverityLevel;
   const started = parseCylDateTime(e.fecha_inicio);
-  const updated =
-    parseCylDateTime(e.fecha_control) ??
-    parseCylDateTime(e.fecha_estabilizado) ??
-    started ??
-    new Date().toISOString();
+  // INFORCYL no publica un "última modificación" por incidente (fecha_control/
+  // estabilizado suelen venir vacías), así que "Actualizado" refleja la frescura
+  // del dato (se refresca ~cada 2 min), no un evento antiguo del incendio.
+  const updated = new Date().toISOString();
   const id = `${e.emergencia_cpm ?? ''}-${e.emergencia_num1 ?? ''}-${e.emergencia_num2 ?? ''}`;
 
   return {
@@ -674,7 +673,7 @@ function infocaToFire(f: {
     hectares: 0, // INFOCA no publica superficie en esta capa
     coordinates: [g.x, g.y],
     startedAt,
-    updatedAt: startedAt,
+    updatedAt: new Date().toISOString(), // frescura del dato (INFOCA no da modificado)
     resources: infocaResources(a),
     sources: ['infoca'],
   };

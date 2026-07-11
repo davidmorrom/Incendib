@@ -14,6 +14,7 @@ const AERIAL_ICON: Record<AerialKind, IconKind> = {
   helicoptero: 'heli',
   'helicoptero-coord': 'heli',
   dron: 'drone',
+  aereo: 'plane',
 };
 
 const GROUND_ICON: Record<GroundKind, IconKind> = {
