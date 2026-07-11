@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils/cn';
 const TABS = [
   { href: '/', key: 'mapa' },
   { href: '/informe', key: 'informe' },
+  { href: '/boletines', key: 'boletines' },
   { href: '/noticias', key: 'noticias' },
   { href: '/fuentes', key: 'fuentes' },
 ] as const;
@@ -31,7 +32,7 @@ export function DesktopTopNav({ className }: { className?: string }) {
   const effective = useEffectiveTheme();
 
   return (
-    <header className={cn('h-[52px] flex-none items-center gap-4 border-b px-4', className)}>
+    <header className={cn('h-[52px] flex-none items-center gap-4 border-b px-4 print:hidden', className)}>
       <Link href="/" className="flex flex-none items-center gap-2.5">
         <Logo size={24} />
         <Wordmark className="text-title" />
