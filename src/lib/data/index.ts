@@ -6,12 +6,13 @@
  * agotar su rate limit (5000 tx / 10 min) — ver docs/DATA-SOURCES.md §Recommendations.
  */
 
-import type { Fire, Hotspot, SourceStatus } from '@/types/fire';
+import type { Fire, Hotspot, SourceId, SourceStatus } from '@/types/fire';
 import { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS } from './mock';
 import {
   fetchFirmsHotspots,
   fetchFogosActive,
   fetchJcylFires,
+  fetchInfocaFires,
   fetchEffisPerimeters,
   attachPerimeters,
 } from './adapters';
@@ -30,20 +31,22 @@ export function getDataMode(): DataMode {
 /**
  * Incendios agregados y normalizados.
  *
- * En live combina las fuentes con datos reales usables: fogos.pt (Portugal) y
- * Castilla y León (JCyL). El resto de España no tiene API nacional de incendios
- * activos, así que ahí solo hay focos satelitales (getHotspots). Los perímetros
- * de EFFIS se adjuntan al incendio oficial más cercano. Nunca lanza: si todas
- * las fuentes fallan, devuelve [] (estado vacío = buena noticia).
+ * En live combina las fuentes con datos reales usables: fogos.pt (Portugal),
+ * Castilla y León (INFORCYL) y Andalucía (INFOCA). El resto de España no tiene
+ * API de incendios activos en tiempo real, así que ahí solo hay focos
+ * satelitales (getHotspots). Los perímetros de EFFIS se adjuntan al incendio
+ * oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío = buena
+ * noticia).
  */
 export async function getFires(): Promise<Fire[]> {
   if (getDataMode() === 'live') {
-    const [pt, cyl, perimeters] = await Promise.all([
+    const [pt, cyl, and, perimeters] = await Promise.all([
       fetchFogosActive(),
       fetchJcylFires(),
+      fetchInfocaFires(),
       fetchEffisPerimeters(),
     ]);
-    return attachPerimeters(dedupeFires([...pt, ...cyl]), perimeters);
+    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and]), perimeters);
   }
   return MOCK_FIRES;
 }
@@ -72,13 +75,88 @@ export async function getFire(slug: string): Promise<Fire | null> {
  */
 export async function getHotspots(): Promise<Hotspot[]> {
   if (getDataMode() === 'live') {
-    return fetchFirmsHotspots({ days: 1 });
+    // 2 días: robusto ante ventanas VIIRS/NRT vacías (madrugada). El mapa los
+    // atenúa por antigüedad y el KPI "Focos 24 h" cuenta solo las últimas 24 h.
+    return fetchFirmsHotspots({ days: 2 });
   }
   return MOCK_HOTSPOTS;
 }
 
+/** Recuento de focos de las últimas 24 h (KPI), relativo a `now` (ms). */
+export function countHotspots24h(hotspots: Hotspot[], now: number): number {
+  const cutoff = now - 24 * 3600e3;
+  return hotspots.filter((h) => Date.parse(h.acquiredAt) >= cutoff).length;
+}
+
+/** ISO más reciente de una lista, o `fallback` si está vacía. */
+function latestIso(isos: string[], fallback: string): string {
+  let max = 0;
+  for (const s of isos) {
+    const t = Date.parse(s);
+    if (t > max) max = t;
+  }
+  return max ? new Date(max).toISOString() : fallback;
+}
+
+const plural = (n: number, s: string) => `${n} ${s}${n === 1 ? '' : 's'}`;
+
+/**
+ * Estado de las fuentes. En mock, datos de demostración; en live, refleja las
+ * fuentes realmente integradas y la frescura de sus datos.
+ */
 export async function getSourceStatus(): Promise<SourceStatus[]> {
-  return MOCK_SOURCE_STATUS;
+  if (getDataMode() !== 'live') return MOCK_SOURCE_STATUS;
+
+  const [fires, hotspots] = await Promise.all([getFires(), getHotspots()]);
+  const now = new Date().toISOString();
+  const bySrc = (id: SourceId) => fires.filter((f) => f.sources.includes(id));
+  const pt = bySrc('fogos');
+  const cyl = bySrc('jcyl');
+  const and = bySrc('infoca');
+  const perims = fires.filter((f) => f.perimeter).length;
+
+  return [
+    {
+      id: 'firms',
+      label: 'NASA FIRMS',
+      description: 'focos VIIRS/MODIS',
+      status: 'ok',
+      note: hotspots.length ? 'Dominio público · últimas 48 h' : 'Sin focos en la ventana actual',
+      lastUpdate: latestIso(hotspots.map((h) => h.acquiredAt), now),
+    },
+    {
+      id: 'fogos',
+      label: 'fogos.pt / ANEPC',
+      description: 'incidentes activos (PT)',
+      status: 'ok',
+      note: plural(pt.length, 'incidente activo'),
+      lastUpdate: latestIso(pt.map((f) => f.updatedAt), now),
+    },
+    {
+      id: 'jcyl',
+      label: 'INFORCYL · JCyL',
+      description: 'Castilla y León',
+      status: 'ok',
+      note: plural(cyl.length, 'incidente'),
+      lastUpdate: latestIso(cyl.map((f) => f.updatedAt), now),
+    },
+    {
+      id: 'infoca',
+      label: 'INFOCA · Andalucía',
+      description: 'Plan INFOCA',
+      status: 'ok',
+      note: plural(and.length, 'incidente'),
+      lastUpdate: latestIso(and.map((f) => f.updatedAt), now),
+    },
+    {
+      id: 'effis',
+      label: 'EFFIS / Copernicus EMS',
+      description: 'perímetros de área quemada',
+      status: perims ? 'ok' : 'degraded',
+      note: perims ? plural(perims, 'perímetro') : 'sin perímetros disponibles',
+      lastUpdate: now,
+    },
+  ];
 }
 
 export { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS };

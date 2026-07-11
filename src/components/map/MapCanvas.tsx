@@ -94,16 +94,24 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
   // Focos satelitales (FIRMS): puntos naranja con glow, tamaño por FRP, con
   // clustering. Detección térmica, NO incendio confirmado.
   const foco = useMemo(() => statePalette(theme).focoSatelital.base, [theme]);
+  // Edad en horas de cada foco (para atenuar los antiguos). Se recalcula cada
+  // ~10 min (bucket) para no rehacer el GeoJSON en cada tic del reloj.
+  const ageBucket = Math.floor(now / 600_000);
   const hotspotsGeo = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
       features: hotspots.map((h) => ({
         type: 'Feature',
-        properties: { frp: h.frp, sensor: h.sensor, confidence: h.confidence },
+        properties: {
+          frp: h.frp,
+          sensor: h.sensor,
+          confidence: h.confidence,
+          ageH: Math.max(0, (ageBucket * 600_000 - Date.parse(h.acquiredAt)) / 3_600_000),
+        },
         geometry: { type: 'Point', coordinates: h.coordinates },
       })),
     }),
-    [hotspots],
+    [hotspots, ageBucket],
   );
   const hasHotspots = hotspots.length > 0;
   const showHotspots = hotspotsVisible && hasHotspots;
@@ -240,7 +248,7 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
             paint={{
               'circle-color': foco,
               'circle-blur': 1,
-              'circle-opacity': 0.3,
+              'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.32, 24, 0.2, 72, 0.08],
               'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 6, 50, 12, 150, 20],
             }}
           />
@@ -250,7 +258,7 @@ export function MapCanvas({ fires, hotspots = [], onSelect, hoveredSlug, onHover
             filter={['!', ['has', 'point_count']]}
             paint={{
               'circle-color': foco,
-              'circle-opacity': 0.95,
+              'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.95, 24, 0.75, 72, 0.45],
               'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 2.5, 50, 5, 150, 8],
               'circle-stroke-color': theme === 'light' ? '#FFFFFF' : 'rgba(0,0,0,0.35)',
               'circle-stroke-width': theme === 'light' ? 1 : 0.5,

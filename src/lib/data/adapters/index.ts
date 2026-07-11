@@ -50,11 +50,12 @@ const FIRMS_BASE = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv';
 export const IBERIA_BBOX: [number, number, number, number] = [-10, 36, 4.5, 44];
 
 /**
- * Fuentes FIRMS a combinar. "All VIIRS" (SNPP + NOAA-20) da la máxima cobertura
- * NRT a 375 m. Cada consulta de 1 día = 1 transacción; con caché de 5 min son
- * ~24 tx/hora, muy por debajo del límite (5000 tx / 10 min).
+ * Fuentes FIRMS a combinar: VIIRS (SNPP + NOAA-20, 375 m) + MODIS (1 km). MODIS
+ * añade cobertura y robustez cuando la ventana VIIRS reciente está vacía (p. ej.
+ * de madrugada). Cada consulta = 1 transacción; con caché son pocas tx/hora,
+ * muy por debajo del límite (5000 tx / 10 min).
  */
-const FIRMS_SOURCES = ['VIIRS_NOAA20_NRT', 'VIIRS_SNPP_NRT'] as const;
+const FIRMS_SOURCES = ['VIIRS_NOAA20_NRT', 'VIIRS_SNPP_NRT', 'MODIS_NRT'] as const;
 
 /**
  * Focos térmicos de NASA FIRMS en el ámbito ES+PT (últimas 24 h por defecto).
@@ -588,6 +589,124 @@ export async function fetchJcylFires(opts: FetchOptions = {}): Promise<Fire[]> {
   const live = await fetchInforcylFires(opts);
   if (live.length) return live;
   return fetchJcylOpendatasoft(opts);
+}
+
+// ── Andalucía: INFOCA (Plan INFOCA, ArcGIS FeatureServer público) ─────────────
+// Descubierto desde el dashboard oficial (laagencia.maps.arcgis.com): capa
+// "Estado del incendio" del servicio INFOCA/AN_INCIDENTES_PRO, consultable sin
+// token. Trae estado, medios (aéreos, BRICAS, vehículos, técnicos…) y geometría.
+
+const INFOCA_QUERY =
+  'https://utility.arcgis.com/usrsvcs/servers/d6d1c0079ddd4c7f8876d58e13fcf1ac' +
+  '/rest/services/INFOCA/AN_INCIDENTES_PRO/FeatureServer/2/query';
+
+interface InfocaAttrs {
+  OID_ENTERO?: number;
+  ESRI_OID?: number;
+  TERMINO_MUNICIPAL?: string;
+  PROVINCIA?: string;
+  TIPO_INCIDENTE?: string;
+  ESTADO?: string;
+  FECHA?: number; // epoch ms
+  HORA?: string;
+  MEDIOS_AEREOS?: number;
+  UNASIF_ACO?: number;
+  BRICAS?: number;
+  GRUPOS_ESPECIALISTAS?: number;
+  GRUPOS_APOYO?: number;
+  UMIF?: number;
+  VEHICULOS?: number;
+  TECNICOS?: number;
+}
+
+function num(v: unknown): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function infocaResources(a: InfocaAttrs): Fire['resources'] {
+  const aereos = num(a.MEDIOS_AEREOS);
+  const aco = num(a.UNASIF_ACO);
+  const brigada = num(a.BRICAS) + num(a.GRUPOS_ESPECIALISTAS) + num(a.GRUPOS_APOYO) + num(a.UMIF);
+  const veh = num(a.VEHICULOS);
+  const tec = num(a.TECNICOS);
+  const aerialUnits: ResourceUnit<AerialKind>[] = [];
+  if (aereos > 0) aerialUnits.push({ kind: 'helicoptero', count: aereos });
+  if (aco > 0) aerialUnits.push({ kind: 'coordinacion', count: aco });
+  const groundUnits: ResourceUnit<GroundKind>[] = [];
+  if (brigada > 0) groundUnits.push({ kind: 'brigada', count: brigada });
+  if (veh > 0) groundUnits.push({ kind: 'autobomba', count: veh });
+  if (!aereos && !aco && !brigada && !veh && !tec) return undefined;
+  return {
+    aerial: aereos + aco || undefined,
+    ground: brigada + veh || undefined,
+    personnel: tec || undefined,
+    aerialUnits: aerialUnits.length ? aerialUnits : undefined,
+    groundUnits: groundUnits.length ? groundUnits : undefined,
+  };
+}
+
+function infocaToFire(f: {
+  attributes?: InfocaAttrs;
+  geometry?: { x?: number; y?: number };
+}): Fire | null {
+  const a = f.attributes ?? {};
+  const g = f.geometry;
+  if (!g || typeof g.x !== 'number' || typeof g.y !== 'number') return null;
+
+  const muni = titleCase(a.TERMINO_MUNICIPAL ?? 'Incendio');
+  const date = typeof a.FECHA === 'number' ? new Date(a.FECHA).toISOString().slice(0, 10) : '';
+  const hora = a.HORA && /^\d{1,2}:\d{2}/.test(a.HORA) ? a.HORA.slice(0, 5) : '00:00';
+  const startedMs = date ? Date.parse(`${date}T${hora}:00+02:00`) : NaN;
+  const startedAt = Number.isNaN(startedMs) ? new Date().toISOString() : new Date(startedMs).toISOString();
+  const id = a.OID_ENTERO ?? a.ESRI_OID ?? slugify(muni);
+
+  return {
+    slug: `and-${slugify(muni)}-${id}`,
+    name: muni,
+    municipality: muni,
+    province: titleCase(a.PROVINCIA ?? '') || '—',
+    region: 'Andalucía',
+    country: 'ES',
+    state: esStateFromSituacion(a.ESTADO),
+    level: null,
+    type: 'forestal',
+    hectares: 0, // INFOCA no publica superficie en esta capa
+    coordinates: [g.x, g.y],
+    startedAt,
+    updatedAt: startedAt,
+    resources: infocaResources(a),
+    sources: ['infoca'],
+  };
+}
+
+/** Incendios de Andalucía (INFOCA): activos/recientes no extinguidos. [] si falla. */
+export async function fetchInfocaFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    // Solo el filtro de estado en la consulta (comparar FECHA con epoch da 400
+    // en este FeatureServer); la recencia se filtra después en JS con FECHA.
+    const where = `ESTADO <> 'EXTINGUIDO'`;
+    const url =
+      `${INFOCA_QUERY}?where=${encodeURIComponent(where)}` +
+      `&outFields=*&returnGeometry=true&outSR=4326&resultRecordCount=200&f=json`;
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      headers: { 'User-Agent': INFORCYL_HEADERS['User-Agent'] },
+      next: { revalidate: 180 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      features?: { attributes?: InfocaAttrs; geometry?: { x?: number; y?: number } }[];
+    };
+    const feats = Array.isArray(json.features) ? json.features : [];
+    const recent = Date.now() - 20 * 86400e3; // descarta "activos" muy antiguos sin cerrar
+    return feats
+      .filter((f) => typeof f.attributes?.FECHA !== 'number' || f.attributes.FECHA >= recent)
+      .map(infocaToFire)
+      .filter((x): x is Fire => x !== null);
+  } catch {
+    return [];
+  }
 }
 
 // ── EFFIS: perímetros de área quemada (Copernicus, CC BY 4.0) ─────────────────

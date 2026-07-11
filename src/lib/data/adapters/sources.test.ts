@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fetchFogosActive, fetchJcylFires } from './index';
+import { fetchFogosActive, fetchJcylFires, fetchInfocaFires } from './index';
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -137,6 +137,55 @@ describe('fetchJcylFires (INFORCYL, tiempo real)', () => {
       ],
     });
     expect(await fetchJcylFires()).toEqual([]);
+  });
+});
+
+describe('fetchInfocaFires (Andalucía)', () => {
+  it('normaliza estado, geometría (lat/lon) y medios de INFOCA', async () => {
+    mockJson({
+      features: [
+        {
+          attributes: {
+            OID_ENTERO: 12,
+            TERMINO_MUNICIPAL: 'Lanjarón',
+            PROVINCIA: 'GRANADA',
+            TIPO_INCIDENTE: 'IIFF INCENDIOS FORESTALES',
+            ESTADO: 'ACTIVO',
+            FECHA: Date.UTC(2026, 6, 10),
+            HORA: '13:06:00',
+            MEDIOS_AEREOS: 3,
+            UNASIF_ACO: 1,
+            BRICAS: 4,
+            GRUPOS_ESPECIALISTAS: 1,
+            GRUPOS_APOYO: 0,
+            UMIF: 0,
+            VEHICULOS: 6,
+            TECNICOS: 2,
+          },
+          geometry: { x: -3.46, y: 36.93 },
+        },
+      ],
+    });
+    const fires = await fetchInfocaFires();
+    expect(fires).toHaveLength(1);
+    const f = fires[0]!;
+    expect(f.country).toBe('ES');
+    expect(f.region).toBe('Andalucía');
+    expect(f.state).toBe('activo');
+    expect(f.name).toBe('Lanjarón');
+    expect(f.province).toBe('Granada');
+    expect(f.coordinates).toEqual([-3.46, 36.93]);
+    expect(f.resources?.aerial).toBe(4); // 3 aéreos + 1 ACO
+    expect(f.resources?.personnel).toBe(2);
+    expect(f.resources?.groundUnits?.find((u) => u.kind === 'brigada')?.count).toBe(5);
+    expect(f.resources?.groundUnits?.find((u) => u.kind === 'autobomba')?.count).toBe(6);
+    expect(f.resources?.aerialUnits?.find((u) => u.kind === 'coordinacion')?.count).toBe(1);
+    expect(f.sources).toEqual(['infoca']);
+  });
+
+  it('descarta features sin geometría', async () => {
+    mockJson({ features: [{ attributes: { TERMINO_MUNICIPAL: 'X', ESTADO: 'ACTIVO' } }] });
+    expect(await fetchInfocaFires()).toEqual([]);
   });
 });
 
