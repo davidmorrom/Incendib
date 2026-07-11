@@ -104,12 +104,36 @@ export function AlertasScreen() {
   const disable = async () => {
     setBusy(true);
     try {
+      const sub = await getExistingSubscription();
+      if (sub) {
+        await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ remove: true, endpoint: sub.endpoint }),
+        }).catch(() => {});
+      }
       await unsubscribeFromPush();
       setSubscribed(false);
     } finally {
       setBusy(false);
     }
   };
+
+  // Mantiene las preferencias del servidor en sync mientras se está suscrito
+  // (con un pequeño retardo para no llamar en cada arrastre del slider).
+  useEffect(() => {
+    if (!subscribed) return;
+    const t = setTimeout(async () => {
+      const sub = await getExistingSubscription();
+      if (!sub) return;
+      fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON(), prefs }),
+      }).catch(() => {});
+    }, 600);
+    return () => clearTimeout(t);
+  }, [prefs, subscribed]);
 
   const sendTest = async () => {
     setTest('idle');
