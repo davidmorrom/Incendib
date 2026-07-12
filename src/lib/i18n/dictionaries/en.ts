@@ -74,6 +74,7 @@ const en: Dictionary = {
     hotspots: '{n} VIIRS hotspots · last pass {time}',
     satelliteConfirmed: 'Thermal activity detected · VIIRS {km} km away',
     press: 'press',
+    tracked: 'tracking',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'no spread 24 h',
     approx: 'satellite estimate',

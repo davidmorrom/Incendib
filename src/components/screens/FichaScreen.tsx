@@ -256,7 +256,14 @@ export function FichaScreen({ fire }: { fire: Fire }) {
                             </span>
                           </a>
                         ) : (
-                          <div className="mt-px text-[11.5px] text-fg-body">{e.label}</div>
+                          <div className="mt-px text-[11.5px] text-fg-body">
+                            {e.label}
+                            {e.detected && (
+                              <span className="ml-1 font-mono text-[9px] font-normal text-fg-mute">
+                                · {d.fire.tracked}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </li>
