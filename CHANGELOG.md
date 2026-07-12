@@ -5,6 +5,34 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.16.0] - 2026-07-12
+
+### Añadido
+
+- **Boletín semanal (F1)**: snapshot consolidado e inmutable por semana ISO.
+  Páginas `/boletines` (índice) y `/boletin/[id]` (edición) con KPIs, ranking
+  territorial, incendios destacados y vista imprimible. Agregador desde la capa
+  de datos y endpoint `/api/boletin/generar` (base del cron semanal F2).
+- **Capa de área quemada en el mapa** (EFFIS): perímetros reales recientes,
+  aparte de los marcadores de incidentes.
+- **Noticias reales**: titulares vía RSS de Google News (ES+PT) con fuente,
+  hora y enlace reales, sustituyendo el contenido de demostración.
+- Superficie **estimada por satélite** (EFFIS) donde no hay cifra oficial,
+  marcada con «~» y «estimación satélite»; «sin dato» cuando no hay ninguna.
+
+### Corregido
+
+- **EFFIS devolvía siempre vacío** (se pedía `application/json`, que el MapServer
+  ignora respondiendo GML). Ahora GeoJSON + campaña reciente: vuelven perímetros
+  y superficie de área quemada.
+- **Hectáreas erróneas/ausentes**: se lee la superficie oficial de INFORCYL
+  (`sup_arbolado + sup_pasto`) y EFFIS ya no sobrescribe con estimaciones bajas
+  (El Barraco pasó de 15 ha falsas a 140 ha oficiales).
+- **Notificaciones que no se podían reactivar**: el cliente registra el SW si
+  falta, espera más al SW activo y re-suscribe en limpio; aviso de recuperación
+  en la UI cuando el permiso está concedido pero falla la suscripción.
+- Se retiran las **cámaras DGT de demostración** (sin fuente real todavía).
+
 ## [0.15.3] - 2026-07-12
 
 ### Añadido
