@@ -88,6 +88,21 @@ El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
 - Trabaja de forma continua hasta agotar el presupuesto; deja siempre `main`
   estable para que el propietario lo revise a la vuelta.
 
+### Modo nocturno continuo (temporal — mientras el propietario duerme)
+
+- **No pares.** Trabaja toda la noche. Si una tarea se **bloquea** (falta una
+  fuente de datos, una clave o una decisión del propietario), **déjala
+  documentada y pasa a OTRA** de la hoja de ruta o de mejoras; nunca te detengas
+  a esperar.
+- **Documenta hitos y fallos** sobre la marcha en `docs/notas-sesion-<fecha>.md`
+  para que el propietario lo revise por la mañana.
+- **Multiagente:** puede haber otro agente a la vez. Lee y actualiza
+  `COORDINACION.md`; árbol compartido → commits por **ruta explícita** (nunca
+  `git add -A`/`-a`) y **rebase antes de push**.
+- No introduzcas datos «probablemente erróneos» por rellenar huecos: mejor «sin
+  dato» que una cifra falsa. Prefiere trabajo que puedas **verificar** (consulta
+  real de la API/prod) frente a cambios de UI que no puedas comprobar.
+
 ### Hoja de ruta (orden sugerido)
 
 1. Pantallas restantes: **Informe (2b)** → **Fuentes (3b)** → **Ficha (1c)** →
