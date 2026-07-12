@@ -87,7 +87,7 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
         right={<LangButton />}
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-6 lg:mx-auto lg:w-full lg:max-w-2xl lg:border-x">
+      <div className="min-h-0 flex-1 overflow-y-auto pb-6 lg:mx-auto lg:w-full lg:max-w-2xl lg:border-x print:block print:overflow-visible print:pb-0 print:max-w-none print:border-x-0">
         {/* Cabecera de edición */}
         <header className="px-screen pt-4 lg:pt-6">
           <div className="flex items-center gap-2">

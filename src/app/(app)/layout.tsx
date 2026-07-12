@@ -12,13 +12,15 @@ import { NetworkStatus } from '@/components/layout/NetworkStatus';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
-      <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg">
-        <NetworkStatus />
-        <DesktopTopNav className="hidden lg:flex" />
-        <div id="contenido" className="flex min-h-0 flex-1 flex-col">
+      <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg print:block print:h-auto print:overflow-visible">
+        <div className="print:hidden">
+          <NetworkStatus />
+        </div>
+        <DesktopTopNav className="hidden lg:flex print:!hidden" />
+        <div id="contenido" className="flex min-h-0 flex-1 flex-col print:block print:min-h-0 print:overflow-visible">
           {children}
         </div>
-        <BottomNav className="lg:hidden" />
+        <BottomNav className="lg:hidden print:!hidden" />
       </div>
     </I18nProvider>
   );
