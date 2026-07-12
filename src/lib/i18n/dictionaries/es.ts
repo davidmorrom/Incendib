@@ -258,6 +258,8 @@ const es = {
     downloadData: 'Descargar datos (JSON)',
     cite: 'Citar',
     citeCopied: 'Cita copiada',
+    prevEdition: 'Semana anterior',
+    nextEdition: 'Semana siguiente',
     level: 'Nivel {n}',
   },
   historico: {

@@ -73,8 +73,19 @@ function levelText(level: SeverityLevel): string {
   return level == null ? '—' : String(level);
 }
 
+/** Referencia mínima a una edición contigua (para navegar el archivo). */
+type EdRef = { id: string; isoWeek: number; year: number } | null;
+
 /** Vista de una edición del boletín semanal (inmutable). */
-export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
+export function BoletinScreen({
+  boletin: b,
+  older,
+  newer,
+}: {
+  boletin: Boletin;
+  older?: EdRef;
+  newer?: EdRef;
+}) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
   const k = b.kpi;
@@ -306,6 +317,31 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
             {d.boletin.downloadData} ↓
           </a>
         </section>
+
+        {(older || newer) && (
+          <nav className="mx-screen mt-5 flex items-center justify-between gap-2 border-t pt-3 print:hidden">
+            {older ? (
+              <Link
+                href={`/boletin/${older.id}`}
+                className="font-mono text-[11px] font-semibold text-action-text"
+              >
+                ← {d.boletin.prevEdition}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {newer ? (
+              <Link
+                href={`/boletin/${newer.id}`}
+                className="font-mono text-[11px] font-semibold text-action-text"
+              >
+                {d.boletin.nextEdition} →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
 
         <p className="mx-screen mt-4 border-t pt-2.5 text-[10px] leading-relaxed text-fg-mute">
           {d.disclaimer.short.split('112')[0]}

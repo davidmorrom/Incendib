@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getBoletin, listBoletines } from '@/lib/boletin/store';
+import { adjacentBoletines, getBoletin, listBoletines } from '@/lib/boletin/store';
 import { BoletinScreen } from '@/components/screens/BoletinScreen';
 
 // Edición inmutable de una semana ISO. URL estable, citable y compartible.
@@ -78,13 +78,16 @@ export default async function BoletinPage({ params }: Params) {
     },
   };
 
+  const { older, newer } = adjacentBoletines(boletin.id);
+  const slim = (b: typeof older) => (b ? { id: b.id, isoWeek: b.isoWeek, year: b.year } : null);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSafe(jsonLd) }}
       />
-      <BoletinScreen boletin={boletin} />
+      <BoletinScreen boletin={boletin} older={slim(older)} newer={slim(newer)} />
     </>
   );
 }
