@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { PushSubscription } from 'web-push';
 import { sendPush, pushConfigured } from '@/lib/push/server';
 import { isSafePushEndpoint } from '@/lib/push/validate';
+import { allowRequest, clientIp } from '@/lib/push/ratelimit';
 
 export const runtime = 'nodejs';
 export const preferredRegion = 'fra1';
@@ -17,6 +18,10 @@ export async function POST(req: Request) {
   try {
     if (Number(req.headers.get('content-length') ?? 0) > 10_000) {
       return NextResponse.json({ ok: false, error: 'cuerpo demasiado grande' }, { status: 413 });
+    }
+    // Rate-limit estricto: este endpoint firma y envía push (fail-open sin almacén).
+    if (!(await allowRequest(clientIp(req), { bucket: 'test', limit: 10, windowSec: 60 }))) {
+      return NextResponse.json({ ok: false, error: 'demasiadas peticiones' }, { status: 429 });
     }
     const { subscription } = (await req.json()) as { subscription?: PushSubscription };
     // No enviar a destinos no https o internos/reservados (anti-SSRF y anti-abuso
