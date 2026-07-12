@@ -5,6 +5,13 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.11] - 2026-07-12
+
+### Corregido
+
+- **Accesibilidad** (WCAG 2.2): los botones «Compartir» y «Citar» del boletín
+  anuncian con `aria-live` el cambio a «copiado», para lectores de pantalla.
+
 ## [0.17.10] - 2026-07-12
 
 ### Añadido
