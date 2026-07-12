@@ -193,6 +193,7 @@ const pt: Dictionary = {
     showing: '{visible} de {total} incêndios',
     riskLow: 'muito baixo',
     riskHigh: 'extremo',
+    areaNote: 'Ao filtrar por área ocultam-se os incêndios sem dado.',
   },
   a11y: {
     skipToContent: 'Ir para o conteúdo',

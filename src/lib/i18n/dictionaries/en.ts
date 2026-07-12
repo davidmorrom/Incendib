@@ -193,6 +193,7 @@ const en: Dictionary = {
     showing: '{visible} of {total} fires',
     riskLow: 'very low',
     riskHigh: 'extreme',
+    areaNote: 'Filtering by area hides fires with no surface data.',
   },
   a11y: {
     skipToContent: 'Skip to content',
