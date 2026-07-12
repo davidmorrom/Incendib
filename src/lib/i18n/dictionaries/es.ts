@@ -73,6 +73,7 @@ const es = {
     hotspots: '{n} focos VIIRS · última pasada {time}',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sin avance 24 h',
+    approx: 'estimación satélite',
   },
   resources: {
     heading: 'Medios desplegados',

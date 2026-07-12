@@ -71,7 +71,9 @@ export function FireRow({
       </span>
       <span className="flex-none text-right">
         <span className="block font-mono text-[13px] font-semibold text-fg">
-          {fire.hectares > 0 ? `${formatNumber(fire.hectares)} ha` : d.kpis.noData}
+          {fire.hectares > 0
+            ? `${fire.hectaresApprox ? '~' : ''}${formatNumber(fire.hectares)} ha`
+            : d.kpis.noData}
         </span>
         <span className="block font-mono text-[9.5px] text-fg-mute">
           {timeAgo(fire.updatedAt, now, locale)}

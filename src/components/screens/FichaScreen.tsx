@@ -168,12 +168,22 @@ export function FichaScreen({ fire }: { fire: Fire }) {
             {fire.hectares > 0 ? (
               <>
                 <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
+                  {fire.hectaresApprox ? '~' : ''}
                   {formatNumber(fire.hectares)} <span className="text-[11px] text-fg-secondary">ha</span>
                 </div>
-                <div className="whitespace-nowrap font-mono text-[10px] font-medium text-state-activo-text">
-                  {fire.delta24h && fire.delta24h > 0
-                    ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
-                    : d.fire.noProgress}
+                <div
+                  className={cn(
+                    'whitespace-nowrap font-mono text-[10px] font-medium',
+                    fire.hectaresApprox || !(fire.delta24h && fire.delta24h > 0)
+                      ? 'text-fg-mute'
+                      : 'text-state-activo-text',
+                  )}
+                >
+                  {fire.hectaresApprox
+                    ? d.fire.approx
+                    : fire.delta24h && fire.delta24h > 0
+                      ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
+                      : d.fire.noProgress}
                 </div>
               </>
             ) : (

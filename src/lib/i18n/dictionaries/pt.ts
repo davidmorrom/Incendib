@@ -74,6 +74,7 @@ const pt: Dictionary = {
     hotspots: '{n} focos VIIRS · última passagem {time}',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sem avanço 24 h',
+    approx: 'estimativa satélite',
   },
   resources: {
     heading: 'Meios mobilizados',

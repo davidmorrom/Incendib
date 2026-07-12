@@ -128,6 +128,12 @@ export interface Fire {
   level: SeverityLevel;
   type?: FireType;
   hectares: number;
+  /**
+   * La superficie es una estimación por satélite (EFFIS/MODIS) y no una cifra
+   * oficial de la fuente autonómica. Se muestra con «~» y debe comunicarse como
+   * aproximada. Solo se rellena así cuando la fuente oficial no publica superficie.
+   */
+  hectaresApprox?: boolean;
   /** Variación en las últimas 24 h (ha). Positivo = crece. */
   delta24h?: number;
   /** Coordenadas [lon, lat] para el mapa. */
