@@ -58,6 +58,14 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
     incluye el sur de Francia). Aplicado el recorte `inEsPt` como en FIRMS.
 11. **FIRMS**: `/fuentes` marca la fuente como caída si falta la clave; clamp del
     adaptador bajado a 5 días (máximo real de la API).
+12. **Superficie coherente en todo el mapa**: marcador y tooltip también usan
+    «~»/«sin dato» (antes «0 ha»).
+13. **SEO**: `sitemap.xml` dinámico (rutas + fichas + boletines) y `robots.txt`
+    → fichas y boletines indexables/citables (objetivo del research). Verificado (57 URLs).
+14. **Tests** (67 en total): parser de noticias, rosa de viento, fechas EFFIS y
+    **`attachPerimeters`** (blinda el caso El Barraco: no pisar cifra oficial).
+15. **A11y**: roles ARIA de tabla en Histórico.
+16. `CLAUDE.md`: **modo nocturno continuo** (no parar; si bloqueo, otra tarea).
 
 
 ## 🐞 Fallos / limitaciones detectados
@@ -92,6 +100,11 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
 - **Islas (Canarias/Azores/Madeira)**: fuera del bbox de FIRMS/EFFIS **y** de la
   máscara `es-pt-land.json`. No hay focos ni área quemada satelital para ellas.
   Ampliar requiere segundo bbox + regenerar la máscara (`npm run geo:gen`).
+- **Más regiones en vivo (Valencia/CLM/Galicia/Aragón…)**: bloqueado por
+  herramientas. Los visores oficiales son SPA (las llamadas XHR/ArcGIS no se ven
+  con fetch headless) y la búsqueda pública de ArcGIS Online no expone sus
+  FeatureServer (van proxied). Las integraciones previas (CyL/INFOCA/Cataluña)
+  se hicieron inspeccionando la red en un navegador. Retomar con esa vía.
 
 ## 🧭 Estado de la sesión
 
