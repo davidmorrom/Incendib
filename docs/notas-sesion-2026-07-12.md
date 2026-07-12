@@ -3,13 +3,15 @@
 Registro de hitos, fallos y pendientes para revisión por la mañana. Todo lo
 marcado ✅ está en `main`, construible y desplegado en https://incendib.es.
 
-## ⚠️ Acción tuya pendiente (bloqueante para FIRMS)
+## ℹ️ FIRMS (actualización — parece resuelto)
 
-- **Falta `FIRMS_MAP_KEY` en Vercel.** Sin ella el adaptador de NASA FIRMS
-  devuelve vacío → en producción **«Focos 24 h» = 0**, capa de focos vacía y
-  **Galicia sin cobertura** (solo tenía FIRMS). Añade tu MAP_KEY de NASA en
-  Vercel → Project → Settings → Environment Variables (Production), y redeploy.
-  Es lo único que no puedo resolver yo.
+- Al empezar la sesión veía **«Focos 24 h» = 0** y creí que faltaba
+  `FIRMS_MAP_KEY` en Vercel. **Ahora producción muestra 58 focos** (verificado en
+  `/informe` y `/fuentes`: «últimas 48 h · hace 4 h»), así que **FIRMS funciona en
+  producción**. Aquel 0 fue por (a) un bug del boletín (pedía 7 días; la API solo
+  admite 1..5 → lo arregló el otro agente y yo bajé el clamp del adaptador a 5) y
+  (b) ventanas satelitales vacías puntuales. **Si algún día vuelve a 0**, revisa
+  que `FIRMS_MAP_KEY` siga en las env vars de Vercel (Production).
 
 ## 🔔 Tu móvil: notificaciones «pilladas» — cómo recuperarlas
 
@@ -50,6 +52,13 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
    muestra el archivo real de áreas quemadas EFFIS (municipio, provincia, fecha,
    ha), ordenado por superficie. Enlazado desde Boletines.
 8. **Release `v0.16.0`** con CHANGELOG.
+9. **Meteo local real en la ficha** (Open-Meteo, sin clave): temperatura,
+   humedad y viento por coordenadas. Antes la sección salía vacía en vivo.
+10. **EFFIS recortado a ES+PT**: se colaban «áreas quemadas» francesas (bbox
+    incluye el sur de Francia). Aplicado el recorte `inEsPt` como en FIRMS.
+11. **FIRMS**: `/fuentes` marca la fuente como caída si falta la clave; clamp del
+    adaptador bajado a 5 días (máximo real de la API).
+
 
 ## 🐞 Fallos / limitaciones detectados
 

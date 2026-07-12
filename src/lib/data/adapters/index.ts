@@ -32,7 +32,7 @@ import { utmToLonLat } from '@/lib/geo/utm';
 export interface FetchOptions {
   /** Bounding box [minLon, minLat, maxLon, maxLat]. */
   bbox?: [number, number, number, number];
-  /** Ventana temporal en días (FIRMS admite 1–10). */
+  /** Ventana temporal en días (FIRMS area/csv admite 1–5). */
   days?: number;
   signal?: AbortSignal;
 }
@@ -67,7 +67,9 @@ export async function fetchFirmsHotspots(opts: FetchOptions = {}): Promise<Hotsp
   if (!key) return [];
 
   const bbox = opts.bbox ?? IBERIA_BBOX;
-  const days = Math.min(10, Math.max(1, opts.days ?? 1));
+  // La API area/csv de FIRMS solo admite rango 1..5 días; pedir más devuelve
+  // "Invalid day range" → []. Acotamos a 5 para que ninguna llamada falle en silencio.
+  const days = Math.min(5, Math.max(1, opts.days ?? 1));
   const bboxStr = bbox.join(',');
 
   const perSource = await Promise.all(
