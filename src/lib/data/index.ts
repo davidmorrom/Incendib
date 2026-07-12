@@ -6,10 +6,11 @@
  * agotar su rate limit (5000 tx / 10 min) — ver docs/DATA-SOURCES.md §Recommendations.
  */
 
-import type { Fire, Hotspot, SourceId, SourceStatus } from '@/types/fire';
+import type { Fire, Hotspot, SourceId, SourceStatus, Weather } from '@/types/fire';
 import { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS } from './mock';
 import { MOCK_NEWS, type NewsItem } from './news';
 import { fetchNews } from './adapters/news';
+import { fetchWeather } from './adapters/weather';
 import {
   fetchFirmsHotspots,
   fetchFogosActive,
@@ -107,6 +108,14 @@ export async function getBurnedAreas(): Promise<Fire[]> {
 export async function getNews(): Promise<NewsItem[]> {
   if (getDataMode() !== 'live') return MOCK_NEWS;
   return fetchNews();
+}
+
+/**
+ * Meteo local (Open-Meteo, sin clave) para la ficha de un incendio. Es el tiempo
+ * del punto, no un dato de la fuente del incendio. undefined si no hay dato.
+ */
+export async function getWeather(coordinates: [number, number]): Promise<Weather | undefined> {
+  return fetchWeather(coordinates[0], coordinates[1]);
 }
 
 /** Recuento de focos de las últimas 24 h (KPI), relativo a `now` (ms). */
