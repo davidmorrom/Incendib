@@ -1022,11 +1022,16 @@ export async function fetchCatalunyaFires(opts: FetchOptions = {}): Promise<Fire
 }
 
 // ── Castilla-La Mancha: INFOCAM (ArcGIS FeatureServer público de la JCCM) ──────
-// Capa V_Incendio (org LVA9E9zjh6QfM7Mo), consultable sin token. Particularidades
-// verificadas: (1) mezcla histórico hasta 2024 y el campo `Estado` no es fiable
-// (viejos siguen "Activo"); usamos `Fecha_Fin` (null = abierto) + recencia de
-// `Fecha_Inicio`. (2) Incluye incendios fronterizos de otras CCAA; filtramos a
-// CLM. Solo trae punto, municipio y fechas: sin nivel, sin medios, sin superficie.
+// ⚠️ NO SE USA en getFires (a propósito). La capa V_Incendio (org
+// LVA9E9zjh6QfM7Mo) es un LOG ACUMULATIVO: nunca cierra incidentes (`Estado`
+// queda "Activo" para siempre, `Fecha_Fin` casi siempre nula) y no publica
+// "última actualización". Verificado contra prensa (2026-07-12): de los 11 que
+// mostraba como activos, 0 lo estaban (todos extintos/controlados; alguno ni
+// existía). Por eso se desconecta: mejor sin CLM que con activos falsos.
+// Para re-activar con honestidad: cruzar cada incendio con focos FIRMS recientes
+// (<48 h, <~4 km) y mostrar solo los confirmados por satélite. Se conserva el
+// adaptador (endpoint + parseo) para ese futuro. Trae punto, municipio y fechas;
+// sin nivel, sin medios, sin superficie.
 
 const INFOCAM_QUERY =
   'https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services/V_Incendio/FeatureServer/0/query';
