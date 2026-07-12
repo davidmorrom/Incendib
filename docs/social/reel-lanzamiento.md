@@ -16,6 +16,12 @@ recién creada, 0 publicaciones).
 > `src/lib/legal.ts`, los diccionarios i18n (`src/lib/i18n/dictionaries/*.ts`),
 > `src/lib/data/mock.ts` y el `README.md`. No hay datos inventados.
 
+> **Grabaciones de pantalla listas:** los planos **[REC]** (mapa, ficha,
+> informe) ya están grabados en modo oscuro/mock y reescalados a 1080×1920 en
+> [`reel-grabacion/`](reel-grabacion/) (`rec-01-mapa`, `rec-02-ficha`,
+> `rec-03-informe` + `reel-preview-bruto`). Falta solo la capa de Claude Design
+> (§3), los subtítulos y el montaje (§4).
+
 ---
 
 ## 0. Datos reales del repo (referencia de verificación)
