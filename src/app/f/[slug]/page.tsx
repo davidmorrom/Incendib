@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getFire, getFires } from '@/lib/data';
+import { getFire, getFires, getWeather } from '@/lib/data';
 import { FichaScreen } from '@/components/screens/FichaScreen';
 
 // Pantalla canónica 1c: ficha con URL propia y compartible. SIEMPRE muestra el
@@ -31,5 +31,7 @@ export default async function FichaPage({ params }: Params) {
   const { slug } = await params;
   const fire = await getFire(slug);
   if (!fire) notFound();
-  return <FichaScreen fire={fire} />;
+  // Meteo local real (Open-Meteo) si la fuente del incendio no la trae.
+  const weather = fire.weather ?? (await getWeather(fire.coordinates));
+  return <FichaScreen fire={weather ? { ...fire, weather } : fire} />;
 }

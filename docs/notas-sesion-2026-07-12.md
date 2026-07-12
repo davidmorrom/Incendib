@@ -46,15 +46,22 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
 5. **Noticias reales**: RSS de Google News (ES+PT), con fuente/hora/enlace reales.
    Retiradas las **cámaras DGT falsas** y los thumbnails «foto» inventados.
 6. **Notificaciones robustas**: cliente resiliente + aviso de recuperación en UI.
+7. **Histórico de campaña (10b)** ✅: `/historico` deja de ser placeholder y
+   muestra el archivo real de áreas quemadas EFFIS (municipio, provincia, fecha,
+   ha), ordenado por superficie. Enlazado desde Boletines.
+8. **Release `v0.16.0`** con CHANGELOG.
 
 ## 🐞 Fallos / limitaciones detectados
 
 - **FIRMS** (arriba): falta la key → focos=0. Bloqueante, acción tuya.
 - **Cámaras DGT**: no hay fuente pública fácil de imágenes geolocalizadas →
   **retiradas** (mejor que datos falsos). Pendiente integración real.
-- **fogos.pt tiene superficie oficial** (`icnf.burnArea`, en ares → ÷100 = ha):
-  de momento uso la estimación EFFIS para PT; convendría usar la de fogos
-  (más fiable) tras confirmar bien la unidad. Anotado como mejora.
+- **fogos.pt `icnf.burnArea`**: investigado y **descartado por ahora**. El valor
+  crudo (p. ej. `total`=13596.77 para un incendio pequeño en Vouzela, 55 medios,
+  en «Conclusão») es implausible como hectáreas del incendio y no trae unidad;
+  podría ser acumulado del concelho o estar en otra unidad. Riesgo de cifra muy
+  errónea → no se usa. Portugal queda cubierto por la estimación EFFIS (AREA_HA,
+  unidad clara). Reintentar solo con confirmación fiable de la unidad.
 - **Meteo/FWI/evolución/evacuación** no los rellena ninguna fuente en vivo →
   esas secciones de la ficha salen vacías con datos reales. Importante:
   **las alertas de evacuación no pueden dispararse** porque ninguna fuente
@@ -62,12 +69,15 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
 
 ## ⏭️ Pendiente / cola de trabajo autónomo
 
-- Publicar la primera edición del **boletín** (mejor con FIRMS activo para que
-  los focos no salgan en 0; el endpoint `/api/boletin/generar` ya da datos reales).
-- **Histórico (10a–10b)**: aún es un placeholder (`ScaffoldNotice`).
-- **fogos ICNF**: superficie oficial de Portugal (mejor que estimación EFFIS).
-- **Evacuación** en vivo → arreglar alertas de evacuación.
-- Cámaras DGT reales.
+- Publicar la primera edición del **boletín**: pendiente. Bloqueos: (a) FIRMS=0
+  sin tu key, (b) el agregador F1 usa el dato actual, no la semana exacta cerrada,
+  así que publicar «cerrado» sería algo impreciso. Mejor con FIRMS activo + cron F2.
+- **Meteo local en la ficha** (Open-Meteo, sin clave): rellenar temp/humedad/viento
+  reales (ahora vacío en vivo). [en curso esta sesión]
+- **Evacuación** en vivo → arreglar alertas de evacuación (ninguna fuente marca
+  `evacuation`; investigar si INFORCYL `nivelIgr`/textos o fogos lo permiten).
+- **fogos ICNF**: superficie oficial PT (tras confirmar la unidad).
+- **Ficha 10a** (balance final del extinguido) y cámaras DGT reales.
 
 ## 🔎 Verificaciones en prod (esta sesión)
 
