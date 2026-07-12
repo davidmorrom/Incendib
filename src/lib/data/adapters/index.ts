@@ -1094,13 +1094,17 @@ export async function fetchInfocamFires(opts: FetchOptions = {}): Promise<Fire[]
       features?: { attributes?: InfocamAttrs; geometry?: { x?: number; y?: number } }[];
     };
     const feats = Array.isArray(json.features) ? json.features : [];
-    const recent = Date.now() - 30 * 86400e3;
+    // Ventana de 7 días: INFOCAM casi nunca cierra los incendios (Fecha_Fin queda
+    // nula ~siempre) y no publica "última actualización", así que la única señal
+    // fiable de "activo ahora" es una Fecha_Inicio reciente. 30 días arrastraba
+    // decenas de incendios ya apagados; 7 días ≈ incidentes de esta semana.
+    const recent = Date.now() - 7 * 86400e3;
     return feats
       .filter((ft) => {
         const a = ft.attributes ?? {};
         if (typeof a.Fecha_Inicio !== 'number') return false; // sin fecha → descartar
-        if (a.Fecha_Inicio < recent) return false; // fuera histórico (mezcla hasta 2024)
-        if (a.Fecha_Fin != null) return false; // cerrado → no activo (Estado no es fiable)
+        if (a.Fecha_Inicio < recent) return false; // solo campaña de la última semana
+        if (a.Fecha_Fin != null) return false; // cerrado (si algún día lo marcan)
         if ((a.Estado ?? '').toLowerCase().includes('exting')) return false;
         // Solo CLM (el dataset trae incendios fronterizos de otras CCAA).
         if (a.CCAA && !/mancha/i.test(a.CCAA)) return false;
