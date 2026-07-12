@@ -192,6 +192,7 @@ const es = {
     showing: '{visible} de {total} incendios',
     riskLow: 'muy bajo',
     riskHigh: 'extremo',
+    areaNote: 'Al filtrar por superficie se ocultan los incendios sin dato.',
   },
   a11y: {
     skipToContent: 'Saltar al contenido',
