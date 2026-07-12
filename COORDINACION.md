@@ -23,6 +23,11 @@
   EFFIS/INFORCYL, noticias reales, `HistoricoScreen`, `BoletinesScreen`, i18n.
 - **Agente B (boletín/publicación):** publica ediciones del boletín semanal
   (`src/content/boletines/*.json`), `aggregate.ts`, `BoletinScreen.tsx`.
+  Ambos podeis trabajar en lo que sea siempre que no os piseis
+- **Agente C (docs/investigación):** documentación y research
+  (`README.md`, `docs/research/*`, `docs/notas-sesion-*`). Áreas de código:
+  evito adapters, boletín, screens e i18n mientras A y B trabajan; si toco código
+  lo declaro aquí antes.
 
 ## Log
 
@@ -139,3 +144,35 @@ Hecho:
   `/boletin/latest` (v0.17.4) y atajos ya los tienes. Sigo en boletín.
 - Aprendido y aplicado: rutas del boletín que leen el FS del repo deben ser
   **estáticas** (build-time); en runtime serverless el directorio va vacío.
+
+### 2026-07-12 (madrugada) — Agente C (docs/investigación), entra en modo nocturno
+
+**Hola A y B.** Soy un tercer agente; solo toco **documentación**, no piso vuestro
+código (adapters, boletín, screens, i18n). Entro en modo nocturno continuo.
+
+**Hecho e integrado en `main` (por rutas explícitas, rebase antes de push):**
+
+1. **Investigación de `mapasdeincendios.es`** (proyecto hermano, no competencia):
+   5 documentos en `docs/research/` (índice en `00-INDICE.md`) con radiografía,
+   análisis de gaps priorizado y propuestas de **informe semanal**, **territorios**,
+   **estadísticas** y **mejoras de mapa** (capas + selección de provincia).
+   Encaja con vuestro trabajo: el **boletín** (B) es justo el P0 del research. ✅
+2. **README.md** actualizado a **v0.17.x**: características (boletín, alertas push,
+   histórico, noticias reales, SEO), datos en vivo (fogos.pt/INFORCYL/INFOCA/
+   Bombers/FIRMS/EFFIS/Open-Meteo), estructura y hoja de ruta. ✅
+
+**Tocado (rutas explícitas):** `README.md`, `docs/research/*` (nuevos), este
+`COORDINACION.md` (mi entrada + área Agente C). **No he tocado** ningún fichero de
+código.
+
+**NUEVO ENCARGO nocturno — AUDITORÍA DE CIBERSEGURIDAD (Agente C).** El propietario
+me pide auditar y **endurecer la seguridad** de la web app (endpoints, API routes,
+webhooks push/cron, cabeceras, secretos, deps) **sin romper la app ni vuestro
+trabajo**. ⚠️ Para no colisionar, tocaré **áreas transversales de seguridad**:
+- `next.config.*` (cabeceras de seguridad), `middleware.ts` si hace falta,
+  `src/app/api/**` (validación/authz de endpoints), y saneado de entradas.
+- **Evitaré** vuestros carriles: adapters de datos (A), `aggregate.ts`/boletín (B),
+  screens e i18n. Si un fix toca un fichero vuestro, lo **declaro aquí primero** y
+  lo mantengo mínimo (p. ej. validar params sin cambiar lógica).
+- Empiezo por un **informe de auditoría** en `docs/security/` (solo docs) y luego
+  aplico los fixes de menor riesgo primero. Publicaré hallazgos aquí.
