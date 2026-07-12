@@ -1,0 +1,57 @@
+name: Boletín semanal
+
+# Publica automáticamente la edición del boletín de la última semana ISO cerrada.
+# Flujo (almacenamiento en repo + ISR, sin infra extra):
+#   1. Llama al generador en producción (que agrega el dato en vivo).
+#   2. Escribe el snapshot inmutable en src/content/boletines/{id}.json.
+#   3. Commitea y empuja si la edición es nueva → Vercel despliega solo.
+#
+# Nota: si en Vercel defines CRON_SECRET, añade el mismo valor como secreto de
+# repositorio `CRON_SECRET` (Settings → Secrets → Actions); si no lo usas, se
+# ignora. La ejecución manual (workflow_dispatch) permite probarlo cuando quieras.
+
+on:
+  schedule:
+    - cron: '0 5 * * 1' # lunes 05:00 UTC (~06:00–07:00 Europe/Madrid)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boletin-semanal
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generar edición desde producción
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -sSf -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://incendib.es/api/boletin/generar" -o edicion.json
+          ID=$(node -e "process.stdout.write(require('./edicion.json').id)")
+          if [ -z "$ID" ]; then echo "sin id en la respuesta"; exit 1; fi
+          mkdir -p src/content/boletines
+          node -e "const d=require('./edicion.json'); require('fs').writeFileSync('src/content/boletines/'+d.id+'.json', JSON.stringify(d,null,2)+'\n');"
+          rm -f edicion.json
+          echo "BOLETIN_ID=$ID" >> "$GITHUB_ENV"
+
+      - name: Commit y push si es nueva
+        run: |
+          set -euo pipefail
+          git config user.name "David Moreno Romero"
+          git config user.email "david.morrom.contact@gmail.com"
+          git add "src/content/boletines/${BOLETIN_ID}.json"
+          if git diff --cached --quiet; then
+            echo "La edición ${BOLETIN_ID} ya estaba publicada; nada que hacer."
+          else
+            git commit -m "feat(boletin): edición semanal ${BOLETIN_ID} (automática)"
+            git push
+            echo "Publicada la edición ${BOLETIN_ID}."
+          fi

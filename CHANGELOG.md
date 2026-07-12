@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.2] - 2026-07-12
+
+### Añadido
+
+- **Imagen para compartir del boletín** (`next/og`): cada edición
+  `/boletin/[id]` genera una tarjeta 1200×630 con los KPIs de la semana, usada
+  como vista previa en redes y como descarga PNG.
+- **Automatización semanal del boletín** (GitHub Action): cada lunes genera la
+  edición de la semana cerrada desde producción y la publica en el repo (Vercel
+  despliega). Ejecutable también a mano (`workflow_dispatch`).
+- Nota de método (F1) en **todas** las ediciones generadas por el agregador, no
+  solo en la primera.
+
 ## [0.17.1] - 2026-07-12
 
 ### Corregido
