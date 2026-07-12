@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { PushSubscription } from 'web-push';
 import { sendPush, pushConfigured } from '@/lib/push/server';
+import { isSafePushEndpoint } from '@/lib/push/validate';
 
 export const runtime = 'nodejs';
 export const preferredRegion = 'fra1';
@@ -15,7 +16,9 @@ export async function POST(req: Request) {
   }
   try {
     const { subscription } = (await req.json()) as { subscription?: PushSubscription };
-    if (!subscription?.endpoint) {
+    // No enviar a destinos no https o internos/reservados (anti-SSRF y anti-abuso
+    // de relay: el servidor no debe firmar push hacia direcciones arbitrarias).
+    if (!subscription?.endpoint || !isSafePushEndpoint(subscription.endpoint)) {
       return NextResponse.json({ ok: false, error: 'suscripción no válida' }, { status: 400 });
     }
     const res = await sendPush(subscription, {
