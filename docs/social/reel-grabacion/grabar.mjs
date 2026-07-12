@@ -1,49 +1,55 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 
-const BASE = 'http://localhost:3200';
-const OUT = 'C:/Users/ADMINI~1/AppData/Local/Temp/claude/C--Users-Administrador-Documents-Antigravity-Iberfuego/bfe4ef81-5746-4874-967b-84bfc8aaa774/scratchpad/clips';
+// Servidor local en modo oscuro + mock (ver README). Ajusta el puerto si hace falta.
+const BASE = process.env.BASE || 'http://localhost:3200';
+const OUT = new URL('./clips', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 fs.mkdirSync(OUT, { recursive: true });
 
 const VW = 720, VH = 1280;
 
-async function newCtx(browser) {
-  const ctx = await browser.newContext({
+function ctxOpts(record) {
+  return {
     viewport: { width: VW, height: VH },
     deviceScaleFactor: 1,
-    recordVideo: { dir: OUT, size: { width: VW, height: VH } },
-  });
-  await ctx.addInitScript(() => {
-    try { localStorage.setItem('incendib-theme', 'dark'); } catch (e) {}
-  });
+    ...(record ? { recordVideo: { dir: OUT, size: { width: VW, height: VH } } } : {}),
+  };
+}
+async function newCtx(browser, record = true) {
+  const ctx = await browser.newContext(ctxOpts(record));
+  await ctx.addInitScript(() => { try { localStorage.setItem('incendib-theme', 'dark'); } catch (e) {} });
   return ctx;
 }
 
 async function smoothScroll(page, dist, ms) {
   await page.evaluate(({ dist, ms }) => new Promise((res) => {
     let scroller = document.scrollingElement || document.documentElement;
-    const main = document.querySelector('main');
-    const cands = [main, ...document.querySelectorAll('main *')].filter(Boolean);
+    const cands = [document.querySelector('main'), ...document.querySelectorAll('main *')].filter(Boolean);
     for (const el of cands) { if (el.scrollHeight - el.clientHeight > 40) { scroller = el; break; } }
-    const start = scroller.scrollTop;
-    const t0 = performance.now();
-    function step(now) {
+    const start = scroller.scrollTop, t0 = performance.now();
+    (function step(now) {
       const t = Math.min(1, (now - t0) / ms);
       const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       scroller.scrollTop = start + dist * e;
       if (t < 1) requestAnimationFrame(step); else res();
-    }
-    requestAnimationFrame(step);
+    })(performance.now());
   }), { dist, ms });
+}
+
+// Las teselas del mapa se piden DESPUÉS de montar el componente cliente, así que
+// el primer networkidle no basta: espera al canvas + un segundo networkidle +
+// asentado. El mapa de la ficha (FireMiniMap) NO expone window.__ibermap.
+async function waitMapReady(page) {
+  await page.waitForSelector('canvas.maplibregl-canvas', { timeout: 30000 });
+  await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(3500);
 }
 
 async function save(ctx, page, name) {
   const vid = page.video();
-  await ctx.close(); // flushes video
-  const p = await vid.path();
-  const dest = `${OUT}/${name}.webm`;
-  fs.renameSync(p, dest);
-  console.log(`saved ${dest}`);
+  await ctx.close();
+  fs.renameSync(await vid.path(), `${OUT}/${name}.webm`);
+  console.log(`saved ${OUT}/${name}.webm`);
 }
 
 const browser = await chromium.launch();
@@ -61,13 +67,22 @@ const browser = await chromium.launch();
 }
 
 // ---- Clip 3 · FICHA (las-hurdes) ----
+// Pre-calienta la ruta (compilación de Next) y espera a que el mapa de la ficha
+// cargue teselas + perímetro ANTES de grabar, para que no salga en gris.
 {
+  const warm = await newCtx(browser, false);
+  const wp = await warm.newPage();
+  await wp.goto(`${BASE}/f/las-hurdes?e2e`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await waitMapReady(wp);
+  await warm.close();
+
   const ctx = await newCtx(browser);
   const page = await ctx.newPage();
-  await page.goto(`${BASE}/f/las-hurdes?e2e`, { waitUntil: 'networkidle', timeout: 60000 });
-  await page.waitForTimeout(2200); // cabecera: nombre, Activo N2, superficie, meteo
+  await page.goto(`${BASE}/f/las-hurdes?e2e`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await waitMapReady(page); // mapa con perímetro cargado
+  await page.waitForTimeout(2200); // hero: mapa + cabecera (Activo N2, meteo)
   await smoothScroll(page, 900, 3200); // baja a medios / meteo / evolución
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1600);
   await save(ctx, page, 'clip3-ficha');
 }
 
