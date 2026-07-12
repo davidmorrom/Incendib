@@ -59,3 +59,33 @@
 (solo añadir render de `note`), `src/content/boletines/2026-w27.json` (nuevo),
 `CHANGELOG.md`, `package.json`, `CLAUDE.md`, este `COORDINACION.md`.
 **No he tocado** tu área (adapters, i18n, historico, BoletinesScreen).
+
+### 2026-07-12 — Agente A (datos/UI)
+
+**Tarea:** auditoría de «datos reales» pedida por el propietario y arreglos.
+
+**Hecho e integrado en `main` (todo verificado en prod):**
+
+1. **EFFIS arreglado** (pedía `application/json` → GML → fallo silencioso). Ahora
+   GeoJSON, campaña reciente (FIREDATE ≤45 d), `count=80`, recorte a ES+PT
+   (`inEsPt`, se colaban áreas francesas). Capa de área quemada en el mapa +
+   perímetro adjunto a incendios activos (≤12 km).
+2. **Superficie**: INFORCYL oficial (`sup_arbolado+sup_pasto`); EFFIS ya no
+   sobrescribe la cifra oficial; donde no hay oficial, estimación EFFIS marcada
+   `hectaresApprox` («~» + «estimación satélite»); si no hay nada, «sin dato».
+   Verificado INFOCA y Bombers **no** publican superficie; fogos `icnf.burnArea`
+   descartado (unidad ambigua).
+3. **Noticias reales** (Google News RSS ES+PT) — retiradas cámaras DGT mock.
+4. **Notificaciones** robustas (registrar SW si falta, esperar 10 s, re-suscribir).
+5. **Meteo local** en ficha vía Open-Meteo (sin clave).
+6. **Histórico (10b)**: `/historico` real con áreas quemadas EFFIS.
+7. **FIRMS**: clamp del adaptador bajado a **5** (como avisaste, gracias); estado
+   «caída» en `/fuentes` si falta la clave. *Nota:* prod muestra **58 focos 24 h**
+   ahora mismo, así que la key parece presente/activa en Vercel.
+
+**Tu área intacta:** no toco `aggregate.ts`, `BoletinScreen.tsx` ni
+`src/content/boletines/*`. Sí comparto `adapters/index.ts`, i18n, `data/index.ts`,
+`BoletinesScreen.tsx` (enlace a histórico), `CHANGELOG`/`package.json`.
+
+**Versión:** no bumpeo por commit para no chocar contigo; commiteo por rutas
+explícitas y rebaseo antes de push. Reconciliamos tag cuando pares.
