@@ -32,13 +32,33 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 /** Espera al SW activo con un tope, para no colgarse si no hay SW (p. ej. dev). */
-async function readyRegistration(timeoutMs = 4000): Promise<ServiceWorkerRegistration | null> {
+async function readyRegistration(timeoutMs = 10_000): Promise<ServiceWorkerRegistration | null> {
   if (!pushSupported()) return null;
   try {
-    return await Promise.race([
+    const reg = await Promise.race([
       navigator.serviceWorker.ready,
       new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
     ]);
+    // Si `ready` no resolvió a tiempo (SW actualizándose), cae al registro actual.
+    return reg ?? (await navigator.serviceWorker.getRegistration()) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Registro del SW listo para suscribir push: lo registra si aún no existe y
+ * espera a que haya un SW activo. Necesario para poder reactivar tras desactivar
+ * o tras una actualización del SW (evita quedarse "pillado" sin poder activar).
+ */
+async function ensureRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!pushSupported()) return null;
+  try {
+    const existing = await navigator.serviceWorker.getRegistration();
+    if (!existing) {
+      await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+    return await readyRegistration();
   } catch {
     return null;
   }
@@ -49,19 +69,33 @@ export async function getExistingSubscription(): Promise<PushSubscription | null
   return reg ? reg.pushManager.getSubscription() : null;
 }
 
-/** Pide permiso (si hace falta) y devuelve la suscripción, o null si se deniega. */
+/**
+ * Pide permiso (si hace falta) y devuelve la suscripción, o null si se deniega
+ * o falla. Es resiliente: registra el SW si falta y, si había una suscripción
+ * "colgada" (p. ej. tras desactivar), la suelta y crea una nueva.
+ */
 export async function subscribeToPush(vapidPublicKey: string): Promise<PushSubscription | null> {
   if (!pushSupported() || !vapidPublicKey) return null;
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') return null;
-  const reg = await readyRegistration();
+  const reg = await ensureRegistration();
   if (!reg) return null;
-  const existing = await reg.pushManager.getSubscription();
-  if (existing) return existing;
-  return reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
-  });
+  const key = urlBase64ToUint8Array(vapidPublicKey) as BufferSource;
+  try {
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) {
+      // Suelta la anterior (puede haber quedado inválida o con otra clave VAPID)
+      // y vuelve a suscribir en limpio.
+      try {
+        await existing.unsubscribe();
+      } catch {
+        /* noop */
+      }
+    }
+    return await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+  } catch {
+    return null;
+  }
 }
 
 export async function unsubscribeFromPush(): Promise<void> {

@@ -58,6 +58,7 @@ export function AlertasScreen() {
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [test, setTest] = useState<'idle' | 'sent' | 'fail'>('idle');
+  const [enableErr, setEnableErr] = useState(false);
   const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export function AlertasScreen() {
   const enable = async () => {
     setBusy(true);
     setTest('idle');
+    setEnableErr(false);
     try {
       const sub = await subscribeToPush(VAPID);
       if (sub) {
@@ -94,7 +96,11 @@ export function AlertasScreen() {
           body: JSON.stringify({ subscription: sub.toJSON(), prefs }),
         }).catch(() => {});
       } else {
-        setPerm(notificationPermission());
+        const p = notificationPermission();
+        setPerm(p);
+        // Permiso concedido pero sin suscripción ⇒ falló el registro/suscripción
+        // (SW en mal estado, permiso "pillado" por una PWA…): guiar a recuperar.
+        if (p === 'granted') setEnableErr(true);
       }
     } finally {
       setBusy(false);
@@ -217,6 +223,9 @@ export function AlertasScreen() {
               )}
               {perm === 'denied' && (
                 <p className="mt-2 text-[11px] leading-relaxed text-warn">{d.alerts.denied}</p>
+              )}
+              {enableErr && perm !== 'denied' && (
+                <p className="mt-2 text-[11px] leading-relaxed text-warn">{d.alerts.enableError}</p>
               )}
             </div>
 
