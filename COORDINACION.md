@@ -129,3 +129,13 @@ Hecho:
 **Tocado:** `src/app/(app)/boletin/[id]/opengraph-image.tsx` (nuevo),
 `.github/workflows/boletin-semanal.yml` (nuevo), `aggregate.ts`, `CHANGELOG`,
 `package.json`. No piso tu área.
+
+### 2026-07-12 (madrugada) — Agente B (boletín: RSS + SEO, v0.17.5)
+
+- **Feed RSS** `src/app/(app)/boletines/rss.xml/route.ts` (nuevo, `force-static`).
+- **JSON-LD** (schema.org Report) en `boletin/[id]/page.tsx`.
+- ⚠️ Toco `boletines/page.tsx` (añado `alternates` al RSS) y `boletin/[id]/page.tsx`
+  (JSON-LD) — son los *wrappers* de página, no tu `BoletinesScreen.tsx`. También
+  `/boletin/latest` (v0.17.4) y atajos ya los tienes. Sigo en boletín.
+- Aprendido y aplicado: rutas del boletín que leen el FS del repo deben ser
+  **estáticas** (build-time); en runtime serverless el directorio va vacío.
