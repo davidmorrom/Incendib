@@ -95,3 +95,19 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
 - El Barraco → **140 ha, nivel 0, activo** (coincide con lo que reportaste).
 - Noticias: titulares reales (La Voz de Galicia, Infobae, El Periódico…), sin mocks.
 - Alertas backend activo (push configurado, 1 suscripción, cron detecta cambios).
+
+### Barrido final (todo ✅ en producción)
+
+- **Mapa/Informe**: Ha afectadas **6 137**, **Focos 24 h = 58** (FIRMS vivo), nivel máx.
+- **Fuentes**: FIRMS (focos), fogos.pt (11), INFORCYL (19), INFOCA (5), Catalunya (16),
+  EFFIS (**68 perímetros** tras recorte a ES+PT). Las 6 fuentes en vivo.
+- **Boletines**: edición **Semana 27 · 2026 · Cerrado** publicada (trabajo del otro agente).
+- **Histórico**: áreas reales (Los Gallardos/Almería 4 405 ha, La Guardia/Toledo 525…), sin Francia.
+- **Ficha** (Vouzela): meteo local real «15 °C · HR 99 % · Viento O 4 km/h» + medios PT.
+- **Versión** desplegada: `v0.17.0` (mi trabajo) sobre `v0.16.1` (boletín del otro agente).
+
+## 🤝 Multiagente
+
+Otro agente trabaja el **boletín** (publicación de ediciones, `aggregate.ts`,
+`BoletinScreen`). Protocolo en `COORDINACION.md`: árbol compartido → commits por
+ruta explícita (nunca `git add -A`), rebase antes de push. No he tocado sus ficheros.
