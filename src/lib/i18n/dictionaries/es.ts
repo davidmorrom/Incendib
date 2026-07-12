@@ -38,6 +38,7 @@ const es = {
     focos24h: 'Focos 24 h',
     nivelMaximo: 'Nivel máximo',
     evacuados: 'Evacuados',
+    noData: 'sin dato',
   },
   report: {
     title: 'Informe de situación',

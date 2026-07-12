@@ -39,6 +39,7 @@ const en: Dictionary = {
     focos24h: 'Hotspots 24 h',
     nivelMaximo: 'Max level',
     evacuados: 'Evacuated',
+    noData: 'no data',
   },
   report: {
     title: 'Situation report',

@@ -165,14 +165,22 @@ export function FichaScreen({ fire }: { fire: Fire }) {
         >
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.surface}</div>
-            <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
-              {formatNumber(fire.hectares)} <span className="text-[11px] text-fg-secondary">ha</span>
-            </div>
-            <div className="whitespace-nowrap font-mono text-[10px] font-medium text-state-activo-text">
-              {fire.delta24h && fire.delta24h > 0
-                ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
-                : d.fire.noProgress}
-            </div>
+            {fire.hectares > 0 ? (
+              <>
+                <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
+                  {formatNumber(fire.hectares)} <span className="text-[11px] text-fg-secondary">ha</span>
+                </div>
+                <div className="whitespace-nowrap font-mono text-[10px] font-medium text-state-activo-text">
+                  {fire.delta24h && fire.delta24h > 0
+                    ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
+                    : d.fire.noProgress}
+                </div>
+              </>
+            ) : (
+              <div className="mt-1 whitespace-nowrap font-mono text-[13px] font-semibold text-fg-secondary">
+                {d.kpis.noData}
+              </div>
+            )}
           </div>
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.start}</div>
