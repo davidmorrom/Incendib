@@ -167,6 +167,7 @@ export function BoletinScreen({
             <button
               type="button"
               onClick={onShare}
+              aria-live="polite"
               className="font-mono text-[10.5px] font-semibold text-action-text print:hidden"
             >
               {copied ? d.boletin.shareCopied : d.boletin.share}
@@ -174,6 +175,7 @@ export function BoletinScreen({
             <button
               type="button"
               onClick={onCite}
+              aria-live="polite"
               className="font-mono text-[10.5px] font-semibold text-action-text print:hidden"
             >
               {cited ? d.boletin.citeCopied : d.boletin.cite}
