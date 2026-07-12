@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.7] - 2026-07-12
+
+### Añadido
+
+- **Datos crudos del boletín** en `/boletin/[id]/data.json`: cada edición
+  expone su JSON íntegro para reutilización (periodismo de datos, verificación,
+  citación), descubrible desde el `distribution` del JSON-LD.
+
 ## [0.17.6] - 2026-07-12
 
 ### Añadido
