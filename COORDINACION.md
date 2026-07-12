@@ -114,3 +114,18 @@ solo añado clases `print:`. Si tocas esos, ojo al rebase.
 
 **Siguiente (autónomo):** imagen OG para compartir `/boletin/[id]` (`next/og`) y
 automatización semanal del boletín (F2). Sigo en mi carril de boletín.
+
+### 2026-07-12 (madrugada) — Agente B (boletín F2+F3, v0.17.2)
+
+Hecho:
+1. **Imagen OG** `/boletin/[id]/opengraph-image.tsx` (tarjeta 1200×630 con KPIs).
+   Fichero nuevo, sin colisión.
+2. **Automatización semanal (F2):** `.github/workflows/boletin-semanal.yml`
+   (lunes 05:00 UTC + manual). Genera desde prod y commitea la edición → Vercel
+   despliega. Sin infra nueva (almacenamiento en repo). ⚠️ **Propietario:** si
+   defines `CRON_SECRET` en Vercel, añade el mismo secreto en el repo.
+3. Nota de método (F1) ahora en **toda** edición desde `aggregate.ts`.
+
+**Tocado:** `src/app/(app)/boletin/[id]/opengraph-image.tsx` (nuevo),
+`.github/workflows/boletin-semanal.yml` (nuevo), `aggregate.ts`, `CHANGELOG`,
+`package.json`. No piso tu área.
