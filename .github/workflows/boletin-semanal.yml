@@ -37,6 +37,12 @@ jobs:
             "https://incendib.es/api/boletin/generar" -o edicion.json
           ID=$(node -e "process.stdout.write(require('./edicion.json').id)")
           if [ -z "$ID" ]; then echo "sin id en la respuesta"; exit 1; fi
+          # Valida el formato (año-wsemana) antes de usar $ID en rutas y $GITHUB_ENV:
+          # evita inyección/path-traversal si la respuesta viniera manipulada.
+          case "$ID" in
+            [0-9][0-9][0-9][0-9]-w[0-9]|[0-9][0-9][0-9][0-9]-w[0-9][0-9]) : ;;
+            *) echo "id con formato inesperado: $ID"; exit 1 ;;
+          esac
           mkdir -p src/content/boletines
           node -e "const d=require('./edicion.json'); require('fs').writeFileSync('src/content/boletines/'+d.id+'.json', JSON.stringify(d,null,2)+'\n');"
           rm -f edicion.json
