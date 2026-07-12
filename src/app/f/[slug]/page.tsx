@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getFire, getFires, getWeather, getNews } from '@/lib/data';
 import { relatedNews } from '@/lib/fires/news-match';
+import { getFireEvents } from '@/lib/history/store';
 import { FichaScreen } from '@/components/screens/FichaScreen';
 
 // Pantalla canónica 1c: ficha con URL propia y compartible. SIEMPRE muestra el
@@ -32,13 +33,14 @@ export default async function FichaPage({ params }: Params) {
   const { slug } = await params;
   const fire = await getFire(slug);
   if (!fire) notFound();
-  // Meteo local real (Open-Meteo) + noticias de prensa relacionadas por municipio.
-  const [weather, news] = await Promise.all([
+  // Meteo (Open-Meteo) + histórico de cambios propio + prensa relacionada.
+  const [weather, news, events] = await Promise.all([
     fire.weather ? Promise.resolve(fire.weather) : getWeather(fire.coordinates),
     getNews(),
+    getFireEvents(fire.slug),
   ]);
   const press = relatedNews(fire, news);
-  const timeline = [...(fire.timeline ?? []), ...press].sort(
+  const timeline = [...(fire.timeline ?? []), ...events, ...press].sort(
     (a, b) => Date.parse(b.at) - Date.parse(a.at),
   );
   return (
