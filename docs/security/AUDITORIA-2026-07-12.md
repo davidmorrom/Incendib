@@ -17,13 +17,18 @@ Prioridades (detalle abajo):
 
 | # | Hallazgo | Severidad | Estado |
 |---|---|---|---|
-| H1 | Faltan cabeceras de seguridad HTTP (CSP, X-Frame-Options, HSTS…) | **Media-Alta** | Fix aplicable (config) |
-| H2 | `/api/push/cron` y `/api/boletin/generar` *fail-open* sin `CRON_SECRET` | **Media** | Acción propietario + doc |
-| H3 | `/api/push/test` es un *relay* de push abierto (sin auth ni límite) | **Media** | Fix mitigación |
-| H4 | `/api/push/subscribe`: sin validar endpoint ni acotar prefs (SSRF/abuso) | **Media** | Fix mitigación |
-| H5 | JSON-LD del boletín sin escapar (`<`,`>`,`&`,U+2028/9) | **Baja** | Fix mínimo |
-| H6 | Sin límite de tamaño de cuerpo en endpoints POST | **Baja** | Fix opcional |
-| H7 | Sin rate-limiting en endpoints públicos | **Baja-Media** | Recomendación |
+| H1 | Faltan cabeceras de seguridad HTTP (CSP, X-Frame-Options, HSTS…) | **Media-Alta** | ✅ **Aplicado** (`next.config.mjs`) |
+| H2 | `/api/push/cron` y `/api/boletin/generar` *fail-open* sin `CRON_SECRET` | **Media** | ⚠️ **Acción propietario** (documentado en `.env.example`) |
+| H3 | `/api/push/test` es un *relay* de push abierto (sin auth ni límite) | **Media** | ✅ **Mitigado** (validación endpoint anti-SSRF) |
+| H4 | `/api/push/subscribe`: sin validar endpoint ni acotar prefs (SSRF/abuso) | **Media** | ✅ **Mitigado** (validación + clamp) |
+| H5 | JSON-LD del boletín sin escapar (`<`,`>`,`&`,U+2028/9) | **Baja** | ✅ **Corregido** (`jsonLdSafe`) |
+| H6 | Sin límite de tamaño de cuerpo en endpoints POST | **Baja** | Pendiente (opcional) |
+| H7 | Sin rate-limiting en endpoints públicos | **Baja-Media** | Pendiente (recomendación) |
+
+> **Estado (12 jul 2026, madrugada):** H1, H3, H4 y H5 **aplicados, verificados**
+> (typecheck + lint + build + 74 tests, 7 nuevos para el validador) y en `main`.
+> H2 requiere una acción del propietario (definir `CRON_SECRET` en Vercel). H6/H7
+> quedan como endurecimiento opcional posterior.
 
 ## Superficie expuesta (inventario)
 
