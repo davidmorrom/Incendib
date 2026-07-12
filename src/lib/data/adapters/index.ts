@@ -25,9 +25,26 @@ import type {
   GroundKind,
   SeverityLevel,
   Country,
+  TimelineEntry,
 } from '@/types/fire';
 import { inEsPt } from '@/lib/geo/point-in-region';
 import { utmToLonLat } from '@/lib/geo/utm';
+
+/**
+ * Construye el timeline de evolución de un incendio a partir de los eventos
+ * fechados que publica cada fuente (declaración, cambios de nivel/estado…).
+ * Descarta los que no tienen fecha y ordena de más reciente a más antiguo.
+ * Devuelve undefined si no hay ninguno (la ficha oculta la sección).
+ */
+function buildTimeline(
+  entries: { at?: string; label: string; state?: FireState }[],
+): TimelineEntry[] | undefined {
+  const out = entries
+    .filter((e): e is { at: string; label: string; state?: FireState } => Boolean(e.at))
+    .map((e) => ({ at: e.at, label: e.label, state: e.state }))
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  return out.length ? out : undefined;
+}
 
 export interface FetchOptions {
   /** Bounding box [minLon, minLat, maxLon, maxLat]. */
@@ -319,6 +336,10 @@ function fogosToFire(d: FogosRaw): Fire | null {
       aerialUnits: aerialUnits.length ? aerialUnits : undefined,
       groundUnits: groundUnits.length ? groundUnits : undefined,
     },
+    timeline: buildTimeline([
+      { at: started, label: 'Início', state: 'activo' },
+      ...(state !== 'activo' && d.status ? [{ at: updated, label: d.status.trim(), state }] : []),
+    ]),
     sources: ['fogos'],
   };
 }
@@ -372,6 +393,7 @@ interface InforcylEmergencia {
   provincia?: { nombre?: string };
   nivel_infocal?: number;
   nivel_maximo?: number;
+  fecha_nivel_maximo?: string;
   emergencia_cpm?: number;
   emergencia_num1?: number;
   emergencia_num2?: number;
@@ -443,6 +465,18 @@ function inforcylToFire(e: InforcylEmergencia): Fire | null {
   const updated = new Date().toISOString();
   const id = `${e.emergencia_cpm ?? ''}-${e.emergencia_num1 ?? ''}-${e.emergencia_num2 ?? ''}`;
 
+  // Histórico de evolución con los eventos fechados de INFORCYL (la fuente más rica).
+  const nivelMax = Number(e.nivel_maximo);
+  const timeline = buildTimeline([
+    { at: started, label: 'Declarado', state: 'activo' },
+    {
+      at: parseCylDateTime(e.fecha_nivel_maximo),
+      label: Number.isFinite(nivelMax) ? `Nivel máximo ${nivelMax}` : 'Nivel máximo',
+    },
+    { at: parseCylDateTime(e.fecha_estabilizado), label: 'Estabilizado', state: 'estabilizado' },
+    { at: parseCylDateTime(e.fecha_control), label: 'Controlado', state: 'controlado' },
+  ]);
+
   return {
     slug: `cyl-${slugify(name)}-${id}`,
     name,
@@ -459,6 +493,7 @@ function inforcylToFire(e: InforcylEmergencia): Fire | null {
     startedAt: started ?? updated,
     updatedAt: updated,
     resources: inforcylMedios(e.medios ?? []),
+    timeline,
     sources: ['jcyl'],
   };
 }
@@ -682,6 +717,8 @@ function infocaToFire(f: {
     startedAt,
     updatedAt: new Date().toISOString(), // frescura del dato (INFOCA no da modificado)
     resources: infocaResources(a),
+    // INFOCA no publica fechas de cambio de estado; solo la declaración.
+    timeline: buildTimeline([{ at: startedAt, label: 'Declarado', state: 'activo' }]),
     sources: ['infoca'],
   };
 }
@@ -943,6 +980,12 @@ function catalunyaToFire(f: {
     startedAt: started ?? updated,
     updatedAt: updated,
     resources: veh > 0 ? { ground: veh, groundUnits: [{ kind: 'autobomba', count: veh }] } : undefined,
+    timeline: buildTimeline([
+      { at: started, label: 'Declarat', state: 'activo' },
+      ...(a.COM_FASE && catStateFromFase(a.COM_FASE) !== 'activo'
+        ? [{ at: updated, label: titleCase(a.COM_FASE), state: catStateFromFase(a.COM_FASE) }]
+        : []),
+    ]),
     sources: ['catalunya'],
   };
 }

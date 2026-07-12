@@ -232,12 +232,12 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           <ResourcesPanel resources={fire.resources} />
           {fire.timeline && fire.timeline.length > 0 ? (
             <>
-              <div className="font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
+              <div className="mt-4 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
                 {d.fire.evolution}
               </div>
               <ol className="mt-2">
-                {fire.timeline.slice(0, 2).map((e, i, arr) => (
-                  <li key={e.at} className="flex gap-2.5">
+                {fire.timeline.map((e, i, arr) => (
+                  <li key={`${e.at}-${i}`} className="flex gap-2.5">
                     <div className="flex flex-none flex-col items-center">
                       <span
                         className="mt-1 h-2 w-2 rounded-full"
@@ -253,11 +253,6 @@ export function FichaScreen({ fire }: { fire: Fire }) {
                   </li>
                 ))}
               </ol>
-              {fire.timeline.length > 2 && (
-                <button type="button" className="mt-1 text-[10.5px] font-semibold text-action-text">
-                  {interpolate(d.fire.viewFull, { n: fire.timeline.length })}
-                </button>
-              )}
             </>
           ) : null}
         </div>
