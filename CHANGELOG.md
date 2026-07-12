@@ -5,6 +5,31 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.16] - 2026-07-13
+
+### Añadido
+
+- **Incendios hoy** (`/incendios-hoy`): nueva pantalla con el ranking de la
+  actividad por provincia (o distrito en PT) —incendios activos, total y
+  superficie— más el recuento nacional de focos satelitales con su advertencia.
+  Enlazada desde el Informe y en el sitemap. Inspirada en el proyecto hermano
+  mapasdeincendios.es (ver `docs/research/`).
+- **Política de seguridad**: `SECURITY.md` y `/.well-known/security.txt`
+  (RFC 9116) para el reporte responsable de vulnerabilidades.
+
+### Seguridad
+
+- **Cabeceras HTTP** en todas las respuestas: Content-Security-Policy acotada
+  (mapa OpenFreeMap + iframe YouTube-nocookie), `Strict-Transport-Security`,
+  `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` y
+  `Permissions-Policy` (geolocalización propia permitida).
+- **Endpoints de push**: validación del destino (anti-SSRF: solo `https` a hosts
+  públicos), acotado de preferencias, límite de tamaño de cuerpo y
+  rate-limiting por IP (fail-open con Upstash).
+- **JSON-LD del boletín** y **service worker** endurecidos (escape de `<script>`;
+  la notificación solo navega dentro del propio origen). Auditoría en
+  `docs/security/AUDITORIA-2026-07-12.md`.
+
 ## [0.17.15] - 2026-07-12
 
 ### Añadido

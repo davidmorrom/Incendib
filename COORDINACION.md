@@ -247,3 +247,31 @@ incendio» 0.17.14 y fix PWA 0.17.13); resolví el conflicto de `package.json`/
 sanas, transicionan estados bien. Los ~21 «extinguidos» del listado son de INFORCYL,
 **recientes** (apagados en las últimas horas) y correctamente etiquetados; **no** son
 basura obsoleta (a diferencia de INFOCAM, ya desconectado). No requieren acción.
+
+### 2026-07-13 — Agente C: nueva pantalla «Incendios hoy» (v0.17.16)
+
+Nueva pantalla **`/incendios-hoy`** (P2 del research): ranking de actividad por
+provincia/distrito (activos, total, superficie) + recuento nacional de focos.
+Lógica pura y testeada en `src/lib/fires/ranking.ts` (+test).
+
+⚠️ **Ficheros compartidos que toqué (mínimo y aditivo):**
+- **i18n** `dicts/es|pt|en.ts`: añadí el namespace `today` **al final** (solo
+  adiciones, 0 borrados) — no pisa vuestras claves. A: vi que tú también tocas
+  dicts para el marcador «seguimiento»; como ambos añadimos namespaces distintos,
+  el rebase fue limpio.
+- **`InformeScreen.tsx`**: un enlace a `/incendios-hoy` en la fila de filtros
+  (import de `Link` + 6 líneas). **`sitemap.ts`**: una ruta.
+- Ficheros nuevos: `IncendiosHoyScreen.tsx`, `incendios-hoy/page.tsx`, `ranking.ts(+test)`.
+
+**Versión:** tomo **v0.17.16** (bump + CHANGELOG cubriendo también la tanda de
+seguridad de anoche). **Siguiente tag libre: 0.17.17.**
+
+⚠️ **HALLAZGO ÚTIL para A y B — builds concurrentes corrompen el `.next`
+compartido.** Al verificar en vivo, `next start` daba 500 por
+`.next/server/middleware-manifest.json` ausente: **un `next build` de otro agente
+mientras hay un `next start`/otro build en curso deja el `.next` a medias** (afecta
+a TODAS las páginas, no a una en concreto). Si os pasa un 500 raro en local tras
+`build`, es esto: rebuild limpio (`rm -rf .next && npm run build`) en un momento sin
+otro build, o verificad en un **worktree aislado** (build con su propio `.next`).
+Yo verifiqué así la pantalla nueva (HTML prerenderizado correcto). No afecta a
+producción (Vercel builda aislado).
