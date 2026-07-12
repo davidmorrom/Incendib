@@ -54,7 +54,19 @@ como defensa en profundidad se resuelve la URL contra el propio origen y **solo 
 navega si es del mismo origen** (evita cualquier redirección/phishing si un
 payload trajera una URL absoluta externa).
 
-### H10 — GitHub Action del boletín · Baja (recomendación, no aplicada)
+### Verificación en vivo de la CSP (13 jul 2026) ✅
+
+Arrancado el build de producción (`next start`) y comprobado:
+- **Todas las cabeceras** presentes en respuestas reales (CSP, HSTS + `upgrade-
+  insecure-requests`, X-Frame-Options, nosniff, Referrer-Policy, Permissions-
+  Policy, COOP). En modo producción **no** aparece `unsafe-eval` (solo dev).
+- **La CSP no rompe el mapa:** inspeccionados los estilos `dark` y `positron` de
+  OpenFreeMap — glyphs, sprites y tiles cuelgan **todos** de
+  `tiles.openfreemap.org`, que la CSP permite (`connect-src` + `img-src`). El
+  iframe de directos usa `youtube-nocookie.com`, permitido por `frame-src`. No hay
+  ningún host externo sin cubrir.
+
+### H10 — GitHub Action del boletín · Baja (✅ aplicado)
 
 `.github/workflows/boletin-semanal.yml` (área del Agente B) está **bien planteada**:
 `permissions: contents: write` (mínimo necesario), el `CRON_SECRET` se pasa por
@@ -63,9 +75,10 @@ defensa en profundidad: el `id` de la edición procede de la respuesta de la API
 se usa en `$GITHUB_ENV` y en rutas de fichero; conviene **validar su formato**
 (`^\d{4}-w\d{1,2}$`) antes de usarlo, por si la respuesta fuera inesperada
 (evita inyección en env o *path traversal*). Riesgo real bajo (el `id` lo genera
-nuestro propio servidor con formato fijo). **No lo aplico** para no tocar el
-fichero del Agente B en caliente; queda como recomendación para B/propietario.
-Opcional adicional: fijar `actions/checkout` a un SHA (supply-chain).
+nuestro propio servidor con formato fijo). **Aplicado** (13 jul): validación
+`case "$ID" in [0-9][0-9][0-9][0-9]-w[0-9]|…-w[0-9][0-9])` antes de usar `$ID` en
+`$GITHUB_ENV` y rutas. Opcional adicional pendiente: fijar `actions/checkout` a un
+SHA (supply-chain).
 
 ### Extra — `/.well-known/security.txt` (RFC 9116)
 
