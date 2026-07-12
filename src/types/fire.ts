@@ -120,6 +120,9 @@ export interface TimelineEntry {
    */
   source?: string;
   url?: string;
+  /** Evento derivado por nuestro seguimiento (cambio de nivel/medios detectado
+   * comparando fotos); la hora es de detección (aproximada), no oficial. */
+  detected?: boolean;
 }
 
 export interface Fire {

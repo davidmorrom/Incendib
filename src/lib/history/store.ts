@@ -106,7 +106,9 @@ export async function getFireEvents(slug: string): Promise<TimelineEntry[]> {
   const r = redis();
   if (!r) return [];
   try {
-    return (await r.get<TimelineEntry[]>(`${EV_PREFIX}${slug}`)) ?? [];
+    const evs = (await r.get<TimelineEntry[]>(`${EV_PREFIX}${slug}`)) ?? [];
+    // Marca como "detectado" (hora aproximada, no oficial) para distinguirlos.
+    return evs.map((e) => ({ ...e, detected: true }));
   } catch {
     return [];
   }
