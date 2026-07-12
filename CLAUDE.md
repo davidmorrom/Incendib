@@ -102,6 +102,17 @@ El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
 - No introduzcas datos «probablemente erróneos» por rellenar huecos: mejor «sin
   dato» que una cifra falsa. Prefiere trabajo que puedas **verificar** (consulta
   real de la API/prod) frente a cambios de UI que no puedas comprobar.
+- **Decide tú, no preguntes por prioridades.** En modo autónomo no consultes al
+  propietario qué hacer primero: elige la siguiente tarea con más valor y
+  ejecútala. Nada de «¿prefieres A o B?».
+- **Tareas que requieren aprobación del propietario → apárcalas y sigue.** Si
+  algo necesita su visto bueno (o una acción suya: clave, decisión de producto,
+  algo irreversible/externo), **no te detengas a esperar**: documenta la tarea
+  como bloqueada y pasa a otra. No bloquees el avance.
+- **Para saber si otro agente terminó un área, usa un vigía**, no esperes
+  parado: lanza un comando en segundo plano que sondee la señal (p. ej. `git`
+  sobre los ficheros del área, o el endpoint/artefacto esperado) y te reactive
+  al cumplirse; mientras tanto, avanza con otra tarea.
 
 ### Hoja de ruta (orden sugerido)
 
