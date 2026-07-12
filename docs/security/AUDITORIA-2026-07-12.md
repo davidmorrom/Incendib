@@ -23,14 +23,15 @@ Prioridades (detalle abajo):
 | H4 | `/api/push/subscribe`: sin validar endpoint ni acotar prefs (SSRF/abuso) | **Media** | ✅ **Mitigado** (validación + clamp) |
 | H5 | JSON-LD del boletín sin escapar (`<`,`>`,`&`,U+2028/9) | **Baja** | ✅ **Corregido** (`jsonLdSafe`) |
 | H6 | Sin límite de tamaño de cuerpo en endpoints POST | **Baja** | ✅ **Aplicado** (guard `content-length`) |
-| H7 | Sin rate-limiting en endpoints públicos | **Baja-Media** | Pendiente (recomendación) |
+| H7 | Sin rate-limiting en endpoints públicos | **Baja-Media** | ✅ **Aplicado** (por IP, fail-open Upstash) |
 | H8 | `npm audit`: postcss <8.5.10 (XSS build-time) anidado en Next | **Baja** | Documentado (no accionable sin riesgo) |
 | H9 | SW abría `clients.openWindow` con URL del payload | **Baja** | ✅ **Endurecido** (solo mismo origen) |
 
-> **Estado (12 jul 2026, madrugada):** H1, H3, H4, H5, H6 y H9 **aplicados,
-> verificados** (typecheck + lint + build + 74 tests, 7 nuevos para el validador)
-> y en `main`. Añadido `/.well-known/security.txt` (RFC 9116). H2 requiere acción
-> del propietario (`CRON_SECRET` en Vercel). H7 y H8 quedan documentados abajo.
+> **Estado (12 jul 2026, madrugada):** H1, H3, H4, H5, H6, H7 y H9 **aplicados,
+> verificados** (typecheck + lint + build + 77 tests, 10 nuevos de seguridad) y en
+> `main`. Añadido `/.well-known/security.txt` (RFC 9116). **H2 requiere acción del
+> propietario** (`CRON_SECRET` en Vercel). H8 documentado (no accionable sin
+> riesgo). Único pendiente real: **H2**.
 
 ### H8 — `npm audit`: postcss anidado en Next · Baja (no accionable sin riesgo)
 
@@ -52,6 +53,19 @@ los payloads los genera **nuestro** servidor (rutas relativas `/f/{slug}`), pero
 como defensa en profundidad se resuelve la URL contra el propio origen y **solo se
 navega si es del mismo origen** (evita cualquier redirección/phishing si un
 payload trajera una URL absoluta externa).
+
+### H10 — GitHub Action del boletín · Baja (recomendación, no aplicada)
+
+`.github/workflows/boletin-semanal.yml` (área del Agente B) está **bien planteada**:
+`permissions: contents: write` (mínimo necesario), el `CRON_SECRET` se pasa por
+`env` desde *secrets* y no se registra, y `set -euo pipefail`. Única mejora de
+defensa en profundidad: el `id` de la edición procede de la respuesta de la API y
+se usa en `$GITHUB_ENV` y en rutas de fichero; conviene **validar su formato**
+(`^\d{4}-w\d{1,2}$`) antes de usarlo, por si la respuesta fuera inesperada
+(evita inyección en env o *path traversal*). Riesgo real bajo (el `id` lo genera
+nuestro propio servidor con formato fijo). **No lo aplico** para no tocar el
+fichero del Agente B en caliente; queda como recomendación para B/propietario.
+Opcional adicional: fijar `actions/checkout` a un SHA (supply-chain).
 
 ### Extra — `/.well-known/security.txt` (RFC 9116)
 
