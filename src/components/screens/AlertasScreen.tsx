@@ -6,6 +6,7 @@ import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { useFollowStore } from '@/lib/follow';
 import { LEGAL } from '@/lib/legal';
 import {
   notificationPermission,
@@ -60,8 +61,12 @@ export function AlertasScreen() {
   const [test, setTest] = useState<'idle' | 'sent' | 'fail'>('idle');
   const [enableErr, setEnableErr] = useState(false);
   const [prefs, setPrefs] = useState<AlertPrefs>(DEFAULT_PREFS);
+  const followed = useFollowStore((s) => s.fires);
+  const unfollowFire = useFollowStore((s) => s.unfollow);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setPerm(notificationPermission());
     getExistingSubscription().then((s) => setSubscribed(!!s));
     try {
@@ -332,6 +337,44 @@ export function AlertasScreen() {
 
             <p className="mx-screen mt-3 text-[10.5px] leading-relaxed text-fg-mute">{d.alerts.autoNote}</p>
           </>
+        )}
+
+        {/* Incendios que sigues (lista de seguimiento local, persistida) */}
+        {mounted && (
+          <section className="mt-6">
+            <div className="mx-screen pb-1.5">
+              <span className={SECTION}>{d.alerts.followingHeading}</span>
+            </div>
+            {followed.length === 0 ? (
+              <p className="mx-screen text-[12px] leading-relaxed text-fg-mute">
+                {d.alerts.followingEmpty}
+              </p>
+            ) : (
+              <ul className="mx-screen">
+                {followed.map((f) => (
+                  <li
+                    key={f.slug}
+                    className="flex items-center gap-2 border-t border-subtle py-2.5 last:border-b"
+                  >
+                    <Link
+                      href={`/f/${f.slug}`}
+                      className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-fg-body"
+                    >
+                      {f.name}
+                      <span className="ml-1.5 font-mono text-[10px] text-fg-mute">{f.region}</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => unfollowFire(f.slug)}
+                      className="flex-none font-mono text-[10.5px] font-semibold text-action-text"
+                    >
+                      {d.alerts.unfollow}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
 
         <p className="mx-screen mt-4 border-t pt-2.5 text-[10px] text-fg-mute">

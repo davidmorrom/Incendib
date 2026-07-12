@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.14] - 2026-07-12
+
+### Corregido / Añadido
+
+- **«Seguir este incendio» ahora funciona.** Antes era un botón sin efecto (solo
+  cambiaba de color y perdía el estado al recargar, mostrando además un texto
+  erróneo). Ahora mantiene una **lista de seguimiento** persistente (localStorage)
+  y muestra la etiqueta correcta («Siguiendo»).
+- **Sección «Incendios que sigues»** en Ajustes de alertas: lista los incendios
+  que sigues, con enlace a su ficha y opción de dejar de seguirlos (ES/EN/PT).
+  (Las notificaciones push por incendio llegarán con el backend de alertas.)
+
 ## [0.17.13] - 2026-07-12
 
 ### Corregido

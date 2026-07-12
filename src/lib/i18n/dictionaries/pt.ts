@@ -68,6 +68,7 @@ const pt: Dictionary = {
     shareNote: 'A ligação mostra sempre o estado atual, não uma captura de agora.',
     satelliteUnconfirmed: 'Deteção de satélite {sensor} — não confirmada',
     follow: 'Seguir este incêndio',
+    following: 'A seguir',
     evolution: 'Evolução',
     viewFull: 'Ver evolução completa ({n})',
     fwi: 'FWI {level}',
@@ -205,6 +206,9 @@ const pt: Dictionary = {
   },
   alerts: {
     title: 'Alertas',
+    followingHeading: 'Incêndios que segues',
+    followingEmpty: 'Ainda não segues nenhum incêndio. Abre uma ficha e toca em «Seguir este incêndio».',
+    unfollow: 'Deixar de seguir',
     aria: 'Definições de alertas',
     softAsk:
       'Ativa as notificações para receber avisos de incêndios e evacuações nas zonas que escolheres. Os alertas de evacuação tocam sempre.',
