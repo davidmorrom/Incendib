@@ -781,6 +781,10 @@ export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fir
     for (const feat of feats) {
       const ring = outerRing(feat?.geometry);
       if (!ring || ring.length < 4) continue;
+      // Recorte a tierra de España/Portugal: el bbox incluye Francia/Andorra/mar,
+      // pero Incendib es solo ES+PT (evita "áreas quemadas" francesas).
+      const centroid = ringCentroid(ring);
+      if (!inEsPt(centroid[0], centroid[1])) continue;
       const props = lowerKeys(feat?.properties);
       const started = parseEffisDate(props.firedate);
       // Solo campaña reciente (capa multi-anual): descarta áreas de años previos.
@@ -800,7 +804,7 @@ export async function fetchEffisPerimeters(opts: FetchOptions = {}): Promise<Fir
         state: 'extinguido',
         level: null,
         hectares: Math.round(area),
-        coordinates: ringCentroid(ring),
+        coordinates: centroid,
         startedAt: started ?? updated,
         updatedAt: updated,
         sources: ['effis'],
