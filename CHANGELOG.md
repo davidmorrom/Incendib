@@ -5,6 +5,31 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.0] - 2026-07-12
+
+### Añadido
+
+- **Histórico de campaña (10b)**: `/historico` deja de ser un placeholder y
+  muestra el archivo real de áreas quemadas de EFFIS (municipio, provincia,
+  país, fecha y hectáreas), ordenado por superficie. Enlazado desde Boletines.
+- **Meteo local real en la ficha** (Open-Meteo, sin clave): temperatura,
+  humedad y viento (rosa de 8 puntos) por coordenadas del incendio. Antes esta
+  sección salía vacía con datos reales.
+
+### Corregido
+
+- **EFFIS recortado a España + Portugal**: el bbox incluye el sur de Francia,
+  Andorra y mar; aparecían «áreas quemadas» francesas en el mapa y el histórico.
+  Ahora se aplica el mismo recorte punto-en-polígono (`inEsPt`) que a FIRMS.
+- **FIRMS**: ventana acotada a 5 días (máximo real de la API `area/csv`; pedir
+  más fallaba en silencio) y `/fuentes` marca la fuente como caída si falta la
+  clave `FIRMS_MAP_KEY`.
+
+### Interno
+
+- Pruebas unitarias del parser de noticias (Google News RSS) y de la rosa de
+  viento; mejora en la detección de titulares críticos (capta «evacúan»).
+
 ## [0.16.1] - 2026-07-12
 
 ### Añadido
