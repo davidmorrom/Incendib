@@ -281,6 +281,18 @@ const pt: Dictionary = {
     colHa: 'HA',
     link: 'Histórico de área ardida',
   },
+  today: {
+    title: 'Incêndios hoje',
+    subtitle: 'Atividade por distrito',
+    firms24h: '{n} focos satélite · 24 h',
+    firmsNote: 'Deteção por satélite — não equivale a incêndio confirmado',
+    colProvince: 'DISTRITO',
+    colActive: 'AT.',
+    colTotal: 'TOTAL',
+    colArea: 'HA',
+    empty: 'Sem incêndios registados neste momento',
+    link: 'Incêndios hoje',
+  },
 };
 
 export default pt;

@@ -281,6 +281,18 @@ const en: Dictionary = {
     colHa: 'HA',
     link: 'Burned-area archive',
   },
+  today: {
+    title: 'Fires today',
+    subtitle: 'Activity by province',
+    firms24h: '{n} satellite hotspots · 24 h',
+    firmsNote: 'Satellite detection — not a confirmed wildfire',
+    colProvince: 'PROVINCE',
+    colActive: 'ACT.',
+    colTotal: 'TOTAL',
+    colArea: 'HA',
+    empty: 'No fires on record right now',
+    link: 'Fires today',
+  },
 };
 
 export default en;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
 import { ReportKpis } from '@/components/fires/ReportKpis';
@@ -105,10 +106,16 @@ export function InformeScreen({
         maxNames={maxNames}
       />
 
-      <div className="flex flex-none gap-1.5 px-screen pt-2.5">
+      <div className="flex flex-none items-center gap-1.5 px-screen pt-2.5">
         {chip('todos', d.report.all, counts.todos)}
         {chip('es', d.report.spain, counts.es)}
         {chip('pt', d.report.portugal, counts.pt)}
+        <Link
+          href="/incendios-hoy"
+          className="ml-auto whitespace-nowrap text-[11px] font-semibold text-action-text"
+        >
+          {d.today.link} ›
+        </Link>
       </div>
 
       {degraded && !dismissed && (
