@@ -1021,6 +1021,98 @@ export async function fetchCatalunyaFires(opts: FetchOptions = {}): Promise<Fire
   }
 }
 
+// ── Castilla-La Mancha: INFOCAM (ArcGIS FeatureServer público de la JCCM) ──────
+// Capa V_Incendio (org LVA9E9zjh6QfM7Mo), consultable sin token. Particularidades
+// verificadas: (1) mezcla histórico hasta 2024 y el campo `Estado` no es fiable
+// (viejos siguen "Activo"); usamos `Fecha_Fin` (null = abierto) + recencia de
+// `Fecha_Inicio`. (2) Incluye incendios fronterizos de otras CCAA; filtramos a
+// CLM. Solo trae punto, municipio y fechas: sin nivel, sin medios, sin superficie.
+
+const INFOCAM_QUERY =
+  'https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services/V_Incendio/FeatureServer/0/query';
+
+interface InfocamAttrs {
+  OBJECTID?: number;
+  Incendios?: string; // nombre del incendio
+  Estado?: string; // Activo / Extinguido (no fiable)
+  CCAA?: string;
+  Provincia?: string;
+  Municipio?: string;
+  Paraje?: string;
+  Fecha_Inicio?: number; // epoch ms
+  Fecha_Fin?: number | null; // epoch ms; null si sigue abierto
+  ID_Incendio?: string | number;
+}
+
+function infocamToFire(f: {
+  attributes?: InfocamAttrs;
+  geometry?: { x?: number; y?: number };
+}): Fire | null {
+  const a = f.attributes ?? {};
+  const g = f.geometry;
+  if (!g || typeof g.x !== 'number' || typeof g.y !== 'number') return null;
+
+  const muni = titleCase(a.Municipio || a.Incendios || 'Incendio');
+  const started = typeof a.Fecha_Inicio === 'number' ? new Date(a.Fecha_Inicio).toISOString() : undefined;
+  const id = a.ID_Incendio ?? a.OBJECTID ?? slugify(muni);
+
+  return {
+    slug: `clm-${slugify(muni)}-${id}`,
+    name: muni,
+    municipality: muni,
+    province: titleCase(a.Provincia ?? '') || '—',
+    region: 'Castilla-La Mancha',
+    country: 'ES',
+    // La fuente solo distingue Activo/Extinguido; los extintos se filtran fuera.
+    state: 'activo',
+    level: null,
+    type: 'forestal',
+    hectares: 0, // INFOCAM no publica superficie → estimación EFFIS por cercanía
+    coordinates: [g.x, g.y],
+    startedAt: started ?? new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    timeline: buildTimeline([{ at: started, label: 'Declarado', state: 'activo' }]),
+    sources: ['infocam'],
+  };
+}
+
+/** Incendios de Castilla-La Mancha (INFOCAM): abiertos y recientes. [] si falla. */
+export async function fetchInfocamFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    // Traemos todo (dataset pequeño, ~200) ordenado por fecha y filtramos en JS,
+    // porque el filtro por fecha en el `where` de este servicio es poco fiable.
+    const url =
+      `${INFOCAM_QUERY}?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326` +
+      `&orderByFields=${encodeURIComponent('Fecha_Inicio DESC')}&resultRecordCount=500&f=json`;
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      headers: { 'User-Agent': INFORCYL_HEADERS['User-Agent'] },
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      features?: { attributes?: InfocamAttrs; geometry?: { x?: number; y?: number } }[];
+    };
+    const feats = Array.isArray(json.features) ? json.features : [];
+    const recent = Date.now() - 30 * 86400e3;
+    return feats
+      .filter((ft) => {
+        const a = ft.attributes ?? {};
+        if (typeof a.Fecha_Inicio !== 'number') return false; // sin fecha → descartar
+        if (a.Fecha_Inicio < recent) return false; // fuera histórico (mezcla hasta 2024)
+        if (a.Fecha_Fin != null) return false; // cerrado → no activo (Estado no es fiable)
+        if ((a.Estado ?? '').toLowerCase().includes('exting')) return false;
+        // Solo CLM (el dataset trae incendios fronterizos de otras CCAA).
+        if (a.CCAA && !/mancha/i.test(a.CCAA)) return false;
+        return true;
+      })
+      .map(infocamToFire)
+      .filter((x): x is Fire => x !== null);
+  } catch {
+    return [];
+  }
+}
+
 // ── Pendientes (fases posteriores) ───────────────────────────────────────────
 // ICNF (áreas ardidas PT) queda pendiente.
 

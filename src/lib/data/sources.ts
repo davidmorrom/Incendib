@@ -85,6 +85,16 @@ export const SOURCES: Record<SourceId, SourceMeta> = {
     license: 'Reutilización libre con mención',
     requiresKey: false,
   },
+  infocam: {
+    id: 'infocam',
+    label: 'INFOCAM (Castilla-La Mancha)',
+    endpoint:
+      'https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services/V_Incendio/FeatureServer/0',
+    format: 'ArcGIS FeatureServer (JSON)',
+    attribution: 'Plan INFOCAM — Junta de Comunidades de Castilla-La Mancha',
+    license: 'Reutilización libre con atribución',
+    requiresKey: false,
+  },
   aemet: {
     id: 'aemet',
     label: 'AEMET / IPMA',
