@@ -135,6 +135,15 @@ export interface Fire {
    * aproximada. Solo se rellena así cuando la fuente oficial no publica superficie.
    */
   hectaresApprox?: boolean;
+  /**
+   * Confirmación por satélite (capa de calidad): hay un foco térmico FIRMS
+   * reciente muy cerca, lo que corrobora que arde ahora. Su AUSENCIA no implica
+   * que esté apagado (FIRMS falla por nubes, tamaño o paso del satélite): es una
+   * señal positiva de confianza, no un filtro para fuentes fiables.
+   */
+  satelliteConfirmed?: boolean;
+  /** Distancia (km) al foco FIRMS más cercano cuando `satelliteConfirmed`. */
+  hotspotKm?: number;
   /** Variación en las últimas 24 h (ha). Positivo = crece. */
   delta24h?: number;
   /** Coordenadas [lon, lat] para el mapa. */

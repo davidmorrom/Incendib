@@ -72,6 +72,7 @@ const pt: Dictionary = {
     viewFull: 'Ver evolução completa ({n})',
     fwi: 'FWI {level}',
     hotspots: '{n} focos VIIRS · última passagem {time}',
+    satelliteConfirmed: 'Atividade térmica detetada · VIIRS a {km} km',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sem avanço 24 h',
     approx: 'estimativa satélite',

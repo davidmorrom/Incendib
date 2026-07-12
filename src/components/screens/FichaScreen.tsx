@@ -63,8 +63,6 @@ export function FichaScreen({ fire }: { fire: Fire }) {
     }
   };
 
-  const hotspotCount = Math.max(1, Math.round(fire.hectares / 600));
-
   return (
     <main id="contenido" className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg">
       {/* Mapa enfocado */}
@@ -93,14 +91,14 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </div>
         </div>
 
-        {fire.state === 'activo' && (
+        {fire.satelliteConfirmed && (
           <div
             className="if-overlay absolute left-3 top-[62px] z-[3] inline-flex items-center gap-1.5 rounded-[5px] px-[9px] py-[5px]"
             style={{ borderColor: mix(V.foco, 40) }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-state-foco" aria-hidden />
             <span className="font-mono text-[9.5px] font-medium text-state-foco-text">
-              {interpolate(d.fire.hotspots, { n: hotspotCount, time: '13:47' })}
+              {interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
             </span>
           </div>
         )}
