@@ -254,6 +254,9 @@ const en: Dictionary = {
     latest: 'Latest bulletin',
     viewAll: 'View all bulletins',
     print: 'Print / PDF',
+    share: 'Share',
+    shareCopied: 'Link copied',
+    downloadData: 'Download data (JSON)',
     level: 'Level {n}',
   },
   historico: {

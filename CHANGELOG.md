@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.8] - 2026-07-12
+
+### Añadido
+
+- **Compartir y descargar en el boletín**: botón «Compartir» (Web Share API con
+  fallback a copiar enlace) y enlace «Descargar datos (JSON)» en cada edición.
+  Traducidos (ES/EN/PT).
+
 ## [0.17.7] - 2026-07-12
 
 ### Añadido
