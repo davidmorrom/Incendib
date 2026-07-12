@@ -10,6 +10,7 @@ import {
   type AlertPrefs,
   type StoredSub,
 } from '@/lib/push/store';
+import { recordFireHistory } from '@/lib/history/store';
 import { STATE_RANK } from '@/lib/fires/derive';
 import type { Fire } from '@/types/fire';
 
@@ -83,6 +84,8 @@ async function handle(req: Request) {
   }
 
   const fires = await getFires();
+  // Registra el histórico de cambios (nivel, medios) para el timeline de la ficha.
+  await recordFireHistory(fires, new Date().toISOString());
   const seen = await getLastSeen();
   const firstRun = Object.keys(seen).length === 0;
 
