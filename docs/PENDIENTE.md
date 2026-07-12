@@ -7,11 +7,23 @@
 
 ## 1. Desbloqueantes (acción del propietario) 🧑
 
-- **Ampliar CCAA en vivo**: capturar el endpoint de datos de un visor oficial
-  (F12 → pestaña Network → filtro Fetch/XHR → recargar → copiar la URL que
-  devuelve incendios en `arcgis`/`FeatureServer`/`.json`). Con una URL válida se
-  integra la región (marcador + ficha + filtros + estado de fuente). *Los agentes
-  intentan descubrirlo headless en paralelo; si no, hace falta esta captura.*
+- **Ampliar CCAA en vivo (las que faltan)**: capturar el endpoint de un visor
+  oficial (F12 → Network → Fetch/XHR → recargar → copiar la URL que devuelve
+  incendios en `arcgis`/`FeatureServer`/`.json`). **Integradas: PT, CyL,
+  Andalucía, Cataluña.**
+  - **Castilla-La Mancha (INFOCAM)**: endpoint público encontrado
+    (`services-eu1.arcgis.com/.../V_Incendio/FeatureServer/0`) pero es un **log
+    acumulativo** que da por "Activo" incendios ya extinguidos (contrastado con
+    prensa: **0 de 11 realmente activos**) → **NO integrado**. Re-alta solo con
+    **validación por focos FIRMS** (mostrar únicamente los confirmados por
+    satélite <48 h, <~4 km). Adaptador conservado en `fetchInfocamFires`.
+  - **Comunitat Valenciana**: GeoServer localizado (`112cv.gva.es/geoserver/cv112`,
+    capa `V_INCIDENTES_EN_CURSO`) pero **WMS/WFS deshabilitado** externamente.
+    Reintentar con inspección de red desde IP española, o pedir acceso a
+    `dadesobertes@gva.es`.
+  - Sin fuente headless usable: Galicia, Aragón, Extremadura, Murcia, Asturias.
+  - **Lección**: verificar SIEMPRE que la fuente da estado "activo" fiable
+    (no un log acumulativo) antes de integrarla; cruzar con prensa/FIRMS.
 - **Probar push en iPhone**: instalar la PWA desde **Safari → Compartir → Añadir a
   pantalla de inicio**, abrirla y activar notificaciones ahí (en iOS el push solo
   funciona como PWA instalada, no en pestaña). Verificar «Enviar prueba».

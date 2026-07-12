@@ -17,7 +17,6 @@ import {
   fetchJcylFires,
   fetchInfocaFires,
   fetchCatalunyaFires,
-  fetchInfocamFires,
   fetchEffisPerimeters,
   attachPerimeters,
 } from './adapters';
@@ -37,23 +36,27 @@ export function getDataMode(): DataMode {
  * Incendios agregados y normalizados.
  *
  * En live combina las fuentes con datos reales usables: fogos.pt (Portugal),
- * Castilla y León (INFORCYL), Andalucía (INFOCA), Cataluña (Bombers) y
- * Castilla-La Mancha (INFOCAM). El resto de España no tiene API de incendios
- * activos en tiempo real, así que ahí solo hay focos satelitales (getHotspots).
- * Los perímetros de EFFIS se adjuntan al incendio oficial más cercano. Nunca
- * lanza: si todo falla, devuelve [] (vacío = buena noticia).
+ * Castilla y León (INFORCYL), Andalucía (INFOCA) y Cataluña (Bombers). El resto
+ * de España no tiene API de incendios activos en tiempo real, así que ahí solo
+ * hay focos satelitales (getHotspots). Los perímetros de EFFIS se adjuntan al
+ * incendio oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío =
+ * buena noticia).
+ *
+ * NOTA: Castilla-La Mancha (INFOCAM) NO se integra: su capa es un log acumulativo
+ * que nunca cierra incidentes (Estado siempre "Activo", Fecha_Fin nula), así que
+ * daría por activos incendios ya extinguidos (verificado contra prensa: 0/11
+ * reales). Ver `fetchInfocamFires` — solo re-activar con validación por FIRMS.
  */
 export async function getFires(): Promise<Fire[]> {
   if (getDataMode() === 'live') {
-    const [pt, cyl, and, cat, clm, perimeters] = await Promise.all([
+    const [pt, cyl, and, cat, perimeters] = await Promise.all([
       fetchFogosActive(),
       fetchJcylFires(),
       fetchInfocaFires(),
       fetchCatalunyaFires(),
-      fetchInfocamFires(),
       fetchEffisPerimeters(),
     ]);
-    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat, ...clm]), perimeters);
+    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
   }
   return MOCK_FIRES;
 }
@@ -152,7 +155,6 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
   const cyl = bySrc('jcyl');
   const and = bySrc('infoca');
   const cat = bySrc('catalunya');
-  const clm = bySrc('infocam');
   // EFFIS: nº de áreas quemadas recientes recuperadas (independiente de si se
   // adjuntan a un incidente), para reflejar fielmente si la fuente responde.
   const perims = burned.length;
@@ -203,14 +205,6 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
       status: 'ok',
       note: plural(cat.length, 'incidente'),
       lastUpdate: latestIso(cat.map((f) => f.updatedAt), now),
-    },
-    {
-      id: 'infocam',
-      label: 'INFOCAM · CLM',
-      description: 'Castilla-La Mancha',
-      status: 'ok',
-      note: plural(clm.length, 'incidente'),
-      lastUpdate: latestIso(clm.map((f) => f.updatedAt), now),
     },
     {
       id: 'effis',
