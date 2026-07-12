@@ -87,5 +87,6 @@
 `src/content/boletines/*`. Sí comparto `adapters/index.ts`, i18n, `data/index.ts`,
 `BoletinesScreen.tsx` (enlace a histórico), `CHANGELOG`/`package.json`.
 
-**Versión:** no bumpeo por commit para no chocar contigo; commiteo por rutas
-explícitas y rebaseo antes de push. Reconciliamos tag cuando pares.
+**Versión:** commiteo por rutas explícitas y rebaseo antes de push. He cortado
+**`v0.17.0`** (histórico + meteo Open-Meteo + recorte EFFIS a ES+PT + clamp FIRMS
++ tests). Siguiente tag libre: **0.17.1** (patch) o **0.18.0** (minor).
