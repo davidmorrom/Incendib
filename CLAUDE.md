@@ -2,6 +2,10 @@
 
 Guía de trabajo para agentes en este repositorio.
 
+> **Trabajo multiagente:** si hay varios agentes a la vez, revisa
+> **`COORDINACION.md`** antes de empezar y antes de integrar en `main` (reglas
+> de convivencia sobre el árbol compartido y log entre agentes).
+
 ## Qué es
 
 Visor web (PWA mobile-first) de incendios forestales activos en España y
