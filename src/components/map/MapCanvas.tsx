@@ -326,7 +326,11 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
                 {d.states[STATE_LABEL_KEY[tipFire.state]]}
               </span>
               {tipFire.level != null && ` · Nivel ${tipFire.level}`} —{' '}
-              <span className="font-mono">{formatNumber(tipFire.hectares)} ha</span>
+              <span className="font-mono">
+                {tipFire.hectares > 0
+                  ? `${tipFire.hectaresApprox ? '~' : ''}${formatNumber(tipFire.hectares)} ha`
+                  : d.kpis.noData}
+              </span>
             </div>
             <div className="mt-[3px] font-mono text-[9px] text-fg-mute">
               {d.status.updatedAgo.replace('{when}', timeAgo(tipFire.updatedAt, now, locale))} ·{' '}

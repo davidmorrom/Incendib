@@ -33,7 +33,7 @@ export function FireMarker({
   const label =
     `${fire.name} · ${stateLabel}` +
     (fire.level != null ? ` · nivel ${fire.level}` : '') +
-    ` · ${formatNumber(fire.hectares)} ha`;
+    (fire.hectares > 0 ? ` · ${fire.hectaresApprox ? '~' : ''}${formatNumber(fire.hectares)} ha` : '');
 
   return (
     <button
