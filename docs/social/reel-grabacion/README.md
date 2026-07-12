@@ -1,9 +1,22 @@
-# Reel de lanzamiento — grabaciones de pantalla [REC]
+# Reel de lanzamiento — grabaciones [REC] + montaje
 
-Material **bruto de grabación de pantalla** para el reel de lanzamiento (ver el
-guion en [`../reel-lanzamiento.md`](../reel-lanzamiento.md)). Es solo la capa de
-movimiento **[REC]**: **sin** gráficos de Claude Design, **sin** subtítulos y
-**sin** música. Esos elementos se superponen/montan encima en el editor.
+Material del reel de lanzamiento (guion en
+[`../reel-lanzamiento.md`](../reel-lanzamiento.md)):
+
+- **`reel-lanzamiento.mp4`** — **el reel final montado** (1080×1920, 9:16, 30 fps,
+  ~23,6 s): portada → mapa → ficha → informe → tarjeta 112 → cierre, con las
+  franjas de contexto superpuestas. Sin audio (añade música neutra si quieres).
+- `reel_estaticos_png/` — los estáticos de Claude Design (portada, tarjetas,
+  franjas con alfa, tarjeta 112, cierre).
+- `rec-0*.mp4` — las grabaciones de pantalla en bruto (capa de movimiento [REC]).
+- `montar.sh` — reensambla `reel-lanzamiento.mp4` desde las grabaciones + estáticos.
+
+Para regenerar el reel: `bash montar.sh` (requiere ffmpeg). Para rehacer las
+grabaciones de pantalla: `node grabar.mjs` (ver «Regenerar» abajo).
+
+## Grabaciones en bruto [REC]
+
+Solo la capa de movimiento: **sin** gráficos, subtítulos ni música.
 
 Grabado con Playwright (Chromium) contra el servidor local en **modo oscuro** y
 **datos mock** (el «ahora» mock es 2026-07-10 14:32, toma estable y
@@ -24,12 +37,15 @@ H.264, 30 fps, sin audio).
 
 ## Montaje
 
-Estos clips son la base. Sobre ellos, en el editor:
-1. Añadir la **portada** (plano 1) y las tarjetas/overlays de Claude Design
-   (barra inferior, tarjeta 112, cierre) según §2–§3 del guion.
-2. Recortar cada plano a su duración objetivo (~6 / ~5 / ~4 s) y ajustar el
-   ritmo. Cortes secos.
-3. Incrustar **subtítulos** y, si acaso, una pista neutra a bajo volumen.
+`montar.sh` combina las grabaciones con los estáticos de `reel_estaticos_png/`
+según el guion (§5 de `../reel-lanzamiento.md`): recorta cada grabación a su
+tramo, superpone la franja de contexto correspondiente (PNG con alfa), intercala
+portada / tarjeta 112 / cierre, aplica cortes secos y un leve *fade* de
+entrada/salida, y concatena todo en `reel-lanzamiento.mp4`.
+
+Pendiente/opcional para pulir en un editor: **subtítulos** incrustados con el copy
+de cada tramo, una **pista neutra** a bajo volumen y, si molesta la barra de
+navegación de la app al pie, escalar la grabación ~8–10 % para sacarla de cuadro.
 
 ## Regenerar
 
