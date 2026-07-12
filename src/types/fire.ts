@@ -36,6 +36,7 @@ export type SourceId =
   | 'jcyl'
   | 'catalunya'
   | 'infoca'
+  | 'infocam'
   | 'aemet'
   | 'nacional';
 
