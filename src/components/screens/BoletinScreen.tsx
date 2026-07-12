@@ -56,7 +56,7 @@ function Kpi({
   return (
     <div className="border-t border-subtle px-screen py-3 first:border-t-0 md:border-t-0">
       <div className={SECTION}>{label}</div>
-      <div className="mt-1 flex items-baseline gap-1.5">
+      <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
         <span className="font-mono text-[22px] font-bold leading-none text-fg">{value}</span>
         {unit && <span className="font-mono text-[11px] text-fg-mute">{unit}</span>}
       </div>
@@ -135,7 +135,7 @@ export function BoletinScreen({
         right={<LangButton />}
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-6 lg:mx-auto lg:w-full lg:max-w-2xl lg:border-x print:block print:overflow-visible print:pb-0 print:max-w-none print:border-x-0">
+      <div className="min-h-0 flex-1 overflow-y-auto pb-6 lg:mx-auto lg:w-full lg:max-w-5xl lg:border-x print:block print:overflow-visible print:pb-0 print:max-w-none print:border-x-0">
         {/* Cabecera de edición */}
         <header className="px-screen pt-4 lg:pt-6">
           <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export function BoletinScreen({
         </header>
 
         {/* KPIs de la semana */}
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           <Kpi
             label={d.boletin.kpiFirms}
             value={formatNumber(k.firmsWeek)}
@@ -220,6 +220,8 @@ export function BoletinScreen({
           <Kpi label={d.boletin.kpiMaxLevel} value={levelText(k.maxLevel)} unit={k.maxLevelWhere} />
         </div>
 
+        {/* Ranking + destacados: apilados en móvil, dos columnas en desktop */}
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         {/* Ranking territorial */}
         {b.ranking.length > 0 && (
           <section className="mt-5">
@@ -299,6 +301,7 @@ export function BoletinScreen({
             </ul>
           )}
         </section>
+        </div>
 
         {/* Notas y método + atribución */}
         <section className="mx-screen mt-5 rounded-card border border-subtle bg-bg-raised p-3">

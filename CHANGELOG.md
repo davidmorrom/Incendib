@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.12] - 2026-07-12
+
+### Cambiado
+
+- **Boletín en desktop**: aprovecha mejor el ancho. Contenedor más amplio
+  (`max-w-5xl`), franja de KPIs a 5 columnas y **ranking + destacados en dos
+  columnas** en pantallas grandes. Móvil sin cambios.
+
 ## [0.17.11] - 2026-07-12
 
 ### Corregido
