@@ -7,7 +7,7 @@
 
 import type { NewsItem } from '@/lib/data/news';
 
-interface Feed {
+export interface Feed {
   q: string;
   hl: string;
   gl: string;
@@ -81,9 +81,9 @@ function regionOf(title: string, country: Feed['country']): string {
 }
 
 /** Titulares que sugieren gravedad se marcan con acento "action" (rojo). */
-const CRITICAL = /evacua|desaloj|descontrol|fuera de control|n[ií]vel\s*[23]|arde sin control|corta(?:da|do)/i;
+const CRITICAL = /evac|desaloj|descontrol|fuera de control|n[ií]vel\s*[23]|arde sin control|cortad[ao]/i;
 
-function parseRss(xml: string, feed: Feed): NewsItem[] {
+export function parseRss(xml: string, feed: Feed): NewsItem[] {
   const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
   const out: NewsItem[] = [];
   for (let i = 0; i < items.length; i++) {

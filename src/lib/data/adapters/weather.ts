@@ -9,7 +9,7 @@ import type { Weather } from '@/types/fire';
 const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'] as const;
 
 /** Grados (meteorológicos, de donde viene el viento) → rosa de 8 puntos. */
-function compass(deg: number): string {
+export function compass(deg: number): string {
   const i = Math.round((((deg % 360) + 360) % 360) / 45) % 8;
   return DIRS[i] ?? 'N';
 }
