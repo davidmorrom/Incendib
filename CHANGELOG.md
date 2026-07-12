@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.9] - 2026-07-12
+
+### Añadido
+
+- **Botón «Citar»** en cada edición del boletín: copia al portapapeles una cita
+  con edición, periodo y URL, para uso por prensa y ámbito académico
+  (ES/EN/PT).
+
 ## [0.17.8] - 2026-07-12
 
 ### Añadido
