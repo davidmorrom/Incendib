@@ -738,8 +738,8 @@ function str(v: unknown): string {
   return v == null ? '' : String(v);
 }
 
-/** "2026-07-08 11:51:00[.micros]" → ISO UTC; null si no parsea. */
-function parseEffisDate(v: unknown): string | null {
+/** "2026-07-08 11:51:00[.micros]" → ISO UTC; null si no parsea. Exportada para tests. */
+export function parseEffisDate(v: unknown): string | null {
   const s = typeof v === 'string' ? v : '';
   const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/.exec(s);
   if (m) return `${m[1]}T${m[2]}Z`;
