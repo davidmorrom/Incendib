@@ -138,6 +138,7 @@ const en: Dictionary = {
     accounts: 'OFFICIAL ACCOUNTS',
     chronology: 'Timeline',
     liveHeading: 'Live & headlines',
+    empty: 'No recent headlines',
   },
   disclaimer: {
     short: 'Not a substitute for official emergency channels. Emergencies: 112',
@@ -207,6 +208,8 @@ const en: Dictionary = {
     disable: 'Turn off',
     denied:
       'You have blocked notifications in the browser. Enable them in the site settings to receive alerts.',
+    enableError:
+      'Could not enable. Reload the page; if it keeps failing, clear the site data (browser settings → this site) and try again.',
     unsupported: 'Your browser does not support push notifications.',
     prefsHeading: 'Preferences',
     levels: 'Alert me from level',

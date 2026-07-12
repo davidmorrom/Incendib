@@ -138,6 +138,7 @@ const pt: Dictionary = {
     accounts: 'CONTAS OFICIAIS',
     chronology: 'Cronologia',
     liveHeading: 'Direto e manchetes',
+    empty: 'Sem manchetes recentes',
   },
   disclaimer: {
     short: 'Não substitui os canais oficiais de emergência. Emergências: 112',
@@ -207,6 +208,8 @@ const pt: Dictionary = {
     disable: 'Desativar',
     denied:
       'Bloqueaste as notificações no navegador. Ativa-as nas definições do site para receber alertas.',
+    enableError:
+      'Não foi possível ativar. Recarrega a página; se continuar, limpa os dados do site (definições do navegador → este site) e tenta de novo.',
     unsupported: 'O teu navegador não suporta notificações push.',
     prefsHeading: 'Preferências',
     levels: 'Avisar a partir do nível',

@@ -137,6 +137,7 @@ const es = {
     accounts: 'CUENTAS OFICIALES',
     chronology: 'Cronología',
     liveHeading: 'Directo y titulares',
+    empty: 'Sin titulares recientes',
   },
   disclaimer: {
     short: 'No sustituye a los canales oficiales de emergencia. Emergencias: 112',
@@ -206,6 +207,8 @@ const es = {
     disable: 'Desactivar',
     denied:
       'Has bloqueado las notificaciones en el navegador. Actívalas en los ajustes del sitio para recibir alertas.',
+    enableError:
+      'No se pudieron activar. Recarga la página; si sigue sin funcionar, borra los datos del sitio (ajustes del navegador → este sitio) y vuelve a intentarlo.',
     unsupported: 'Tu navegador no admite notificaciones push.',
     prefsHeading: 'Preferencias',
     levels: 'Avisarme desde el nivel',
