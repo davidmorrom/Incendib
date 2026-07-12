@@ -8,6 +8,8 @@
 
 import type { Fire, Hotspot, SourceId, SourceStatus } from '@/types/fire';
 import { MOCK_FIRES, MOCK_HOTSPOTS, MOCK_SOURCE_STATUS } from './mock';
+import { MOCK_NEWS, type NewsItem } from './news';
+import { fetchNews } from './adapters/news';
 import {
   fetchFirmsHotspots,
   fetchFogosActive,
@@ -95,6 +97,16 @@ export async function getBurnedAreas(): Promise<Fire[]> {
   const areas = await fetchEffisPerimeters();
   // Cap por higiene visual/perf; ya vienen ordenadas por actualización reciente.
   return areas.slice(0, 250);
+}
+
+/**
+ * Titulares de prensa reales (Google News RSS, ES+PT) para la pantalla Noticias.
+ * En mock, titulares de demostración. En live nunca lanza: si el RSS falla,
+ * devuelve [] y la UI lo señaliza en tono neutro.
+ */
+export async function getNews(): Promise<NewsItem[]> {
+  if (getDataMode() !== 'live') return MOCK_NEWS;
+  return fetchNews();
 }
 
 /** Recuento de focos de las últimas 24 h (KPI), relativo a `now` (ms). */

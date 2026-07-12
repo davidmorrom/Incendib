@@ -9,13 +9,12 @@ import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { timeAgo } from '@/lib/utils/format';
 import { useNow } from '@/components/time/NowProvider';
-import { MOCK_NEWS, MOCK_CAMERAS, MOCK_ACCOUNTS } from '@/lib/data/news';
+import { MOCK_ACCOUNTS, type NewsItem } from '@/lib/data/news';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
 import { cn } from '@/lib/utils/cn';
 import type { Fire } from '@/types/fire';
 
 const SECTION = 'font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute';
-const STRIPES = 'repeating-linear-gradient(135deg,#161d26 0 7px,#10151b 7px 14px)';
 const DOT: Record<'action' | 'activo' | 'ok', string> = {
   action: 'bg-action',
   activo: 'bg-state-activo',
@@ -31,69 +30,39 @@ function SectionHead({ title, right }: { title: string; right?: React.ReactNode 
   );
 }
 
-/** Titulares filtrados por incendio (feed). */
-function Headlines() {
+/** Titulares reales de prensa (Google News RSS). */
+function Headlines({ news }: { news: NewsItem[] }) {
+  const d = useDict();
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
+
+  if (!news.length) {
+    return <p className="px-screen py-5 text-[12px] text-fg-secondary">{d.news.empty}</p>;
+  }
+
   return (
     <ul className="px-screen">
-      {MOCK_NEWS.map((n) => (
+      {news.map((n) => (
         <li key={n.id} className="border-t border-subtle">
-          <a
-            href={n.url}
-            className="flex gap-2.5 py-[9px]"
-            target={n.url.startsWith('http') ? '_blank' : undefined}
-            rel="noreferrer"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    'font-mono text-[9px] font-semibold uppercase',
-                    n.tone === 'warn' ? 'text-state-controlado-text' : 'text-action-text',
-                  )}
-                >
-                  {n.region}
-                </span>
-                <span className="font-mono text-[9px] text-fg-mute">
-                  · {timeAgo(n.at, now, locale)} · {n.source}
-                </span>
-              </div>
-              <div className="text-[12.5px] font-semibold leading-snug text-fg">{n.title}</div>
+          <a href={n.url} className="block py-[9px]" target="_blank" rel="noreferrer">
+            <div className="mb-1 flex items-center gap-1.5">
+              <span
+                className={cn(
+                  'font-mono text-[9px] font-semibold uppercase',
+                  n.tone === 'warn' ? 'text-state-controlado-text' : 'text-action-text',
+                )}
+              >
+                {n.region}
+              </span>
+              <span className="truncate font-mono text-[9px] text-fg-mute">
+                · {timeAgo(n.at, now, locale)} · {n.source}
+              </span>
             </div>
-            <div
-              className="grid h-[50px] w-[66px] flex-none place-items-center rounded-[6px] border border-subtle"
-              style={{ background: STRIPES }}
-              aria-hidden
-            >
-              <span className="font-mono text-[7px] text-fg-mute">foto</span>
-            </div>
+            <div className="text-[12.5px] font-semibold leading-snug text-fg">{n.title}</div>
           </a>
         </li>
       ))}
     </ul>
-  );
-}
-
-/** Cámaras DGT. `grid`: rejilla (desktop, columna estrecha); si no, tira horizontal. */
-function Cameras({ grid }: { grid?: boolean }) {
-  return (
-    <div
-      className={cn(
-        grid ? 'grid grid-cols-2 gap-2 px-screen' : 'flex gap-2 overflow-x-auto px-screen pb-1',
-      )}
-    >
-      {MOCK_CAMERAS.map((c) => (
-        <div key={c.id} className={grid ? '' : 'w-[118px] flex-none'}>
-          <div className="relative h-[66px] rounded-[6px] border border-subtle" style={{ background: STRIPES }}>
-            <span className="absolute bottom-1 left-1.5 font-mono text-[8px] font-medium text-fg-secondary">
-              {c.location}
-            </span>
-          </div>
-          <div className="mt-1 text-[10px] text-fg-secondary">{c.name}</div>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -128,7 +97,7 @@ interface ChronoEvent {
 }
 
 /** Cronología en vivo (6a): mezcla incendios reales y titulares, por hora. */
-function Chronology({ fires }: { fires: Fire[] }) {
+function Chronology({ fires, news }: { fires: Fire[]; news: NewsItem[] }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
@@ -146,19 +115,19 @@ function Chronology({ fires }: { fires: Fire[] }) {
         external: false,
       };
     });
-    const fromNews: ChronoEvent[] = MOCK_NEWS.map((n) => ({
+    const fromNews: ChronoEvent[] = news.map((n) => ({
       key: `n-${n.id}`,
       at: n.at,
       title: n.title,
       sub: `${n.region} · ${n.source}`,
       dot: n.tone === 'warn' ? 'text-state-controlado-text' : 'text-action-text',
       href: n.url,
-      external: n.url.startsWith('http'),
+      external: true,
     }));
     return [...fromFires, ...fromNews]
       .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
       .slice(0, 28);
-  }, [fires, d]);
+  }, [fires, news, d]);
 
   if (!events.length) {
     return <p className="px-screen py-6 text-center text-body text-fg-secondary">{d.empty.good}</p>;
@@ -199,8 +168,8 @@ function Chronology({ fires }: { fires: Fire[] }) {
 }
 
 /** Pantalla Noticias y directos (3a móvil / 6a desktop: cronología · directo +
- * titulares · cámaras + cuentas). */
-export function NoticiasScreen({ fires }: { fires: Fire[] }) {
+ * titulares · cuentas oficiales). Titulares reales vía Google News RSS. */
+export function NoticiasScreen({ fires, news = [] }: { fires: Fire[]; news?: NewsItem[] }) {
   const d = useDict();
 
   return (
@@ -216,24 +185,19 @@ export function NoticiasScreen({ fires }: { fires: Fire[] }) {
           title={d.news.headlines}
           right={<span className="text-[10.5px] font-semibold text-action-text">{d.news.newsSources}</span>}
         />
-        <Headlines />
-        <SectionHead
-          title={d.news.cameras}
-          right={<span className="font-mono text-[9px] text-fg-mute">{d.news.refreshed}</span>}
-        />
-        <Cameras />
+        <Headlines news={news} />
         <SectionHead title={d.news.accounts} />
         <Accounts />
       </div>
 
-      {/* Desktop (6a): 3 columnas — cronología · directo+titulares · cámaras+cuentas */}
+      {/* Desktop (6a): 3 columnas — cronología · directo+titulares · cuentas */}
       <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[300px_1fr_320px] lg:grid-rows-1">
         {/* Cronología */}
         <div className="min-h-0 overflow-y-auto border-r">
           <div className="sticky top-0 z-[1] border-b bg-bg-base px-screen py-2.5">
             <span className={SECTION}>{d.news.chronology}</span>
           </div>
-          <Chronology fires={fires} />
+          <Chronology fires={fires} news={news} />
         </div>
 
         {/* Directo + titulares */}
@@ -245,17 +209,12 @@ export function NoticiasScreen({ fires }: { fires: Fire[] }) {
             title={d.news.headlines}
             right={<span className="text-[10.5px] font-semibold text-action-text">{d.news.newsSources}</span>}
           />
-          <Headlines />
+          <Headlines news={news} />
           <div className="pb-4" />
         </div>
 
-        {/* Cámaras + cuentas */}
+        {/* Cuentas oficiales */}
         <div className="min-h-0 overflow-y-auto border-l">
-          <SectionHead
-            title={d.news.cameras}
-            right={<span className="font-mono text-[9px] text-fg-mute">{d.news.refreshed}</span>}
-          />
-          <Cameras grid />
           <SectionHead title={d.news.accounts} />
           <Accounts />
           <div className="pb-4" />
