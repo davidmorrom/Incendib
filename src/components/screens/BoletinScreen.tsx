@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { ScreenHeader } from '@/components/layout/ScreenHeader';
 import { LangButton } from '@/components/layout/LangButton';
@@ -79,6 +80,27 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
   const k = b.kpi;
   const p = b.prevKpi;
   const vs = d.boletin.vsPrev;
+  const [copied, setCopied] = useState(false);
+
+  async function onShare() {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const title = `${interpolate(d.boletin.week, { n: b.isoWeek })} · ${b.year} — Incendib`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title, url });
+        return;
+      } catch {
+        /* el usuario canceló: no es un error */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* sin permiso de portapapeles: no hacemos nada */
+    }
+  }
 
   return (
     <>
@@ -116,6 +138,13 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
             <span className="font-mono text-[10.5px] text-fg-mute">
               {interpolate(d.boletin.published, { when: fmtDate(b.publishedAt, locale) })}
             </span>
+            <button
+              type="button"
+              onClick={onShare}
+              className="font-mono text-[10.5px] font-semibold text-action-text print:hidden"
+            >
+              {copied ? d.boletin.shareCopied : d.boletin.share}
+            </button>
             <button
               type="button"
               onClick={() => window.print()}
@@ -248,6 +277,12 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
               {b.sources.join(' · ')}
             </p>
           )}
+          <a
+            href={`/boletin/${b.id}/data.json`}
+            className="mt-2 inline-block font-mono text-[10.5px] font-semibold text-action-text print:hidden"
+          >
+            {d.boletin.downloadData} ↓
+          </a>
         </section>
 
         <p className="mx-screen mt-4 border-t pt-2.5 text-[10px] leading-relaxed text-fg-mute">

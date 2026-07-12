@@ -253,6 +253,9 @@ const es = {
     latest: 'Último boletín',
     viewAll: 'Ver todos los boletines',
     print: 'Imprimir / PDF',
+    share: 'Compartir',
+    shareCopied: 'Enlace copiado',
+    downloadData: 'Descargar datos (JSON)',
     level: 'Nivel {n}',
   },
   historico: {

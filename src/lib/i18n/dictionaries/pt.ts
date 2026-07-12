@@ -254,6 +254,9 @@ const pt: Dictionary = {
     latest: 'Último boletim',
     viewAll: 'Ver todos os boletins',
     print: 'Imprimir / PDF',
+    share: 'Partilhar',
+    shareCopied: 'Ligação copiada',
+    downloadData: 'Descarregar dados (JSON)',
     level: 'Nível {n}',
   },
   historico: {
