@@ -113,6 +113,13 @@ export interface TimelineEntry {
   label: string;
   state?: FireState;
   hectares?: number;
+  /**
+   * Si la entrada es una noticia de prensa relacionada (no un evento oficial de
+   * la fuente): nombre del medio y enlace al artículo. Se muestra etiquetada como
+   * «prensa» y enlazada, para que el lector la verifique (no es dato oficial).
+   */
+  source?: string;
+  url?: string;
 }
 
 export interface Fire {
