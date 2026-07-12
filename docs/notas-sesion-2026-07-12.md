@@ -87,6 +87,20 @@ espera más y re-suscribe en limpio), pero tu dispositivo necesita el reset manu
   `evacuation`; investigar si INFORCYL `nivelIgr`/textos o fogos lo permiten).
 - **fogos ICNF**: superficie oficial PT (tras confirmar la unidad).
 - **Ficha 10a** (balance final del extinguido) y cámaras DGT reales.
+- **FWI (riesgo) en la ficha**: dato de EFFIS (WMS GetFeatureInfo). No integrado
+  por riesgo de mostrar un valor erróneo sin poder verificarlo; pendiente.
+- **Islas (Canarias/Azores/Madeira)**: fuera del bbox de FIRMS/EFFIS **y** de la
+  máscara `es-pt-land.json`. No hay focos ni área quemada satelital para ellas.
+  Ampliar requiere segundo bbox + regenerar la máscara (`npm run geo:gen`).
+
+## 🧭 Estado de la sesión
+
+`main` estable, construible y desplegado en **v0.17.0**, todo verificado en
+producción. Lo que queda de la hoja de ruta necesita o una **fuente de datos que
+no existe** (evacuación, cámaras, Galicia, islas) o una **decisión tuya** (FWI):
+lo dejo documentado y NO meto cambios que no pueda verificar de noche. Mientras,
+sigo con **endurecimiento seguro** (tests, robustez) sobre lo ya entregado.
+Artefactos de repaso: este documento + `COORDINACION.md` + `CHANGELOG.md`.
 
 ## 🔎 Verificaciones en prod (esta sesión)
 
