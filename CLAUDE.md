@@ -113,10 +113,19 @@ El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
 4. Web Push + ajustes de alertas (7a–7c), histórico (10a–10b).
 5. Panel desktop (1d, 6a).
 
-## Estado actual
+## Estado actual (v0.17.x)
 
-- ✅ Estructura, sistema de diseño, PWA, i18n y capa de datos (v0.1).
-- ✅ Pantalla **Mapa** (home, 2a) con MapLibre, máscara, marcadores y filtros (v0.2).
-- ✅ Perímetros de área quemada (v0.2.1) · rebranding a Incendib (v0.2.2).
-- ⏳ En curso (modo autónomo): Informe (2b), Fuentes (3b), ficha (1c), Noticias (3a).
-- Datos en modo `mock` por defecto.
+- ✅ **Todas las pantallas** implementadas: Mapa (2a/1d), Informe (2b), Fuentes
+  (3b), Ficha (1c), Noticias (3a/6a), Alertas (7a), Legal, Boletines +
+  Boletín semanal (F1, edición w27 publicada), Histórico (10b).
+- ✅ **Datos en vivo en producción** (`live` en Vercel, `mock` en local):
+  - Incidentes: fogos.pt (PT), INFORCYL (CyL), INFOCA (Andalucía), Bombers (Cataluña).
+  - Satélite: FIRMS (focos), EFFIS (perímetros + área quemada, recortado a ES+PT).
+  - Superficie: oficial donde la hay (INFORCYL) + estimación EFFIS marcada «~»;
+    «sin dato» si no hay ninguna. Meteo local por incendio (Open-Meteo).
+  - Noticias reales (Google News RSS ES+PT).
+- ✅ PWA (iconos, atajos), Web Push + alertas por zona (Upstash + QStash),
+  i18n ES/PT/EN, SEO (`sitemap.xml` + `robots.txt`), 67 tests.
+- ⏳ Pendiente (bloqueado por dato/decisión, ver `docs/notas-sesion-*.md`): más
+  regiones en vivo (requiere inspección de red en navegador), evacuación en vivo,
+  FWI, cámaras DGT reales, islas (fuera del bbox satelital).
