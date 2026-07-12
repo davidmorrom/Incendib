@@ -194,3 +194,40 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Impresión ────────────────────────────────────────────────────────────────
+ * El boletín es imprimible ("Guardar como PDF"). Forzamos paleta clara —aunque
+ * el usuario tenga el tema oscuro— y dejamos fluir el contenido, porque el shell
+ * usa altura de viewport con overflow oculto que si no recortaría la página. */
+@media print {
+  :root,
+  :root[data-theme='dark'],
+  :root[data-theme='light'] {
+    --bg-base: #ffffff;
+    --bg-raised: #ffffff;
+    --bg-sunken: #ffffff;
+    --bg-card: #ffffff;
+    --text-primary: #1c222a;
+    --text-secondary: #3a424c;
+    --text-mute: #5c6470;
+    --text-body: #1c222a;
+    --state-activo-text: #c1272d;
+    --ok-text: #2c9a61;
+    --action-text: #2a5fa8;
+    --warn: #b5822f;
+    --border-subtle: rgba(0, 0, 0, 0.1);
+    --border-default: rgba(0, 0, 0, 0.15);
+    --border-strong: rgba(0, 0, 0, 0.2);
+    color-scheme: light;
+  }
+  html,
+  body {
+    height: auto !important;
+    background: #ffffff !important;
+  }
+  /* Imprime también fondos/colores semánticos (chips de estado, deltas ▲/▼). */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

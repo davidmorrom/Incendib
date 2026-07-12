@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.1] - 2026-07-12
+
+### Corregido
+
+- **Boletín: caracteres erróneos (mojibake)** en nombres con acentos
+  (`AndalucÃ­a` → `Andalucía`, `LeÃ³n` → `León`…), visibles sobre todo al
+  imprimir. Reparada la doble codificación del snapshot `2026-w27` sin alterar
+  las cifras.
+- **Boletín: impresión** («Guardar como PDF»). El marco de la app usa altura de
+  viewport con overflow oculto, que recortaba la página al imprimir; ahora el
+  contenido fluye en varias páginas, se oculta la navegación y se fuerza paleta
+  clara (aunque el tema sea oscuro) con `@media print`.
+
 ## [0.17.0] - 2026-07-12
 
 ### Añadido
