@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.5] - 2026-07-12
+
+### Añadido
+
+- **Feed RSS del boletín** (`/boletines/rss.xml`): sindicación de las ediciones
+  semanales para prensa y ciudadanía, con enlace `alternate` desde `/boletines`.
+- **Datos estructurados** (schema.org `Report`) en cada edición
+  `/boletin/[id]`, para que buscadores y agregadores la traten como un informe
+  fechado y citable.
+
 ## [0.17.4] - 2026-07-12
 
 ### Corregido
