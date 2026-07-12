@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { PushSubscription } from 'web-push';
 import { saveSubscription, deleteSubscription, type AlertPrefs } from '@/lib/push/store';
 import { isSafePushEndpoint, clampPrefs } from '@/lib/push/validate';
+import { allowRequest, clientIp } from '@/lib/push/ratelimit';
 
 export const runtime = 'nodejs';
 export const preferredRegion = 'fra1'; // datos personales tratados en la UE
@@ -17,6 +18,10 @@ export async function POST(req: Request) {
     // Rechaza cuerpos anómalamente grandes pronto (una suscripción ronda 1 KB).
     if (Number(req.headers.get('content-length') ?? 0) > 10_000) {
       return NextResponse.json({ ok: false, error: 'cuerpo demasiado grande' }, { status: 413 });
+    }
+    // Rate-limit por IP (fail-open si no hay almacén).
+    if (!(await allowRequest(clientIp(req), { bucket: 'subscribe', limit: 30, windowSec: 60 }))) {
+      return NextResponse.json({ ok: false, error: 'demasiadas peticiones' }, { status: 429 });
     }
     const body = (await req.json()) as {
       subscription?: PushSubscription;
