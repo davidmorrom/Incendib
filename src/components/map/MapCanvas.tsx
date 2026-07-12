@@ -374,6 +374,12 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
               {d.status.updatedAgo.replace('{when}', timeAgo(tipFire.updatedAt, now, locale))} ·{' '}
               {SOURCES[tipFire.sources[0] ?? 'nacional'].label.split(' · ')[0]}
             </div>
+            {tipFire.satelliteConfirmed && (
+              <div className="mt-[3px] flex items-center gap-1 font-mono text-[9px] text-state-foco-text">
+                <span className="h-1.5 w-1.5 flex-none rounded-full bg-state-foco" aria-hidden />
+                {d.fire.satelliteConfirmed.replace('{km}', String(tipFire.hotspotKm ?? 0))}
+              </div>
+            )}
           </div>
         </Popup>
       )}

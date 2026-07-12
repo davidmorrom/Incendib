@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils/cn';
 import { mix, V } from '@/lib/design/color';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { interpolate } from '@/lib/i18n';
 import { STATE_LABEL_KEY } from '@/lib/fires/style';
 import { PT_TEXT } from '@/lib/fires/labels';
 import type { Fire } from '@/types/fire';
@@ -66,6 +67,14 @@ export function FireRow({
             )}
           </span>
           <LevelBadge level={fire.level} country={fire.country} />
+          {fire.satelliteConfirmed && (
+            <span
+              className="h-1.5 w-1.5 flex-none rounded-full bg-state-foco"
+              style={{ boxShadow: '0 0 4px var(--state-foco)' }}
+              title={interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
+              aria-label={interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
+            />
+          )}
         </span>
         <span className="block truncate text-[10.5px] text-fg-mute">{subtitle(fire)}</span>
       </span>
