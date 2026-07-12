@@ -22,13 +22,42 @@ Prioridades (detalle abajo):
 | H3 | `/api/push/test` es un *relay* de push abierto (sin auth ni límite) | **Media** | ✅ **Mitigado** (validación endpoint anti-SSRF) |
 | H4 | `/api/push/subscribe`: sin validar endpoint ni acotar prefs (SSRF/abuso) | **Media** | ✅ **Mitigado** (validación + clamp) |
 | H5 | JSON-LD del boletín sin escapar (`<`,`>`,`&`,U+2028/9) | **Baja** | ✅ **Corregido** (`jsonLdSafe`) |
-| H6 | Sin límite de tamaño de cuerpo en endpoints POST | **Baja** | Pendiente (opcional) |
+| H6 | Sin límite de tamaño de cuerpo en endpoints POST | **Baja** | ✅ **Aplicado** (guard `content-length`) |
 | H7 | Sin rate-limiting en endpoints públicos | **Baja-Media** | Pendiente (recomendación) |
+| H8 | `npm audit`: postcss <8.5.10 (XSS build-time) anidado en Next | **Baja** | Documentado (no accionable sin riesgo) |
+| H9 | SW abría `clients.openWindow` con URL del payload | **Baja** | ✅ **Endurecido** (solo mismo origen) |
 
-> **Estado (12 jul 2026, madrugada):** H1, H3, H4 y H5 **aplicados, verificados**
-> (typecheck + lint + build + 74 tests, 7 nuevos para el validador) y en `main`.
-> H2 requiere una acción del propietario (definir `CRON_SECRET` en Vercel). H6/H7
-> quedan como endurecimiento opcional posterior.
+> **Estado (12 jul 2026, madrugada):** H1, H3, H4, H5, H6 y H9 **aplicados,
+> verificados** (typecheck + lint + build + 74 tests, 7 nuevos para el validador)
+> y en `main`. Añadido `/.well-known/security.txt` (RFC 9116). H2 requiere acción
+> del propietario (`CRON_SECRET` en Vercel). H7 y H8 quedan documentados abajo.
+
+### H8 — `npm audit`: postcss anidado en Next · Baja (no accionable sin riesgo)
+
+`npm audit` reporta 2 vulnerabilidades **moderate**: `postcss <8.5.10` (XSS por
+`</style>` sin escapar en la salida del *stringify*) en la copia **anidada dentro
+de Next** (`node_modules/next/node_modules/postcss`). Impacto real para nosotros:
+**mínimo** — es un fallo de **tiempo de build** al procesar CSS, no una entrada de
+usuario en runtime. El `npm audit fix --force` **degradaría Next a 9.3.3** (cambio
+rompedor) → **no se aplica**. Nuestra devDep directa `postcss` ya es `^8.5.1`.
+Opción futura de bajo riesgo cuando convenga (requiere `npm install` y toca el
+lockfile compartido, por eso NO se hace en modo nocturno con otros agentes
+activos): añadir `"overrides": { "postcss": "^8.5.10" }` en `package.json`, o
+esperar a que Next actualice su postcss.
+
+### H9 — Endurecimiento del service worker · Baja (aplicado)
+
+`notificationclick` hacía `clients.openWindow(url)` con la `url` del payload. Hoy
+los payloads los genera **nuestro** servidor (rutas relativas `/f/{slug}`), pero
+como defensa en profundidad se resuelve la URL contra el propio origen y **solo se
+navega si es del mismo origen** (evita cualquier redirección/phishing si un
+payload trajera una URL absoluta externa).
+
+### Extra — `/.well-known/security.txt` (RFC 9116)
+
+Añadido canal de divulgación responsable de vulnerabilidades
+(`Contact: mailto:contacto@incendib.es`, `Expires: 2027-07-12`). Buena práctica
+para un servicio público; facilita el reporte por investigadores.
 
 ## Superficie expuesta (inventario)
 
