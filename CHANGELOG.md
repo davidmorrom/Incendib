@@ -5,6 +5,15 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.4] - 2026-07-12
+
+### Corregido
+
+- **`/boletin/latest`** era dinámica y leía el sistema de ficheros en runtime
+  (vacío en serverless), con riesgo de redirigir siempre al índice. Ahora es
+  estática (se resuelve en build, como el resto de páginas del boletín) y
+  redirige de forma fiable a la última edición.
+
 ## [0.17.3] - 2026-07-12
 
 ### Añadido
