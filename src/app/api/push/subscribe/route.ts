@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { PushSubscription } from 'web-push';
 import { saveSubscription, deleteSubscription, type AlertPrefs } from '@/lib/push/store';
+import { isSafePushEndpoint, clampPrefs } from '@/lib/push/validate';
 
 export const runtime = 'nodejs';
 export const preferredRegion = 'fra1'; // datos personales tratados en la UE
@@ -27,15 +28,12 @@ export async function POST(req: Request) {
     }
 
     const sub = body.subscription;
-    if (!sub?.endpoint) {
+    // Rechaza endpoints no https o hacia destinos internos/reservados (anti-SSRF):
+    // este endpoint se consultará luego desde el cron con nuestras claves VAPID.
+    if (!sub?.endpoint || !isSafePushEndpoint(sub.endpoint)) {
       return NextResponse.json({ ok: false, error: 'suscripción no válida' }, { status: 400 });
     }
-    const prefs: AlertPrefs = {
-      minLevel: Number(body.prefs?.minLevel ?? 2),
-      radiusKm: Number(body.prefs?.radiusKm ?? 30),
-      silence: Boolean(body.prefs?.silence ?? false),
-      zone: body.prefs?.zone ?? null,
-    };
+    const prefs: AlertPrefs = clampPrefs(body.prefs);
     await saveSubscription({ subscription: sub, prefs, createdAt: Date.now() });
     return NextResponse.json({ ok: true });
   } catch {

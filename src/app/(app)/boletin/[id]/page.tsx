@@ -7,6 +7,20 @@ import { BoletinScreen } from '@/components/screens/BoletinScreen';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://incendib.es';
 
+/**
+ * Serializa el JSON-LD escapando `<`, `>`, `&` y los separadores de línea
+ * U+2028/U+2029 para que ningún valor pueda cerrar el `<script>` (endurecimiento
+ * anti-XSS; `JSON.stringify` por sí solo no escapa estos caracteres).
+ */
+function jsonLdSafe(obj: unknown): string {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 type Params = { params: Promise<{ id: string }> };
 
 export function generateStaticParams() {
@@ -68,7 +82,7 @@ export default async function BoletinPage({ params }: Params) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSafe(jsonLd) }}
       />
       <BoletinScreen boletin={boletin} />
     </>
