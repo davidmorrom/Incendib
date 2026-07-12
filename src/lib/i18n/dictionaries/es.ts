@@ -255,6 +255,16 @@ const es = {
     print: 'Imprimir / PDF',
     level: 'Nivel {n}',
   },
+  historico: {
+    title: 'Histórico de campaña',
+    subtitle:
+      'Áreas quemadas de la campaña según la cartografía de EFFIS/Copernicus (satélite). No es una cifra oficial definitiva; la superficie final la fija cada organismo.',
+    empty: 'Sin áreas quemadas registradas en la campaña reciente.',
+    count: '{n} áreas · {ha} ha',
+    colArea: 'ÁREA QUEMADA',
+    colHa: 'HA',
+    link: 'Histórico de área quemada',
+  },
 };
 
 export default es;

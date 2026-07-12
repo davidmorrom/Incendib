@@ -26,6 +26,12 @@ export function BoletinesScreen({ boletines }: { boletines: Boletin[] }) {
           <p className="mt-1 max-w-prose text-[12.5px] leading-relaxed text-fg-secondary">
             {d.boletin.subtitle}
           </p>
+          <Link
+            href="/historico"
+            className="mt-2 inline-block font-mono text-[11px] font-semibold text-action-text"
+          >
+            {d.historico.link} →
+          </Link>
         </div>
 
         {boletines.length === 0 ? (
