@@ -21,7 +21,20 @@
     capa `V_INCIDENTES_EN_CURSO`) pero **WMS/WFS deshabilitado** externamente.
     Reintentar con inspección de red desde IP española, o pedir acceso a
     `dadesobertes@gva.es`.
-  - Sin fuente headless usable: Galicia, Aragón, Extremadura, Murcia, Asturias.
+  - **Sin fuente headless usable (2 rondas de descubrimiento)**: Galicia, Aragón,
+    Extremadura, Murcia, Navarra, Asturias, Cantabria, La Rioja. Detalle:
+    - **Aragón** (IDEAragon GeoServer WFS `DAGMA_INCENDIOS`): la capa
+      `INCENDIOS_ACTIVOS` da **0 features** hoy y las capas ricas de perímetros
+      están **congeladas en 2020** (archivo); además `esactivo=1` en TODOS los
+      registros (mismo problema que INFOCAM). No usable.
+    - **Extremadura (INFOEX)**: la operativa en vivo está tras **login**; la IDE
+      no expone capa de incidentes. Solo prevención/estadística.
+    - **Galicia / Murcia / Navarra / Asturias / Cantabria / La Rioja**: sin
+      endpoint público de activos (SPA con login o solo histórico/satélite).
+  - **Techo real**: los agregadores de referencia (mapasdeincendios, etc.)
+    integran las MISMAS fuentes que nosotros (JCyL, Bombers, INFOCA, INFOCAM,
+    112CV). El resto de España se cubre con **FIRMS (satélite)**. Ampliar más
+    requiere inspección de red en navegador (SPAs) o acceso concedido.
   - **Lección**: verificar SIEMPRE que la fuente da estado "activo" fiable
     (no un log acumulativo) antes de integrarla; cruzar con prensa/FIRMS.
 - **Probar push en iPhone**: instalar la PWA desde **Safari → Compartir → Añadir a
