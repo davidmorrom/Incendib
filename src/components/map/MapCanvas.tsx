@@ -71,6 +71,13 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   const mapRef = useRef<MapRef>(null);
   const [tip, setTip] = useState<string | null>(null);
   const [hotspotTip, setHotspotTip] = useState<HotspotTip | null>(null);
+  const [areaTip, setAreaTip] = useState<{
+    lng: number;
+    lat: number;
+    name: string;
+    ha: number;
+    date: string;
+  } | null>(null);
   const [cursor, setCursor] = useState<'grab' | 'pointer'>('grab');
 
   const paint = useMemo(() => maskPaint(theme), [theme]);
@@ -83,13 +90,24 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   // que el perímetro del incidente en curso destaque sobre lo ya quemado.
   const perimeters = useMemo<FeatureCollection<Polygon>>(() => {
     const palette = statePalette(theme);
+    const tagged = [
+      ...burnedAreas.map((f) => [f, 'area'] as const),
+      ...fires.map((f) => [f, 'fire'] as const),
+    ];
     return {
       type: 'FeatureCollection',
-      features: [...burnedAreas, ...fires]
-        .filter((f) => f.perimeter && f.perimeter.length > 2)
-        .map((f) => ({
+      features: tagged
+        .filter(([f]) => f.perimeter && f.perimeter.length > 2)
+        .map(([f, kind]) => ({
           type: 'Feature',
-          properties: { slug: f.slug, color: palette[f.state].base },
+          properties: {
+            kind,
+            slug: f.slug,
+            color: palette[f.state].base,
+            name: f.name,
+            ha: f.hectares,
+            date: f.startedAt,
+          },
           geometry: { type: 'Polygon', coordinates: [f.perimeter!] },
         })),
     };
@@ -99,6 +117,7 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   // Focos satelitales (FIRMS): puntos naranja con glow, tamaño por FRP, con
   // clustering. Detección térmica, NO incendio confirmado.
   const foco = useMemo(() => statePalette(theme).focoSatelital.base, [theme]);
+  const ashColor = useMemo(() => statePalette(theme).extinguido.base, [theme]);
   // Edad en horas de cada foco (para atenuar los antiguos). Se recalcula cada
   // ~10 min (bucket) para no rehacer el GeoJSON en cada tic del reloj.
   const ageBucket = Math.floor(now / 600_000);
@@ -125,6 +144,22 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
     const f = e.features?.[0];
     if (!f) {
       setHotspotTip(null);
+      setAreaTip(null);
+      return;
+    }
+    // Clic en un área quemada (EFFIS): muestra su información. Los perímetros de
+    // incendios activos (kind 'fire') no abren nada aquí (lo hace el marcador).
+    if (f.layer?.id === 'perimeter-fill') {
+      if (f.properties?.kind === 'area') {
+        setAreaTip({
+          lng: e.lngLat.lng,
+          lat: e.lngLat.lat,
+          name: String(f.properties.name ?? ''),
+          ha: Number(f.properties.ha ?? 0),
+          date: String(f.properties.date ?? ''),
+        });
+        setHotspotTip(null);
+      }
       return;
     }
     const coords = (f.geometry as Point).coordinates as [number, number];
@@ -179,7 +214,10 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       onMouseEnter={() => setCursor('pointer')}
       onMouseLeave={() => setCursor('grab')}
       cursor={cursor}
-      interactiveLayerIds={showHotspots ? ['hotspot-clusters', 'hotspot-core'] : undefined}
+      interactiveLayerIds={[
+        ...(perimetersVisible && hasPerimeters ? ['perimeter-fill'] : []),
+        ...(showHotspots ? ['hotspot-clusters', 'hotspot-core'] : []),
+      ]}
       mapStyle={MAP_STYLE[theme]}
       initialViewState={INITIAL_VIEW}
       minZoom={MIN_ZOOM}
@@ -335,6 +373,42 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
             <div className="mt-[3px] font-mono text-[9px] text-fg-mute">
               {d.status.updatedAgo.replace('{when}', timeAgo(tipFire.updatedAt, now, locale))} ·{' '}
               {SOURCES[tipFire.sources[0] ?? 'nacional'].label.split(' · ')[0]}
+            </div>
+          </div>
+        </Popup>
+      )}
+
+      {perimetersVisible && areaTip && (
+        <Popup
+          longitude={areaTip.lng}
+          latitude={areaTip.lat}
+          anchor="bottom"
+          offset={8}
+          closeButton={false}
+          closeOnClick={false}
+          onClose={() => setAreaTip(null)}
+          className="if-tooltip"
+        >
+          <div
+            className="if-overlay max-w-[200px] rounded-card px-[10px] py-[7px]"
+            style={{ borderColor: mix(ashColor, 45) }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="h-2 w-2 flex-none rounded-full"
+                style={{ backgroundColor: ashColor }}
+              />
+              <span className="truncate text-[12px] font-semibold text-fg">
+                {areaTip.name || d.legend.perimeter}
+              </span>
+            </div>
+            <div className="mt-0.5 font-mono text-[10px] text-fg-secondary">
+              {d.legend.perimeter}
+              {areaTip.ha > 0 ? ` · ${formatNumber(areaTip.ha)} ha` : ''}
+            </div>
+            <div className="mt-[3px] font-mono text-[9px] text-fg-mute">
+              EFFIS · {timeAgo(areaTip.date, now, locale)}
             </div>
           </div>
         </Popup>
