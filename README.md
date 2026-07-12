@@ -11,7 +11,7 @@ serio y usable — pensada como panel de sala de emergencias, no como landing.
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![MapLibre](https://img.shields.io/badge/MapLibre-GL-295DAA?logo=maplibre&logoColor=white)](https://maplibre.org)
-![Version](https://img.shields.io/badge/version-0.4.0-E5484D)
+![Version](https://img.shields.io/badge/version-0.17.x-E5484D)
 
 </div>
 
@@ -48,18 +48,26 @@ Azores, Madeira, Ceuta y Melilla. Combina tres capas de precisión creciente:
 ## Características
 
 - 🗺️ **Mapa en vivo** (MapLibre GL) con el resto del mundo atenuado y España +
-  Portugal resaltados con un halo sutil.
+  Portugal resaltados con un halo sutil; focos, perímetros de área quemada y
+  filtros por estado, nivel, superficie, sensor y riesgo.
 - 🎨 **Marcadores por color _y_ forma** (activo, controlado, estabilizado,
   extinguido, foco satelital) — accesible para daltonismo, nunca solo color.
-- 📊 **Panel de situación**: KPIs (activos, hectáreas, focos 24 h), lista por
-  gravedad y filtros rápidos.
+- 📊 **Informe de situación**: KPIs (activos, hectáreas, focos 24 h), tabla
+  densa ordenable y aviso por fuente degradada.
+- 🗞️ **Boletín semanal** archivable en `/boletines` y por edición
+  (`/boletin/{año}-w{semana}`), con imagen Open Graph y vista imprimible.
+- 🔔 **Alertas Web Push por zona** (suscripción por territorio/estado), con
+  backend de detección de cambios.
+- 🕰️ **Histórico de campaña** con el archivo real de áreas quemadas (EFFIS).
+- 📰 **Noticias reales** agregadas (Google News RSS ES + PT).
 - 🌗 **Tema oscuro por defecto** y claro para exteriores, con persistencia.
 - 🌐 **Trilingüe** ES · PT · EN; el dato bilingüe (estados PT «em curso»…) se
   conserva en su idioma original.
 - ♿ **Accesibilidad WCAG 2.2 AA**: foco visible, `prefers-reduced-motion`,
   nombres accesibles completos en marcadores y filas.
-- 🔗 **Ficha por incendio** con URL propia y compartible (`/f/{slug}`) e imagen
-  Open Graph generada en servidor.
+- 🔗 **Ficha por incendio** con URL propia y compartible (`/f/{slug}`), meteo
+  local (Open-Meteo) e imagen Open Graph generada en servidor.
+- 🔎 **SEO**: `sitemap.xml` dinámico (rutas, fichas y boletines) + `robots.txt`.
 - 📶 **Resiliencia**: la caída de una fuente se señaliza por capa, nunca rompe
   el mapa; caché offline con antigüedad visible.
 
@@ -93,7 +101,10 @@ npm run build && npm start
 ```
 
 Sin claves, la app arranca en **modo demostración** (`NEXT_PUBLIC_DATA_MODE=mock`)
-con un conjunto de incendios de ejemplo. Para datos reales, ver
+con un conjunto de incendios de ejemplo. **En producción funciona con datos en
+vivo** (`live`): incidentes de fogos.pt (PT), INFORCYL (Castilla y León), INFOCA
+(Andalucía) y Bombers (Cataluña); focos NASA FIRMS y perímetros/área quemada
+EFFIS; meteo local vía Open-Meteo. Para el detalle de fuentes y claves, ver
 [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md).
 
 ### Scripts
@@ -111,7 +122,9 @@ con un conjunto de incendios de ejemplo. Para datos reales, ver
 
 ```
 src/
-├── app/            # rutas (App Router): mapa, informe, noticias, fuentes, ficha, API
+├── app/            # rutas (App Router): mapa, informe, noticias, fuentes, ficha,
+│                   #   boletines, alertas, histórico, legal, API
+├── content/        # contenido estático (ediciones del boletín semanal)
 ├── components/     # UI, mapa, layout, pantallas, i18n
 ├── lib/            # design tokens, datos, i18n, mapa, utilidades, store
 └── types/          # modelo de dominio (Fire, Hotspot…)
@@ -129,7 +142,9 @@ Todas las fuentes son de reutilización libre con atribución:
 - **NASA FIRMS** (VIIRS/MODIS) — focos térmicos · dominio público.
 - **fogos.pt / ANEPC**, **ICNF** — estado operativo en Portugal.
 - **AEMET / IPMA** — meteorología y riesgo de incendio.
-- **JCyL**, **Bombers de la Generalitat** — datos autonómicos abiertos.
+- **INFORCYL (JCyL)**, **INFOCA (Andalucía)**, **Bombers de la Generalitat**
+  (Cataluña) — estado operativo autonómico en vivo.
+- **Open-Meteo** — meteorología local por incendio (sin clave).
 - Cartografía base © **OpenStreetMap** (ODbL) vía **OpenFreeMap**.
 
 ## Hoja de ruta
@@ -140,8 +155,18 @@ Todas las fuentes son de reutilización libre con atribución:
 - [x] **v0.3** — Pantallas **Informe**, **Fuentes**, **Ficha** y **Noticias**;
   estados de red (offline/reconexión), error y carga (skeleton).
 - [x] **v0.4** — **Panel desktop** (1d): filtros, mapa y lista en tres columnas.
-- [ ] **v0.5** — Fuentes de datos en vivo (FIRMS/EFFIS/fogos.pt) con caché en backend.
-- [ ] **v0.6** — Web Push (alertas por zona) e histórico de campaña.
+- [x] **v0.15–v0.16** — **Datos en vivo** (FIRMS, EFFIS, fogos.pt, INFORCYL,
+  INFOCA, Bombers), hectáreas oficiales, noticias reales y meteo local.
+- [x] **v0.16** — **Web Push** (alertas por zona) e **histórico** de campaña.
+- [x] **v0.17** — **Boletín semanal** (F1: edición publicada; F2: automatización;
+  F3: imagen OG) y **SEO** (`sitemap.xml` + `robots.txt`).
+- [ ] **Próximo** — **Territorios** (páginas por CCAA/provincia), **Estadísticas**
+  (analítica histórica) y mejoras de mapa (selección de provincia, capas base).
+  Ver la investigación en [`docs/research/`](docs/research/00-INDICE.md).
+
+> Pendientes bloqueados por falta de fuente o decisión (documentados en
+> `docs/notas-sesion-*.md`): más regiones autonómicas en vivo, evacuación en
+> vivo, FWI por incendio, cámaras DGT reales e islas (fuera del bbox satelital).
 
 ## Licencia
 
