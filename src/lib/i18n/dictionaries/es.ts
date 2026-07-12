@@ -280,6 +280,18 @@ const es = {
     colHa: 'HA',
     link: 'Histórico de área quemada',
   },
+  today: {
+    title: 'Incendios hoy',
+    subtitle: 'Actividad por provincia',
+    firms24h: '{n} focos satélite · 24 h',
+    firmsNote: 'Detección satelital — no equivale a incendio confirmado',
+    colProvince: 'PROVINCIA',
+    colActive: 'ACT.',
+    colTotal: 'TOTAL',
+    colArea: 'HA',
+    empty: 'Sin incendios registrados ahora mismo',
+    link: 'Incendios hoy',
+  },
 };
 
 export default es;
