@@ -39,6 +39,7 @@ const pt: Dictionary = {
     focos24h: 'Focos 24 h',
     nivelMaximo: 'Nível máximo',
     evacuados: 'Evacuados',
+    noData: 'sem dados',
   },
   report: {
     title: 'Relatório de situação',

@@ -123,7 +123,7 @@ export function ReportTable({ fires, empty }: { fires: Fire[]; empty?: React.Rea
                 {stateLabel(f)}
               </td>
               <td className="text-right font-mono text-[12px] font-semibold text-fg">
-                {formatNumber(f.hectares)}
+                {f.hectares > 0 ? formatNumber(f.hectares) : <span className="text-fg-mute">·</span>}
               </td>
               <td className="pr-screen text-right font-mono text-[10px] text-fg-mute">
                 {elapsedShort(f.updatedAt, now)}
