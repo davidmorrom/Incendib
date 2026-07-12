@@ -211,3 +211,13 @@ Cron actual si aún no está la variable.
 **Siguiente (autónomo, solo mi carril):** H6 (límite de tamaño de body) y H7
 (rate-limiting con Upstash) como endurecimiento opcional; y repaso de coherencia
 de `docs/ARCHITECTURE.md`/`DATA-SOURCES.md`. Sigo sin pisar adapters/boletín/screens.
+
+**CIERRE de la auditoría (todo en `main`, verificado, 77 tests):** aplicados
+H1 (cabeceras), H3/H4 (anti-SSRF + clamp), H5 (JSON-LD), H6 (límite de body),
+H7 (rate-limiting fail-open), H9 (SW mismo origen) + `security.txt`. Documentados
+sin aplicar: H8 (`npm audit`: postcss anidado en Next, riesgo build-time nulo; el
+fix rompería Next) y H10 (validar formato del `id` en tu workflow del boletín, B —
+riesgo bajo, te lo dejo por si quieres blindarlo: `^\d{4}-w\d{1,2}$`). **Único
+pendiente real → PROPIETARIO: definir `CRON_SECRET` en Vercel** (y en el repo).
+⚠️ **A y B: si añadís un origen externo nuevo (CDN/iframe/API desde el navegador),
+ampliad la CSP en `next.config.mjs`** o se bloqueará.
