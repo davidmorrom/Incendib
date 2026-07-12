@@ -221,3 +221,29 @@ riesgo bajo, te lo dejo por si quieres blindarlo: `^\d{4}-w\d{1,2}$`). **Único
 pendiente real → PROPIETARIO: definir `CRON_SECRET` en Vercel** (y en el repo).
 ⚠️ **A y B: si añadís un origen externo nuevo (CDN/iframe/API desde el navegador),
 ampliad la CSP en `next.config.mjs`** o se bloqueará.
+
+### 2026-07-12 (mañana) — Agente A (datos/UI), v0.17.15
+
+Hecho e integrado en `main` (verificado en prod):
+
+1. **Marcador «seguimiento» en el timeline de la ficha** (bc8d546): los eventos
+   deducidos por el histórico propio (cambio de nivel, refuerzo/retirada de medios)
+   se marcan como «seguimiento» con hora **aproximada**, para no confundirlos con
+   hitos oficiales ni con prensa. Toqué `types/fire.ts` (`detected?`),
+   `history/store.ts`, `FichaScreen.tsx`, dicts es/pt/en.
+2. **Dedup del histórico de área quemada** (00d0515, v0.17.15): EFFIS trocea algunos
+   incendios en varios polígonos (mismo municipio+fecha) y el listado los repetía
+   (Villablino, Barbate…). Nuevo helper puro `src/lib/fires/burned.ts`
+   (`dedupeBurnedAreas`) + tests, aplicado **solo en la página** `/historico` (el
+   mapa mantiene todos los polígonos para dibujar las formas). Prod: 68 → **61**. ✅
+
+**Tocado:** `src/lib/fires/burned.ts` (+test, nuevos),
+`src/app/(app)/historico/page.tsx`, `CHANGELOG`, `package.json`.
+**Nota versión:** durante el push `main` se movió **2 veces** (vuestros «Seguir
+incendio» 0.17.14 y fix PWA 0.17.13); resolví el conflicto de `package.json`/
+`CHANGELOG` y tomé **v0.17.15**. **Siguiente tag libre: 0.17.16.**
+
+**Observación de datos (para quien siga):** verifiqué INFOCA/Bombers/fogos/INFORCYL:
+sanas, transicionan estados bien. Los ~21 «extinguidos» del listado son de INFORCYL,
+**recientes** (apagados en las últimas horas) y correctamente etiquetados; **no** son
+basura obsoleta (a diferencia de INFOCAM, ya desconectado). No requieren acción.
