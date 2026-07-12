@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.13] - 2026-07-12
+
+### Corregido
+
+- **Layout en móvil/PWA**: la barra de navegación inferior podía «bajarse» y
+  quedar fuera de pantalla (había que hacer scroll para verla). Se bloquea el
+  scroll del documento (`html, body` con altura fija y `overflow: hidden`;
+  `overscroll-behavior: none`) para que el shell `h-dvh` no se desplace con la
+  barra dinámica del navegador. La `BottomNav` respeta además la zona segura
+  inferior (`env(safe-area-inset-bottom)`).
+
 ## [0.17.12] - 2026-07-12
 
 ### Cambiado

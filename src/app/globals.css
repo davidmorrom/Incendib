@@ -98,6 +98,12 @@ html,
 body {
   padding: 0;
   margin: 0;
+  /* El shell de cada pantalla es `h-dvh` con scroll INTERNO. Fijamos la altura y
+   * bloqueamos el scroll del documento para que, en móvil/PWA, la barra dinámica
+   * del navegador no desplace el body y esconda la barra de navegación inferior. */
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -223,6 +229,7 @@ body {
   html,
   body {
     height: auto !important;
+    overflow: visible !important;
     background: #ffffff !important;
   }
   /* Imprime también fondos/colores semánticos (chips de estado, deltas ▲/▼). */
