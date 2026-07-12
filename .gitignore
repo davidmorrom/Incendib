@@ -53,3 +53,7 @@ yarn-error.log*
 
 # firma de correo (material personal, no forma parte del proyecto)
 docs/firmaMail/
+
+# grabaciones de pantalla del reel (binarios pesados; se versiona solo el texto)
+docs/social/reel-grabacion/*.mp4
+docs/social/reel-grabacion/*.webm
