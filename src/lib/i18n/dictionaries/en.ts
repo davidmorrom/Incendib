@@ -68,6 +68,7 @@ const en: Dictionary = {
     shareNote: 'The link always shows the current state, not a snapshot from now.',
     satelliteUnconfirmed: '{sensor} satellite detection — unconfirmed',
     follow: 'Follow this fire',
+    following: 'Following',
     evolution: 'Timeline',
     viewFull: 'View full timeline ({n})',
     fwi: 'FWI {level}',
@@ -205,6 +206,9 @@ const en: Dictionary = {
   },
   alerts: {
     title: 'Alerts',
+    followingHeading: 'Fires you follow',
+    followingEmpty: 'You don’t follow any fire yet. Open a fire and tap “Follow this fire”.',
+    unfollow: 'Unfollow',
     aria: 'Alert settings',
     softAsk:
       'Turn on notifications to get alerts about fires and evacuations in the zones you choose. Evacuation alerts always sound.',

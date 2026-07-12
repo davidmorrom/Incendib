@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { useFollowStore } from '@/lib/follow';
 import { formatNumber, formatClock, timeAgo } from '@/lib/utils/format';
 import { useNow } from '@/components/time/NowProvider';
 import { interpolate } from '@/lib/i18n';
@@ -28,7 +29,11 @@ export function FichaScreen({ fire }: { fire: Fire }) {
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
   const router = useRouter();
-  const [following, setFollowing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const followedFires = useFollowStore((s) => s.fires);
+  const toggleFollow = useFollowStore((s) => s.toggle);
+  const following = mounted && followedFires.some((f) => f.slug === fire.slug);
   const [copied, setCopied] = useState(false);
 
   const stateLabel =
@@ -278,7 +283,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
         <div className="flex flex-none gap-2 border-t px-4 py-2.5">
           <button
             type="button"
-            onClick={() => setFollowing((f) => !f)}
+            onClick={() => toggleFollow({ slug: fire.slug, name: fire.name, region: fire.region })}
             aria-pressed={following}
             className={cn(
               'flex h-10 flex-1 items-center justify-center rounded-btn border text-[12.5px] font-semibold',
@@ -289,7 +294,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
               borderColor: mix(following ? V.ok : V.action, 55),
             }}
           >
-            {following ? `✓ ${d.status.live}` : d.fire.follow}
+            {following ? `✓ ${d.fire.following}` : d.fire.follow}
           </button>
           <button
             type="button"

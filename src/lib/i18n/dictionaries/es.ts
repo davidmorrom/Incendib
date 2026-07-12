@@ -67,6 +67,7 @@ const es = {
     shareNote: 'El enlace muestra siempre el estado actual, no una captura de ahora.',
     satelliteUnconfirmed: 'Detección satelital {sensor} — no confirmada',
     follow: 'Seguir este incendio',
+    following: 'Siguiendo',
     evolution: 'Evolución',
     viewFull: 'Ver evolución completa ({n})',
     fwi: 'FWI {level}',
@@ -204,6 +205,9 @@ const es = {
   },
   alerts: {
     title: 'Alertas',
+    followingHeading: 'Incendios que sigues',
+    followingEmpty: 'No sigues ningún incendio. Abre una ficha y pulsa «Seguir este incendio».',
+    unfollow: 'Dejar de seguir',
     aria: 'Ajustes de alertas',
     softAsk:
       'Activa las notificaciones para recibir avisos de incendios y evacuaciones en las zonas que elijas. Las alertas de evacuación siempre suenan.',
