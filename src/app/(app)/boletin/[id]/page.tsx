@@ -57,6 +57,11 @@ export default async function BoletinPage({ params }: Params) {
     isAccessibleForFree: true,
     url: `${SITE}/boletin/${boletin.id}`,
     publisher: { '@type': 'Organization', name: 'Incendib', url: SITE },
+    distribution: {
+      '@type': 'DataDownload',
+      encodingFormat: 'application/json',
+      contentUrl: `${SITE}/boletin/${boletin.id}/data.json`,
+    },
   };
 
   return (
