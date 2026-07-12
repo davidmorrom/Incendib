@@ -49,18 +49,22 @@ export function HistoricoScreen({ areas }: { areas: Fire[] }) {
             {d.historico.empty}
           </p>
         ) : (
-          <div className="mx-screen mt-3">
-            <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 border-b border-subtle pb-1 font-mono text-[9.5px] font-semibold uppercase tracking-wide text-fg-mute">
-              <span>{d.historico.colArea}</span>
-              <span className="text-right">{d.report.colUpdated}</span>
-              <span className="text-right">{d.historico.colHa}</span>
+          <div className="mx-screen mt-3" role="table" aria-label={d.historico.title}>
+            <div
+              role="row"
+              className="grid grid-cols-[1fr_auto_auto] gap-x-4 border-b border-subtle pb-1 font-mono text-[9.5px] font-semibold uppercase tracking-wide text-fg-mute"
+            >
+              <span role="columnheader">{d.historico.colArea}</span>
+              <span role="columnheader" className="text-right">{d.report.colUpdated}</span>
+              <span role="columnheader" className="text-right">{d.historico.colHa}</span>
             </div>
             {sorted.map((a) => (
               <div
                 key={a.slug}
+                role="row"
                 className="grid grid-cols-[1fr_auto_auto] items-baseline gap-x-4 border-b border-subtle py-2"
               >
-                <span className="flex min-w-0 items-center gap-1.5 truncate text-[12.5px] text-fg-body">
+                <span role="cell" className="flex min-w-0 items-center gap-1.5 truncate text-[12.5px] text-fg-body">
                   <span className="font-mono text-[9px] text-fg-mute">{a.country}</span>
                   <span className="truncate">
                     {a.municipality !== '—' ? a.municipality : a.name}
@@ -69,10 +73,10 @@ export function HistoricoScreen({ areas }: { areas: Fire[] }) {
                     )}
                   </span>
                 </span>
-                <span className="text-right font-mono text-[10.5px] text-fg-mute">
+                <span role="cell" className="text-right font-mono text-[10.5px] text-fg-mute">
                   {fmtDate(a.startedAt, locale)}
                 </span>
-                <span className="text-right font-mono text-[12px] font-semibold text-fg">
+                <span role="cell" className="text-right font-mono text-[12px] font-semibold text-fg">
                   {formatNumber(a.hectares)}
                 </span>
               </div>
