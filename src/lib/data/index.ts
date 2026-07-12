@@ -153,14 +153,20 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
   // EFFIS: nº de áreas quemadas recientes recuperadas (independiente de si se
   // adjuntan a un incidente), para reflejar fielmente si la fuente responde.
   const perims = burned.length;
+  // FIRMS necesita clave (FIRMS_MAP_KEY); sin ella el adaptador devuelve [].
+  const firmsKey = !!process.env.FIRMS_MAP_KEY;
 
   return [
     {
       id: 'firms',
       label: 'NASA FIRMS',
       description: 'focos VIIRS/MODIS',
-      status: 'ok',
-      note: hotspots.length ? 'Dominio público · últimas 48 h' : 'Sin focos en la ventana actual',
+      status: firmsKey ? 'ok' : 'down',
+      note: !firmsKey
+        ? 'clave FIRMS no configurada'
+        : hotspots.length
+          ? 'Dominio público · últimas 48 h'
+          : 'Sin focos en la ventana actual',
       lastUpdate: latestIso(hotspots.map((h) => h.acquiredAt), now),
     },
     {
