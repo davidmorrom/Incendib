@@ -256,6 +256,16 @@ const en: Dictionary = {
     print: 'Print / PDF',
     level: 'Level {n}',
   },
+  historico: {
+    title: 'Season archive',
+    subtitle:
+      'Burned areas this season per EFFIS/Copernicus mapping (satellite). Not a final official figure; the final area is set by each agency.',
+    empty: 'No burned areas recorded this season.',
+    count: '{n} areas · {ha} ha',
+    colArea: 'BURNED AREA',
+    colHa: 'HA',
+    link: 'Burned-area archive',
+  },
 };
 
 export default en;

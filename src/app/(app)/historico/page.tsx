@@ -1,8 +1,10 @@
-import { ScaffoldNotice } from '@/components/ScaffoldNotice';
+import { getBurnedAreas } from '@/lib/data';
+import { HistoricoScreen } from '@/components/screens/HistoricoScreen';
 
-// Pantallas canónicas 10a–10b: ficha de extinguido (balance final) + archivo.
-export const metadata = { title: 'Histórico' };
+// Pantalla canónica 10b: archivo de área quemada de la campaña (EFFIS/Copernicus).
+export const metadata = { title: 'Histórico de campaña' };
 
-export default function HistoricoPage() {
-  return <ScaffoldNotice screen="Histórico de campaña" canonicalId="10a–10b" />;
+export default async function HistoricoPage() {
+  const areas = await getBurnedAreas();
+  return <HistoricoScreen areas={areas} />;
 }

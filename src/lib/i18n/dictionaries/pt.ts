@@ -256,6 +256,16 @@ const pt: Dictionary = {
     print: 'Imprimir / PDF',
     level: 'Nível {n}',
   },
+  historico: {
+    title: 'Histórico da campanha',
+    subtitle:
+      'Áreas ardidas da campanha segundo a cartografia EFFIS/Copernicus (satélite). Não é um número oficial definitivo; a área final é fixada por cada organismo.',
+    empty: 'Sem áreas ardidas registadas na campanha recente.',
+    count: '{n} áreas · {ha} ha',
+    colArea: 'ÁREA ARDIDA',
+    colHa: 'HA',
+    link: 'Histórico de área ardida',
+  },
 };
 
 export default pt;
