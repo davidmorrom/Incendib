@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.15] - 2026-07-12
+
+### Añadido
+
+- **Ficha · timeline**: los eventos deducidos por seguimiento propio (cambio de
+  nivel, refuerzo/retirada de medios) se marcan como «seguimiento» y su hora es
+  aproximada, para distinguirlos de los hitos oficiales y de la prensa.
+
+### Corregido
+
+- **Histórico de campaña**: se fusionan las áreas quemadas que EFFIS trocea en
+  varios polígonos del mismo incendio (mismo municipio y fecha), sumando las
+  hectáreas. El listado deja de repetir municipios (p. ej. Villablino, Barbate);
+  el mapa mantiene todos los polígonos para dibujar las formas reales.
+
 ## [0.17.14] - 2026-07-12
 
 ### Corregido / Añadido
