@@ -100,5 +100,16 @@ export async function buildBoletin(now: Date, prev?: BoletinKpi): Promise<Boleti
     ranking,
     highlights,
     sources: [...sourceSet],
+    note: F1_NOTE,
   };
 }
+
+/**
+ * Nota de método (F1) que acompaña a cada edición: las cifras son la foto a
+ * fecha de cierre + ventana satelital de 5 días, no reconstruidas para la
+ * semana natural exacta. Se hace explícito para no dar una falsa precisión.
+ */
+const F1_NOTE =
+  'Las cifras reflejan la situación consolidada a fecha de cierre y una ventana ' +
+  'móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el ' +
+  'acotado exacto a la semana natural llegará cuando exista histórico persistido.';
