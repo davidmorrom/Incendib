@@ -7,6 +7,41 @@
 
 ---
 
+## Estado de implementación real (lo que hay en producción)
+
+> El resto del documento es la **investigación previa**. Esta sección resume lo
+> **realmente integrado** y sus particularidades (aprendidas en producción), que
+> difieren en varios endpoints de lo propuesto arriba. Código: `src/lib/data/adapters`.
+
+- **NASA FIRMS** (`fetchFirmsHotspots`): la API `area/csv` **solo admite 1–5 días**
+  (pedir más → «Invalid day range»). Requiere `FIRMS_MAP_KEY`. VIIRS(SNPP+NOAA-20)+MODIS,
+  recorte a tierra ES+PT con `inEsPt`.
+- **EFFIS área quemada** (`fetchEffisPerimeters`, capa `ms:modis.ba.poly`): **pedir
+  `outputFormat=geojson`** (con `application/json` el MapServer devuelve GML y falla
+  el parseo → vacío). Capa **multi-anual** → filtrar `FIREDATE` a la campaña reciente
+  y ordenar por `LASTUPDATE`; **recortar a ES+PT** (el bbox incluye Francia). Se pinta
+  como capa propia del mapa (`getBurnedAreas`) y como archivo en `/historico`.
+- **Superficie (hectáreas)**: prioridad a la cifra **oficial**. INFORCYL SÍ la publica
+  (`sup_arbolado`+`sup_pasto`); INFOCA y Bombers **no**. Donde no hay oficial se rellena
+  con estimación EFFIS cercana marcada `hectaresApprox` («~» + «estimación satélite»);
+  si no hay nada, «sin dato». `attachPerimeters` **nunca** pisa la cifra oficial.
+  `icnf.burnArea` de fogos **descartado** (unidad ambigua).
+- **Castilla y León**: API en vivo de **INFORCYL** (`servicios.jcyl.es/incyl/json/emergencias`),
+  no Opendatasoft (que queda de respaldo). Coordenadas UTM → `utmToLonLat`.
+- **Andalucía (INFOCA)**: FeatureServer real `utility.arcgis.com/usrsvcs/servers/…/INFOCA/AN_INCIDENTES_PRO/FeatureServer/2`.
+- **Cataluña (Bombers)**: FeatureServer `services7.arcgis.com/ZCqVt1fRXwwK6GF4/…/ACTUACIONS_URGENTS_online_PRO_AMB_FASE_VIEW/FeatureServer/0`.
+- **Meteo local por incendio (ficha)**: Open-Meteo (`api.open-meteo.com`, sin clave).
+- **Noticias**: RSS de **Google News** (ES+PT); NewsAPI no usado. Cámaras DGT retiradas (sin fuente fiable).
+- **No integrado / bloqueado**: FWI (peligro), evacuaciones, más CCAA en vivo
+  (Valencia/CLM/Galicia: visores SPA, requieren inspección de red del navegador),
+  islas (fuera del bbox satelital y de la máscara).
+- **Técnica de descubrimiento headless de fuentes ArcGIS**: de un ítem/dashboard,
+  `sharing/rest/content/items/{id}?f=json` da el `orgId`; luego
+  `sharing/rest/search?q=orgid:{id} type:"Feature Service"` lista sus servicios.
+  Los **incidentes activos** suelen estar en la agencia de **emergencias**, no en la de prevención.
+
+---
+
 ## Key Findings
 
 ### 1. Fuentes de datos — comparativa y arquitectura recomendada
