@@ -70,7 +70,10 @@ export async function buildBoletin(now: Date, prev?: BoletinKpi): Promise<Boleti
 
   const [fires, hotspots] = await Promise.all([
     getFires(),
-    fetchFirmsHotspots({ days: 7 }).catch(() => []),
+    // La API area/csv de FIRMS solo admite un rango de 1 a 5 días
+    // ("Invalid day range. Expects [1..5]"); pedir 7 devolvía siempre vacío y
+    // dejaba firmsWeek a 0. 5 días es la ventana máxima disponible en F1.
+    fetchFirmsHotspots({ days: 5 }).catch(() => []),
   ]);
 
   const kpi = computeKpi(fires, hotspots.length);

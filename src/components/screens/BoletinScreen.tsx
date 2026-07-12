@@ -240,6 +240,9 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
         <section className="mx-screen mt-5 rounded-card border border-subtle bg-bg-raised p-3">
           <span className={SECTION}>{d.boletin.methodHeading}</span>
           <p className="mt-1.5 text-[11px] leading-relaxed text-fg-secondary">{d.boletin.method}</p>
+          {b.note && (
+            <p className="mt-2 text-[11px] leading-relaxed text-fg-secondary">{b.note}</p>
+          )}
           {b.sources.length > 0 && (
             <p className="mt-2 font-mono text-[10px] uppercase tracking-wide text-fg-mute">
               {b.sources.join(' · ')}

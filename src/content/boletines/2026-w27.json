@@ -1,0 +1,132 @@
+{
+  "id": "2026-w27",
+  "isoWeek": 27,
+  "year": 2026,
+  "periodStart": "2026-06-29",
+  "periodEnd": "2026-07-05",
+  "publishedAt": "2026-07-12T00:30:15.886Z",
+  "status": "cerrado",
+  "kpi": {
+    "firmsWeek": 1061,
+    "activeFires": 54,
+    "hectares": 6065.6,
+    "perimeters": 14,
+    "maxLevel": 1,
+    "maxLevelWhere": "Caboalles De Arriba Â· Castilla y LeÃ³n"
+  },
+  "ranking": [
+    {
+      "region": "AndalucÃ­a",
+      "country": "ES",
+      "fires": 5,
+      "hectares": 4583
+    },
+    {
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "fires": 20,
+      "hectares": 1371.6000000000001
+    },
+    {
+      "region": "CataluÃ±a",
+      "country": "ES",
+      "fires": 18,
+      "hectares": 108
+    },
+    {
+      "region": "Viseu DÃ£o LafÃµes (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 3
+    },
+    {
+      "region": "RegiÃ£o de Leiria (PT)",
+      "country": "PT",
+      "fires": 3,
+      "hectares": 0
+    },
+    {
+      "region": "CÃ¡vado (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    },
+    {
+      "region": "Beiras e Serra da Estrela (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    },
+    {
+      "region": "Douro (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    }
+  ],
+  "highlights": [
+    {
+      "slug": "cyl-vanidodes-24-331-26",
+      "name": "Vanidodes",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 497,
+      "level": 1,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-caboalles-de-arriba-24-319-26",
+      "name": "Caboalles De Arriba",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 3,
+      "level": 1,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-barraco-el-5-138-26",
+      "name": "Barraco (el)",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 140,
+      "level": 0,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-canseco-24-323-26",
+      "name": "Canseco",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 118,
+      "level": 0,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-ribota-de-sajambre-24-292-26",
+      "name": "Ribota De Sajambre",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 0,
+      "level": 0,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-remolina-24-329-26",
+      "name": "Remolina",
+      "region": "Castilla y LeÃ³n",
+      "country": "ES",
+      "hectares": 0,
+      "level": 0,
+      "state": "activo"
+    }
+  ],
+  "sources": [
+    "fogos",
+    "jcyl",
+    "infoca",
+    "catalunya",
+    "firms",
+    "effis"
+  ],
+  "note": "Primera edición (F1). Las cifras reflejan la situación consolidada a fecha de cierre y una ventana móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el acotado exacto a la semana natural llegará cuando exista histórico persistido."
+}

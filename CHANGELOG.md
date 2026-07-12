@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.16.1] - 2026-07-12
+
+### Añadido
+
+- **Primer boletín semanal publicado** (`2026-w27`): edición consolidada e
+  inmutable con detecciones FIRMS, superficie afectada, perímetros EFFIS,
+  ranking territorial e incendios destacados reales.
+- Nota de método visible en la edición (`Boletin.note`), para dejar explícito el
+  alcance de las cifras (F1: foto a fecha de cierre + ventana satelital de 5 días).
+
+### Corregido
+
+- **FIRMS en el boletín**: el agregador pedía a NASA FIRMS una ventana de 7 días,
+  rechazada por la API (`Invalid day range. Expects [1..5]`), lo que dejaba las
+  detecciones satelitales siempre a 0. Ajustado a 5 días.
+
 ## [0.16.0] - 2026-07-12
 
 ### Añadido
