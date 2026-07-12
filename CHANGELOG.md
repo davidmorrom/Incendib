@@ -5,6 +5,14 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.10] - 2026-07-12
+
+### Añadido
+
+- **Navegación entre ediciones** del boletín (semana anterior / siguiente) al
+  pie de cada edición, para recorrer el archivo. Se muestra según haya ediciones
+  contiguas (ES/EN/PT).
+
 ## [0.17.9] - 2026-07-12
 
 ### Añadido

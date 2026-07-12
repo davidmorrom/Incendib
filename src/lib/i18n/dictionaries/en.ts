@@ -259,6 +259,8 @@ const en: Dictionary = {
     downloadData: 'Download data (JSON)',
     cite: 'Cite',
     citeCopied: 'Citation copied',
+    prevEdition: 'Previous week',
+    nextEdition: 'Next week',
     level: 'Level {n}',
   },
   historico: {

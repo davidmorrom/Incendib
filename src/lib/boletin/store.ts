@@ -38,3 +38,15 @@ export function getBoletin(id: string): Boletin | null {
 export function latestBoletin(): Boletin | null {
   return listBoletines()[0] ?? null;
 }
+
+/**
+ * Ediciones contiguas a `id` para navegar el archivo: `older` (semana anterior)
+ * y `newer` (semana posterior). `null` si no existe. La lista está ordenada de
+ * más reciente a más antigua, así que newer = índice anterior, older = siguiente.
+ */
+export function adjacentBoletines(id: string): { older: Boletin | null; newer: Boletin | null } {
+  const items = listBoletines();
+  const i = items.findIndex((b) => b.id === id);
+  if (i < 0) return { older: null, newer: null };
+  return { older: items[i + 1] ?? null, newer: items[i - 1] ?? null };
+}

@@ -259,6 +259,8 @@ const pt: Dictionary = {
     downloadData: 'Descarregar dados (JSON)',
     cite: 'Citar',
     citeCopied: 'Citação copiada',
+    prevEdition: 'Semana anterior',
+    nextEdition: 'Semana seguinte',
     level: 'Nível {n}',
   },
   historico: {
