@@ -15,6 +15,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'push no configurado' }, { status: 503 });
   }
   try {
+    if (Number(req.headers.get('content-length') ?? 0) > 10_000) {
+      return NextResponse.json({ ok: false, error: 'cuerpo demasiado grande' }, { status: 413 });
+    }
     const { subscription } = (await req.json()) as { subscription?: PushSubscription };
     // No enviar a destinos no https o internos/reservados (anti-SSRF y anti-abuso
     // de relay: el servidor no debe firmar push hacia direcciones arbitrarias).

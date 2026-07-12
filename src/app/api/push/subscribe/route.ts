@@ -14,6 +14,10 @@ export const preferredRegion = 'fra1'; // datos personales tratados en la UE
  */
 export async function POST(req: Request) {
   try {
+    // Rechaza cuerpos anómalamente grandes pronto (una suscripción ronda 1 KB).
+    if (Number(req.headers.get('content-length') ?? 0) > 10_000) {
+      return NextResponse.json({ ok: false, error: 'cuerpo demasiado grande' }, { status: 413 });
+    }
     const body = (await req.json()) as {
       subscription?: PushSubscription;
       prefs?: Partial<AlertPrefs>;

@@ -74,6 +74,14 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? '/';
-  event.waitUntil(clients.openWindow(url));
+  // Navega SOLO dentro del propio origen: aunque un payload trajera una URL
+  // absoluta externa, no abrimos destinos de terceros (defensa anti-phishing).
+  let target = '/';
+  try {
+    const u = new URL(event.notification.data?.url ?? '/', self.location.origin);
+    if (u.origin === self.location.origin) target = u.pathname + u.search + u.hash;
+  } catch {
+    /* payload raro → destino seguro por defecto */
+  }
+  event.waitUntil(clients.openWindow(target));
 });

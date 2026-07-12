@@ -1,0 +1,9 @@
+# Incendib — política de divulgación de vulnerabilidades (RFC 9116)
+# Proyecto sin ánimo de lucro. Agradecemos el reporte responsable de fallos de
+# seguridad. Por favor, no realices pruebas que degraden el servicio ni accedas a
+# datos de terceros.
+
+Contact: mailto:contacto@incendib.es
+Expires: 2027-07-12T00:00:00.000Z
+Preferred-Languages: es, pt, en
+Canonical: https://incendib.es/.well-known/security.txt
