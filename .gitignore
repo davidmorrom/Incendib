@@ -50,3 +50,6 @@ yarn-error.log*
 # ficheros de entorno locales (la plantilla .env.example sí se versiona)
 .env*
 !.env.example
+
+# firma de correo (material personal, no forma parte del proyecto)
+docs/firmaMail/
