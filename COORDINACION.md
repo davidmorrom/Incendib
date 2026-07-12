@@ -176,3 +176,38 @@ trabajo**. ⚠️ Para no colisionar, tocaré **áreas transversales de segurida
   lo mantengo mínimo (p. ej. validar params sin cambiar lógica).
 - Empiezo por un **informe de auditoría** en `docs/security/` (solo docs) y luego
   aplico los fixes de menor riesgo primero. Publicaré hallazgos aquí.
+
+### 2026-07-12 (madrugada) — Agente C, resultados de la auditoría de seguridad
+
+Informe completo en `docs/security/AUDITORIA-2026-07-12.md`. **Aplicado, verificado
+(typecheck + lint + build + 74 tests) e integrado en `main`:**
+
+1. **H1 · Cabeceras de seguridad** (`next.config.mjs`, mi fichero exclusivo): CSP
+   acotada (self, `blob:`, `data:`, teselas OpenFreeMap, YouTube-nocookie),
+   `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+   `Permissions-Policy` (geoloc propia permitida), HSTS + `upgrade-insecure`
+   **solo en producción** (para no romper `npm run dev`), `unsafe-eval` **solo en
+   dev** (React Refresh). ⚠️ **A y B:** si añadís un origen externo nuevo (otra
+   CDN, otro iframe, otra API llamada desde el navegador), avisad o ampliad la CSP
+   en `next.config.mjs` o el recurso se bloqueará. Hoy cubre mapa + YouTube +
+   telemetría Vercel.
+2. **H3/H4 · Anti-SSRF en push** (`src/lib/push/validate.ts` nuevo + `validate.test.ts`):
+   `isSafePushEndpoint` (exige https, rechaza loopback/RFC1918/link-local/metadata/
+   CGNAT/ULA) y `clampPrefs` (acota minLevel 0–3, radiusKm 1–500, valida zona).
+   Enchufado en `api/push/subscribe` y `api/push/test` (cambios mínimos, sin tocar
+   lógica de negocio).
+3. **H5 · Escape del JSON-LD** — ⚠️ **B, toqué tu fichero**
+   `src/app/(app)/boletin/[id]/page.tsx`: añadí `jsonLdSafe()` que escapa
+   `<`,`>`,`&`,U+2028/9 en el `dangerouslySetInnerHTML` del `<script ld+json>`.
+   **No cambié tu lógica** ni el `distribution` que añadiste; solo el render del
+   JSON-LD. Si rebasas, es un cambio pequeño y localizado.
+
+**Acción del PROPIETARIO (H2, importante):** define **`CRON_SECRET`** en Vercel
+(Production) y el mismo valor como secreto del repo para la GitHub Action del
+boletín. Sin él, `/api/push/cron` y `/api/boletin/generar` quedan **abiertos**.
+Documentado en `.env.example`. No lo fuerzo en código para no romper el Vercel
+Cron actual si aún no está la variable.
+
+**Siguiente (autónomo, solo mi carril):** H6 (límite de tamaño de body) y H7
+(rate-limiting con Upstash) como endurecimiento opcional; y repaso de coherencia
+de `docs/ARCHITECTURE.md`/`DATA-SOURCES.md`. Sigo sin pisar adapters/boletín/screens.
