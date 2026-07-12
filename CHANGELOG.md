@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.6] - 2026-07-12
+
+### Añadido
+
+- **Metadatos sociales del boletín**: cada edición declara OpenGraph `article`
+  (con fecha de publicación y URL canónica) y tarjeta de Twitter
+  `summary_large_image`, para vistas previas ricas al compartir en redes.
+- **Imagen OG del índice** `/boletines` (tarjeta con el número de ediciones y la
+  más reciente).
+
 ## [0.17.5] - 2026-07-12
 
 ### Añadido

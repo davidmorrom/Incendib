@@ -17,9 +17,24 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const b = getBoletin(id);
   if (!b) return { title: 'Boletín' };
+  const title = `Boletín · semana ${b.isoWeek} de ${b.year}`;
+  const description = `Situación de incendios en España y Portugal, ${b.periodStart} a ${b.periodEnd}.`;
+  const url = `${SITE}/boletin/${b.id}`;
   return {
-    title: `Boletín · semana ${b.isoWeek} de ${b.year}`,
-    description: `Situación de incendios en España y Portugal, ${b.periodStart} a ${b.periodEnd}.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    // La imagen (og:image/twitter:image) la aporta opengraph-image.tsx del segmento.
+    openGraph: {
+      type: 'article',
+      publishedTime: b.publishedAt,
+      title,
+      description,
+      url,
+      siteName: 'Incendib',
+      locale: 'es_ES',
+    },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
