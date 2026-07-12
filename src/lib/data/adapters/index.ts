@@ -837,19 +837,19 @@ function ringCentroid(ring: [number, number][]): [number, number] {
 }
 
 /**
- * Adjunta a cada incendio el perímetro EFFIS más cercano (≤ 10 km) para darle
- * forma en mapa/ficha. Radio corto a propósito: un área quemada muy cercana es
- * casi con seguridad el mismo incendio; con radios amplios se emparejaban focos
- * distintos. **No** se toca la superficie: las hectáreas deben venir de la fuente
- * oficial (EFFIS/MODIS a 250 m subestima y va con retraso en incendios activos).
- * Las áreas quemadas se muestran además como capa propia (getBurnedAreas).
+ * Adjunta a cada incendio el área quemada EFFIS más cercana (≤ 12 km): le da
+ * forma (perímetro) en mapa/ficha y, **solo si la fuente oficial no publica
+ * superficie**, rellena las hectáreas como ESTIMACIÓN (marcada `hectaresApprox`,
+ * se muestra con «~»). La cifra oficial (p. ej. INFORCYL) siempre tiene prioridad;
+ * EFFIS/MODIS (250 m) subestima y va con retraso, por eso nunca la sobrescribe.
+ * Las áreas quemadas se muestran además como capa propia del mapa (getBurnedAreas).
  */
 export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   if (!perimeters.length) return fires;
   return fires.map((f) => {
     if (f.perimeter) return f;
     let best: Fire | undefined;
-    let bestKm = 10;
+    let bestKm = 12;
     for (const p of perimeters) {
       const km = haversineKm(f.coordinates, p.coordinates);
       if (km < bestKm) {
@@ -857,7 +857,14 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
         best = p;
       }
     }
-    return best?.perimeter ? { ...f, perimeter: best.perimeter } : f;
+    if (!best?.perimeter) return f;
+    const out: Fire = { ...f, perimeter: best.perimeter };
+    // Rellena superficie estimada solo si no hay cifra oficial.
+    if (!f.hectares && best.hectares > 0) {
+      out.hectares = best.hectares;
+      out.hectaresApprox = true;
+    }
+    return out;
   });
 }
 
