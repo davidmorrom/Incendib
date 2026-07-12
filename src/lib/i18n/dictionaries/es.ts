@@ -256,6 +256,8 @@ const es = {
     share: 'Compartir',
     shareCopied: 'Enlace copiado',
     downloadData: 'Descargar datos (JSON)',
+    cite: 'Citar',
+    citeCopied: 'Cita copiada',
     level: 'Nivel {n}',
   },
   historico: {

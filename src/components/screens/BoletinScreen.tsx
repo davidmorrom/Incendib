@@ -81,6 +81,21 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
   const p = b.prevKpi;
   const vs = d.boletin.vsPrev;
   const [copied, setCopied] = useState(false);
+  const [cited, setCited] = useState(false);
+
+  async function onCite() {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const citation =
+      `Incendib. ${interpolate(d.boletin.week, { n: b.isoWeek })} · ${b.year} ` +
+      `(${formatPeriod(b.periodStart, b.periodEnd, locale)}). ${url}`;
+    try {
+      await navigator.clipboard.writeText(citation);
+      setCited(true);
+      setTimeout(() => setCited(false), 2000);
+    } catch {
+      /* sin permiso de portapapeles: no hacemos nada */
+    }
+  }
 
   async function onShare() {
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -144,6 +159,13 @@ export function BoletinScreen({ boletin: b }: { boletin: Boletin }) {
               className="font-mono text-[10.5px] font-semibold text-action-text print:hidden"
             >
               {copied ? d.boletin.shareCopied : d.boletin.share}
+            </button>
+            <button
+              type="button"
+              onClick={onCite}
+              className="font-mono text-[10.5px] font-semibold text-action-text print:hidden"
+            >
+              {cited ? d.boletin.citeCopied : d.boletin.cite}
             </button>
             <button
               type="button"

@@ -257,6 +257,8 @@ const pt: Dictionary = {
     share: 'Partilhar',
     shareCopied: 'Ligação copiada',
     downloadData: 'Descarregar dados (JSON)',
+    cite: 'Citar',
+    citeCopied: 'Citação copiada',
     level: 'Nível {n}',
   },
   historico: {

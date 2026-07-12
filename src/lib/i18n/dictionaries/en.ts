@@ -257,6 +257,8 @@ const en: Dictionary = {
     share: 'Share',
     shareCopied: 'Link copied',
     downloadData: 'Download data (JSON)',
+    cite: 'Cite',
+    citeCopied: 'Citation copied',
     level: 'Level {n}',
   },
   historico: {
