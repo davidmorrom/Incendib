@@ -53,7 +53,12 @@ export function BottomNav({ className }: { className?: string }) {
   return (
     <nav
       aria-label="Navegación principal"
-      className={cn('flex h-14 flex-none border-t bg-bg-raised print:hidden', className)}
+      style={{
+        // Altura fija de 3.5rem + zona segura inferior (home indicator en PWA).
+        height: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+      className={cn('flex flex-none border-t bg-bg-raised print:hidden', className)}
     >
       {ITEMS.map(({ href, key, Icon }) => {
         const active = pathname === href;
