@@ -911,6 +911,40 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   });
 }
 
+// ── Capa de calidad: confirmación por focos FIRMS ────────────────────────────
+
+/**
+ * Marca `satelliteConfirmed` (+ distancia `hotspotKm`) en los incendios con un
+ * foco FIRMS a ≤ radiusKm. Es CONFIRMACIÓN, no filtro: la presencia de foco
+ * corrobora actividad térmica real ahora; su ausencia NO descarta el incendio
+ * (FIRMS falla por nubes, tamaño o paso del satélite), así que no elimina
+ * ninguno. Para fuentes con estado "activo" poco fiable úsese `gateByHotspots`.
+ */
+export function confirmWithHotspots(fires: Fire[], hotspots: Hotspot[], radiusKm = 6): Fire[] {
+  if (!fires.length || !hotspots.length) return fires;
+  return fires.map((f) => {
+    let best = Infinity;
+    for (const h of hotspots) {
+      const km = haversineKm(f.coordinates, h.coordinates);
+      if (km < best) best = km;
+      if (best <= radiusKm) break;
+    }
+    return best <= radiusKm
+      ? { ...f, satelliteConfirmed: true, hotspotKm: Math.round(best * 10) / 10 }
+      : f;
+  });
+}
+
+/**
+ * Gate por satélite: deja SOLO los incendios confirmados por un foco FIRMS
+ * cercano. Para fuentes cuya señal de "activo" no es fiable (logs acumulativos,
+ * p. ej. INFOCAM); NO usar con fuentes que ya marcan extinguidos y filtran por
+ * recencia (ahí generaría falsos negativos por los fallos de detección de FIRMS).
+ */
+export function gateByHotspots(fires: Fire[], hotspots: Hotspot[], radiusKm = 5): Fire[] {
+  return confirmWithHotspots(fires, hotspots, radiusKm).filter((f) => f.satelliteConfirmed);
+}
+
 // ── Cataluña: Bombers de la Generalitat (ArcGIS FeatureServer público) ────────
 // Capa de actuaciones urgentes con fase, descubierta desde el visor oficial
 // (experience.arcgis.com embebido en interior.gencat.cat). Trae fase, municipio,

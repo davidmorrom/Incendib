@@ -19,6 +19,7 @@ import {
   fetchCatalunyaFires,
   fetchEffisPerimeters,
   attachPerimeters,
+  confirmWithHotspots,
 } from './adapters';
 
 export type DataMode = 'mock' | 'live';
@@ -49,14 +50,17 @@ export function getDataMode(): DataMode {
  */
 export async function getFires(): Promise<Fire[]> {
   if (getDataMode() === 'live') {
-    const [pt, cyl, and, cat, perimeters] = await Promise.all([
+    const [pt, cyl, and, cat, hotspots, perimeters] = await Promise.all([
       fetchFogosActive(),
       fetchJcylFires(),
       fetchInfocaFires(),
       fetchCatalunyaFires(),
+      fetchFirmsHotspots({ days: 2 }),
       fetchEffisPerimeters(),
     ]);
-    return attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    const fires = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
+    return confirmWithHotspots(fires, hotspots);
   }
   return MOCK_FIRES;
 }

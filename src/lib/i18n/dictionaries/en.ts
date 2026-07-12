@@ -72,6 +72,7 @@ const en: Dictionary = {
     viewFull: 'View full timeline ({n})',
     fwi: 'FWI {level}',
     hotspots: '{n} VIIRS hotspots · last pass {time}',
+    satelliteConfirmed: 'Thermal activity detected · VIIRS {km} km away',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'no spread 24 h',
     approx: 'satellite estimate',
