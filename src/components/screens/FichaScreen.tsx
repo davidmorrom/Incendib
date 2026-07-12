@@ -234,22 +234,34 @@ export function FichaScreen({ fire }: { fire: Fire }) {
                 {d.fire.evolution}
               </div>
               <ol className="mt-2">
-                {fire.timeline.map((e, i, arr) => (
-                  <li key={`${e.at}-${i}`} className="flex gap-2.5">
-                    <div className="flex flex-none flex-col items-center">
-                      <span
-                        className="mt-1 h-2 w-2 rounded-full"
-                        style={{ background: e.state ? stateVar(e.state) : V.foco }}
-                        aria-hidden
-                      />
-                      {i < arr.length - 1 && <span className="w-px flex-1" style={{ background: 'var(--border-default)' }} />}
-                    </div>
-                    <div className="pb-3">
-                      <div className="font-mono text-[10px] font-semibold text-fg-secondary">{dateFmt(e.at)}</div>
-                      <div className="mt-px text-[11.5px] text-fg-body">{e.label}</div>
-                    </div>
-                  </li>
-                ))}
+                {fire.timeline.map((e, i, arr) => {
+                  const press = Boolean(e.url);
+                  return (
+                    <li key={`${e.at}-${i}`} className="flex gap-2.5">
+                      <div className="flex flex-none flex-col items-center">
+                        <span
+                          className="mt-1 h-2 w-2 rounded-full"
+                          style={{ background: press ? V.action : e.state ? stateVar(e.state) : V.foco }}
+                          aria-hidden
+                        />
+                        {i < arr.length - 1 && <span className="w-px flex-1" style={{ background: 'var(--border-default)' }} />}
+                      </div>
+                      <div className="min-w-0 pb-3">
+                        <div className="font-mono text-[10px] font-semibold text-fg-secondary">{dateFmt(e.at)}</div>
+                        {press ? (
+                          <a href={e.url} target="_blank" rel="noreferrer" className="mt-px block">
+                            <span className="text-[11.5px] leading-snug text-fg-body">{e.label}</span>
+                            <span className="mt-0.5 block font-mono text-[9px] font-semibold text-action-text">
+                              {e.source} · {d.fire.press} ↗
+                            </span>
+                          </a>
+                        ) : (
+                          <div className="mt-px text-[11.5px] text-fg-body">{e.label}</div>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ol>
             </>
           ) : null}

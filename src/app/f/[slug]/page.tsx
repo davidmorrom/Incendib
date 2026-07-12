@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getFire, getFires, getWeather } from '@/lib/data';
+import { getFire, getFires, getWeather, getNews } from '@/lib/data';
+import { relatedNews } from '@/lib/fires/news-match';
 import { FichaScreen } from '@/components/screens/FichaScreen';
 
 // Pantalla canónica 1c: ficha con URL propia y compartible. SIEMPRE muestra el
@@ -31,7 +32,22 @@ export default async function FichaPage({ params }: Params) {
   const { slug } = await params;
   const fire = await getFire(slug);
   if (!fire) notFound();
-  // Meteo local real (Open-Meteo) si la fuente del incendio no la trae.
-  const weather = fire.weather ?? (await getWeather(fire.coordinates));
-  return <FichaScreen fire={weather ? { ...fire, weather } : fire} />;
+  // Meteo local real (Open-Meteo) + noticias de prensa relacionadas por municipio.
+  const [weather, news] = await Promise.all([
+    fire.weather ? Promise.resolve(fire.weather) : getWeather(fire.coordinates),
+    getNews(),
+  ]);
+  const press = relatedNews(fire, news);
+  const timeline = [...(fire.timeline ?? []), ...press].sort(
+    (a, b) => Date.parse(b.at) - Date.parse(a.at),
+  );
+  return (
+    <FichaScreen
+      fire={{
+        ...fire,
+        weather: weather ?? fire.weather,
+        timeline: timeline.length ? timeline : fire.timeline,
+      }}
+    />
+  );
 }

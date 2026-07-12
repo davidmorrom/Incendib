@@ -72,6 +72,7 @@ const es = {
     fwi: 'FWI {level}',
     hotspots: '{n} focos VIIRS · última pasada {time}',
     satelliteConfirmed: 'Actividad térmica detectada · VIIRS a {km} km',
+    press: 'prensa',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sin avance 24 h',
     approx: 'estimación satélite',
