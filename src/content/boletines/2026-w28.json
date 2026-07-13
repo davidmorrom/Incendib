@@ -1,0 +1,140 @@
+{
+  "id": "2026-w28",
+  "isoWeek": 28,
+  "year": 2026,
+  "periodStart": "2026-07-06",
+  "periodEnd": "2026-07-12",
+  "publishedAt": "2026-07-13T08:17:37.351Z",
+  "status": "cerrado",
+  "kpi": {
+    "firmsWeek": 1147,
+    "activeFires": 49,
+    "hectares": 5862.6,
+    "perimeters": 10,
+    "maxLevel": 1,
+    "maxLevelWhere": "Caboalles De Arriba · Castilla y León"
+  },
+  "prevKpi": {
+    "firmsWeek": 1061,
+    "activeFires": 54,
+    "hectares": 6065.6,
+    "perimeters": 14,
+    "maxLevel": 1,
+    "maxLevelWhere": "Caboalles De Arriba · Castilla y León"
+  },
+  "ranking": [
+    {
+      "region": "Andalucía",
+      "country": "ES",
+      "fires": 4,
+      "hectares": 4405
+    },
+    {
+      "region": "Castilla y León",
+      "country": "ES",
+      "fires": 15,
+      "hectares": 790.6
+    },
+    {
+      "region": "Cataluña",
+      "country": "ES",
+      "fires": 20,
+      "hectares": 664
+    },
+    {
+      "region": "Viseu Dão Lafões (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 3
+    },
+    {
+      "region": "Região de Leiria (PT)",
+      "country": "PT",
+      "fires": 3,
+      "hectares": 0
+    },
+    {
+      "region": "Cávado (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    },
+    {
+      "region": "Beiras e Serra da Estrela (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    },
+    {
+      "region": "Oeste (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    }
+  ],
+  "highlights": [
+    {
+      "slug": "cyl-vanidodes-24-331-26",
+      "name": "Vanidodes",
+      "region": "Castilla y León",
+      "country": "ES",
+      "hectares": 497,
+      "level": 1,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-caboalles-de-arriba-24-319-26",
+      "name": "Caboalles De Arriba",
+      "region": "Castilla y León",
+      "country": "ES",
+      "hectares": 3,
+      "level": 1,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-guimara-24-333-26",
+      "name": "Guimara",
+      "region": "Castilla y León",
+      "country": "ES",
+      "hectares": 0,
+      "level": 1,
+      "state": "activo"
+    },
+    {
+      "slug": "cyl-canseco-24-323-26",
+      "name": "Canseco",
+      "region": "Castilla y León",
+      "country": "ES",
+      "hectares": 118,
+      "level": 0,
+      "state": "activo"
+    },
+    {
+      "slug": "cat-la-pobla-de-claramunt-262428875",
+      "name": "La Pobla De Claramunt",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 495,
+      "level": null,
+      "state": "activo"
+    },
+    {
+      "slug": "cat-sabadell-262531214",
+      "name": "Sabadell",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 139,
+      "level": null,
+      "state": "activo"
+    }
+  ],
+  "sources": [
+    "fogos",
+    "jcyl",
+    "infoca",
+    "catalunya",
+    "firms",
+    "effis"
+  ],
+  "note": "Las cifras reflejan la situación consolidada a fecha de cierre y una ventana móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el acotado exacto a la semana natural llegará cuando exista histórico persistido."
+}
