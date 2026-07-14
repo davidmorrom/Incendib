@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.18.0] - 2026-07-14
+
+### Añadido
+
+- **`/api/health`** (`src/app/api/health/route.ts`): endpoint de salud para la sala
+  de situación del panel privado. Reutiliza `getSourceStatus()` (ok/degraded/down +
+  `lastUpdate` por fuente) y añade recuentos (incendios, focos 24 h, perímetros) y un
+  chequeo de **presencia** de variables de entorno (nunca sus valores). Protegido por
+  Bearer `PANEL_TOKEN` (fail-closed: sin token, 401). No altera el pipeline público
+  ni el mapa. Ver `Incendib-Panel/docs/INTEGRACION-INCENDIB.md` (Cambio 4).
+
 ## [0.17.18] - 2026-07-14
 
 ### Corregido
