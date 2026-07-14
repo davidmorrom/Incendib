@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.18] - 2026-07-14
+
+### Corregido
+
+- **Timeline de la ficha: fin del ruido de medios.** El seguimiento propio
+  registraba un evento por cada mínima fluctuación de efectivos entre pasadas del
+  cron (cada ~15 min), inundando la evolución con «Refuerzo/Retirada de medios»
+  y expulsando lo importante (declaración, cambios de nivel). Ahora solo se anota
+  una **escalada apreciable** de medios (umbrales por tipo: aéreos ≥3, terrestres
+  ≥5, efectivos ≥25) y **no** las retiradas (la desescalada ya la marca el estado
+  oficial estabilizado/controlado con su hora).
+
 ## [0.17.17] - 2026-07-13
 
 ### Accesibilidad

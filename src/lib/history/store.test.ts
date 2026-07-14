@@ -18,19 +18,32 @@ describe('fireChangeEvents', () => {
     expect(evs[0]?.label).toBe('Sube a nivel 2');
   });
 
-  it('registra refuerzo de medios con el desglose del incremento', () => {
+  it('registra refuerzo solo con los incrementos que superan el umbral', () => {
     const evs = fireChangeEvents(
       { ...base, aerial: 3, ground: 2, personnel: 10 },
-      { ...base, aerial: 6, ground: 2, personnel: 25 },
+      { ...base, aerial: 6, ground: 4, personnel: 45 }, // +3 aéreos (≥3), +2 terrestres (<5, se ignora), +35 efectivos (≥25)
       AT,
     );
     expect(evs).toHaveLength(1);
-    expect(evs[0]?.label).toBe('Refuerzo de medios (+3 aéreos, +15 efectivos)');
+    expect(evs[0]?.label).toBe('Refuerzo de medios (+3 aéreos, +35 efectivos)');
   });
 
-  it('registra retirada de medios', () => {
-    const evs = fireChangeEvents({ ...base, ground: 8 }, { ...base, ground: 2 }, AT);
-    expect(evs[0]?.label).toBe('Retirada de medios');
+  it('ignora las fluctuaciones pequeñas de medios (vaivén del cron)', () => {
+    const evs = fireChangeEvents(
+      { ...base, aerial: 2, ground: 10, personnel: 100 },
+      { ...base, aerial: 3, ground: 13, personnel: 120 }, // +1 aéreo, +3 terrestres, +20 efectivos: todo por debajo del umbral
+      AT,
+    );
+    expect(evs).toHaveLength(0);
+  });
+
+  it('no registra las retiradas de medios (ruido; lo cubre el estado oficial)', () => {
+    const evs = fireChangeEvents(
+      { ...base, ground: 8, personnel: 40 },
+      { ...base, ground: 2, personnel: 5 },
+      AT,
+    );
+    expect(evs).toHaveLength(0);
   });
 
   it('no registra nada si no cambia', () => {
