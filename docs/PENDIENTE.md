@@ -71,11 +71,21 @@
 - **Timeline de ficha**: Andalucía y Cataluña dan histórico corto (sus fuentes no
   publican fecha de cada cambio de estado). CyL es rico. Aceptable; mejorable si
   aparece más dato.
-- **Histórico de campaña**: hoy ~68 áreas EFFIS (ventana 45 d, `count=80`).
-  Posible dedup por (municipio+fecha) y/o ventana configurable.
-- **A11y**: seguir el barrido (roles ARIA en más tablas, foco visible, navegación
-  por teclado del sheet/filtros).
+- **Histórico de campaña**: ✅ **dedup hecho** (v0.17.15): se fusionan los polígonos
+  EFFIS del mismo incendio (municipio+fecha). Queda opcional: ventana configurable.
+- **A11y**: ✅ enlace «saltar al contenido» + landmark `<main>` (v0.17.17); tablas
+  ya semánticas con `aria-sort`/`caption`, foco visible global, chips con
+  `aria-pressed`. Queda barrido menor (sheet/filtros por teclado) — bajo impacto.
 - **Verificación visual headless** (`?e2e`) de pantallas nuevas en claro/oscuro.
+
+### Hecho recientemente (carril A) — jul 2026
+
+- ✅ **Ruido de medios en el timeline eliminado** (v0.17.18): el seguimiento propio
+  anotaba un evento por cada fluctuación mínima de efectivos (cada ~15 min),
+  inundando la evolución. Ahora solo escaladas apreciables (umbrales) y sin
+  retiradas. Purgados los `hist:ev:*` ya acumulados en Redis (182 claves).
+- ✅ **Marcador «seguimiento»** (hora aproximada) distinguido de hitos oficiales y
+  prensa en el timeline.
 
 ## 5. Ideas / futuro 💡
 
