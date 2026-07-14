@@ -13,7 +13,7 @@ export default function AppError({ error, reset }: { error: Error; reset: () => 
   }, [error]);
 
   return (
-    <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 bg-bg-base px-screen text-center">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 bg-bg-base px-screen text-center">
       <div
         className="grid h-12 w-12 place-items-center rounded-full"
         style={{ backgroundColor: 'color-mix(in srgb, var(--state-activo) 12%, transparent)' }}
@@ -37,6 +37,6 @@ export default function AppError({ error, reset }: { error: Error; reset: () => 
         {d.status.retry}
       </button>
       <p className="max-w-xs font-mono text-meta text-fg-mute">{d.disclaimer.short}</p>
-    </main>
+    </div>
   );
 }

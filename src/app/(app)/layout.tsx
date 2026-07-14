@@ -2,6 +2,7 @@ import { I18nProvider } from '@/components/i18n/I18nProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { DesktopTopNav } from '@/components/layout/DesktopTopNav';
 import { NetworkStatus } from '@/components/layout/NetworkStatus';
+import { SkipLink } from '@/components/layout/SkipLink';
 
 /**
  * Shell de la app: marco de altura de viewport con área de contenido scrollable
@@ -13,13 +14,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
       <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg print:block print:h-auto print:overflow-visible">
+        <SkipLink />
         <div className="print:hidden">
           <NetworkStatus />
         </div>
         <DesktopTopNav className="hidden lg:flex print:!hidden" />
-        <div id="contenido" className="flex min-h-0 flex-1 flex-col print:block print:min-h-0 print:overflow-visible">
+        <main
+          id="contenido"
+          tabIndex={-1}
+          className="flex min-h-0 flex-1 flex-col outline-none print:block print:min-h-0 print:overflow-visible"
+        >
           {children}
-        </div>
+        </main>
         <BottomNav className="lg:hidden print:!hidden" />
       </div>
     </I18nProvider>

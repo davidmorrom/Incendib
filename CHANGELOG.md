@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.17.17] - 2026-07-13
+
+### Accesibilidad
+
+- **Enlace «saltar al contenido»** (WCAG 2.4.1, Bypass Blocks): primer elemento
+  tabulable de la app, oculto salvo cuando recibe foco de teclado, que permite
+  saltarse la navegación repetida e ir directo al contenido. El shell expone
+  ahora un landmark `<main>` focusable (ES/PT/EN; la cadena ya existía en los
+  diccionarios pero no estaba cableada).
+
 ## [0.17.16] - 2026-07-13
 
 ### Añadido
