@@ -51,6 +51,15 @@ export function snapOf(f: Fire): FireSnap {
  * (refuerzo/retirada). Los cambios de estado (estabilizado/controlado) ya vienen
  * con fecha oficial de la fuente, así que no se duplican aquí. Función pura.
  */
+// Umbrales por dimensión para NO registrar el vaivén normal de medios entre
+// pasadas del cron (los efectivos entran y salen constantemente). Solo se anota
+// una escalada apreciable ("se despliegan más medios"). Las RETIRADAS no se
+// registran: son ruido y la desescalada ya la marca el estado oficial
+// (estabilizado/controlado) con su hora.
+const SIG_AERIAL = 3;
+const SIG_GROUND = 5;
+const SIG_PERSONNEL = 25;
+
 export function fireChangeEvents(prev: FireSnap, cur: FireSnap, atIso: string): TimelineEntry[] {
   const evs: TimelineEntry[] = [];
   if (prev.level != null && cur.level != null && cur.level !== prev.level) {
@@ -62,15 +71,11 @@ export function fireChangeEvents(prev: FireSnap, cur: FireSnap, atIso: string): 
   const dA = cur.aerial - prev.aerial;
   const dG = cur.ground - prev.ground;
   const dP = cur.personnel - prev.personnel;
-  if (dA > 0 || dG > 0 || dP > 0) {
-    const parts: string[] = [];
-    if (dA > 0) parts.push(`+${dA} aéreos`);
-    if (dG > 0) parts.push(`+${dG} terrestres`);
-    if (dP > 0) parts.push(`+${dP} efectivos`);
-    evs.push({ at: atIso, label: `Refuerzo de medios (${parts.join(', ')})` });
-  } else if (dA < 0 || dG < 0 || dP < 0) {
-    evs.push({ at: atIso, label: 'Retirada de medios' });
-  }
+  const parts: string[] = [];
+  if (dA >= SIG_AERIAL) parts.push(`+${dA} aéreos`);
+  if (dG >= SIG_GROUND) parts.push(`+${dG} terrestres`);
+  if (dP >= SIG_PERSONNEL) parts.push(`+${dP} efectivos`);
+  if (parts.length) evs.push({ at: atIso, label: `Refuerzo de medios (${parts.join(', ')})` });
   return evs;
 }
 
