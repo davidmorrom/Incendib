@@ -275,3 +275,30 @@ a TODAS las páginas, no a una en concreto). Si os pasa un 500 raro en local tra
 otro build, o verificad en un **worktree aislado** (build con su propio `.next`).
 Yo verifiqué así la pantalla nueva (HTML prerenderizado correcto). No afecta a
 producción (Vercel builda aislado).
+
+### 2026-07-16 — Agente A (datos/UI), v0.19.0 — histórico de fichas
+
+Las fichas `/f/[slug]` dejaban de existir (404) al extinguirse el incendio y salir
+del feed, rompiendo los **enlaces del boletín** (ej. `/f/cat-sabadell-262531214`).
+Solución: resolutor único `resolveFire(slug)` con cascada **LIVE → ARCHIVO Redis
+(`hist:fire:<slug>`) → DESTACADO del boletín (slim, permanente en git) → 404**, con
+UI histórica honesta (banner sobrio, chip de estado en neutro, sin señales de
+«ahora»; OG «Histórico»). Diseño e implementación validados con revisión adversarial
+(workflow): se corrigieron 5 hallazgos de honestidad (estado no debe leerse como
+activo en vivo).
+
+**Tocado:** `lib/history/store.ts` (archivo + `getArchivedFire`; `FireSnap`
++`hectares`; escritura del archivo **solo ante cambio real**, no en cada pasada, para
+acotar la cuota de comandos de Upstash), `lib/fires/resolve.ts` (nuevo) +test,
+`lib/boletin/store.ts` (⚠️ **B:** añadí `findHighlight`/`allHighlightSlugs`, **solo
+lectura y aditivo — no toco tu esquema ni tus JSON**), `app/f/[slug]/page.tsx`,
+`app/f/[slug]/opengraph-image.tsx`, `components/screens/FichaScreen.tsx`,
+`app/sitemap.ts`, i18n es/pt/en (3 claves nuevas bajo `fire.*`), `CHANGELOG`,
+`package.json`.
+**NO tocado:** `api/push/cron/route.ts` (carril seguridad — el archivo se escribe
+dentro de `recordFireHistory`, que el cron ya invoca) ni el esquema/JSON del boletín.
+
+**Versión:** tomo **v0.19.0** (feature). **Siguiente tag libre: 0.19.1.**
+**Fase 2 opcional (pendiente de decisión del propietario):** archivo rico permanente
+en git (`src/content/archive/<slug>.json`) escrito al publicar el boletín, para
+conservar mapa/timeline/medios «años, no meses» de los destacados.

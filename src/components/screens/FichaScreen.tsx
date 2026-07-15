@@ -24,7 +24,23 @@ function stateVar(s: FireState): string {
   return V[s];
 }
 
-export function FichaScreen({ fire }: { fire: Fire }) {
+export function FichaScreen({
+  fire,
+  origin = 'live',
+  asOf,
+  boletinId,
+  hasLocation = true,
+}: {
+  fire: Fire;
+  /** Procedencia del dato: en vivo, archivo o destacado del boletín. */
+  origin?: 'live' | 'archive' | 'boletin';
+  /** Fecha del último dato conocido (modo histórico). */
+  asOf?: string;
+  /** Edición del boletín de la que procede (origin='boletin'). */
+  boletinId?: string;
+  /** Hay coordenadas reales (si no, se oculta el mapa). */
+  hasLocation?: boolean;
+}) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
@@ -35,13 +51,23 @@ export function FichaScreen({ fire }: { fire: Fire }) {
   const toggleFollow = useFollowStore((s) => s.toggle);
   const following = mounted && followedFires.some((f) => f.slug === fire.slug);
   const [copied, setCopied] = useState(false);
+  // Modo histórico: el incendio ya no está en las fuentes en vivo. Se muestra el
+  // último dato conocido, sin señales de «ahora» (meteo, confirmación satelital,
+  // avance 24 h) y con banner sobrio.
+  const historical = origin !== 'live';
 
   const stateLabel =
     fire.country === 'PT' && fire.ptState ? PT_TEXT[fire.ptState] : d.states[STATE_LABEL_KEY[fire.state]];
-  const dateFmt = (iso: string) =>
-    `${new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', timeZone: 'Europe/Madrid' }).format(
-      Date.parse(iso),
-    )} · ${formatClock(Date.parse(iso))}`;
+  const dateFmt = (iso: string) => {
+    const day = new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: 'short',
+      timeZone: 'Europe/Madrid',
+    }).format(Date.parse(iso));
+    // Sin reloj cuando el ISO es solo-fecha (p. ej. periodo del boletín): añadir
+    // una hora sería fabricarla (medianoche UTC → «· 02:00»).
+    return iso.includes('T') ? `${day} · ${formatClock(Date.parse(iso))}` : day;
+  };
 
   const back = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
@@ -70,9 +96,17 @@ export function FichaScreen({ fire }: { fire: Fire }) {
 
   return (
     <main id="contenido" className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg">
-      {/* Mapa enfocado */}
+      {/* Mapa enfocado (oculto si no hay coordenadas reales, p. ej. dato del boletín) */}
       <div className="relative min-h-0 flex-1 bg-bg-map">
-        <FireMiniMapClient fire={fire} />
+        {hasLocation ? (
+          <FireMiniMapClient fire={fire} />
+        ) : (
+          <div className="grid h-full place-items-center px-6 text-center">
+            <span className="font-mono text-[11px] text-fg-mute">
+              {fire.region.replace(/\s*\(PT\)/, '')}
+            </span>
+          </div>
+        )}
 
         <div className="absolute left-3 right-3 top-3.5 z-[3] flex items-center gap-2">
           <button
@@ -96,7 +130,7 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </div>
         </div>
 
-        {fire.satelliteConfirmed && (
+        {!historical && fire.satelliteConfirmed && (
           <div
             className="if-overlay absolute left-3 top-[62px] z-[3] inline-flex items-center gap-1.5 rounded-[5px] px-[9px] py-[5px]"
             style={{ borderColor: mix(V.foco, 40) }}
@@ -113,19 +147,48 @@ export function FichaScreen({ fire }: { fire: Fire }) {
       <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card">
         <div className="mx-auto mt-2 h-1 w-9 flex-none rounded-full" style={{ background: 'var(--border-strong)' }} aria-hidden />
 
+        {historical && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: 'var(--border-default)', background: mix(V.foco, 8) }}
+          >
+            <p className="text-[11px] leading-snug text-fg-secondary">
+              {d.fire.historicalNote}
+              {asOf && (
+                <span className="text-fg-mute"> {interpolate(d.fire.historicalAsOf, { date: dateFmt(asOf) })}</span>
+              )}
+            </p>
+            {boletinId && (
+              <a
+                href={`/boletin/${boletinId}`}
+                className="mt-0.5 inline-block font-mono text-[10px] font-semibold text-action-text"
+              >
+                {d.fire.historicalFromBoletin} ↗
+              </a>
+            )}
+          </div>
+        )}
+
         <div className="flex-none px-4">
           <div className="flex items-center gap-1.5">
+            {/* En histórico el chip va NEUTRO (gris): el color codifica dato (rojo =
+                activo = ardiendo ahora) y no debe leerse como actividad en vivo. */}
             <span
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-chip border px-[9px] py-[3.5px] text-[10.5px] font-bold leading-none tracking-[0.04em]',
-                STATE_TEXT_CLASS[fire.state],
+                historical ? 'border-strong text-fg-secondary' : STATE_TEXT_CLASS[fire.state],
               )}
-              style={{ backgroundColor: mix(stateVar(fire.state), 14), borderColor: mix(stateVar(fire.state), 45) }}
+              style={
+                historical
+                  ? undefined
+                  : { backgroundColor: mix(stateVar(fire.state), 14), borderColor: mix(stateVar(fire.state), 45) }
+              }
             >
               <StateGlyph state={fire.state} size={10} />
               {stateLabel.toUpperCase()}
             </span>
-            {fire.level != null && fire.level >= 1 && (
+            {/* NIVEL es dato operativo caduco: se oculta en histórico. */}
+            {!historical && fire.level != null && fire.level >= 1 && (
               <span
                 className="rounded-chip border px-[9px] py-[3.5px] font-mono text-[10.5px] font-bold text-state-controlado-text"
                 style={{ backgroundColor: mix(V.controlado, 12), borderColor: mix(V.controlado, 45) }}
@@ -157,7 +220,11 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </p>
           <p className="mt-1.5 font-mono text-[9.5px] text-fg-mute">
             {d.fire.source}: {fire.sources.map((s) => SOURCES[s].label).join(' · ')} —{' '}
-            {interpolate(d.status.updatedAgo, { when: timeAgo(fire.updatedAt, now, locale) })}
+            {historical
+              ? asOf
+                ? interpolate(d.fire.historicalAsOf, { date: dateFmt(asOf) })
+                : d.fire.historicalNote
+              : interpolate(d.status.updatedAgo, { when: timeAgo(fire.updatedAt, now, locale) })}
           </p>
         </div>
 
@@ -174,20 +241,22 @@ export function FichaScreen({ fire }: { fire: Fire }) {
                   {fire.hectaresApprox ? '~' : ''}
                   {formatNumber(fire.hectares)} <span className="text-[11px] text-fg-secondary">ha</span>
                 </div>
-                <div
-                  className={cn(
-                    'whitespace-nowrap font-mono text-[10px] font-medium',
-                    fire.hectaresApprox || !(fire.delta24h && fire.delta24h > 0)
-                      ? 'text-fg-mute'
-                      : 'text-state-activo-text',
-                  )}
-                >
-                  {fire.hectaresApprox
-                    ? d.fire.approx
-                    : fire.delta24h && fire.delta24h > 0
-                      ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
-                      : d.fire.noProgress}
-                </div>
+                {(fire.hectaresApprox || !historical) && (
+                  <div
+                    className={cn(
+                      'whitespace-nowrap font-mono text-[10px] font-medium',
+                      fire.hectaresApprox || historical || !(fire.delta24h && fire.delta24h > 0)
+                        ? 'text-fg-mute'
+                        : 'text-state-activo-text',
+                    )}
+                  >
+                    {fire.hectaresApprox
+                      ? d.fire.approx
+                      : fire.delta24h && fire.delta24h > 0
+                        ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
+                        : d.fire.noProgress}
+                  </div>
+                )}
               </>
             ) : (
               <div className="mt-1 whitespace-nowrap font-mono text-[13px] font-semibold text-fg-secondary">
@@ -197,8 +266,16 @@ export function FichaScreen({ fire }: { fire: Fire }) {
           </div>
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.start}</div>
-            <div className="mt-1 font-mono text-[15px] font-semibold">{dateFmt(fire.startedAt)}</div>
-            <div className="font-mono text-[9.5px] text-fg-mute">{timeAgo(fire.startedAt, now, locale)}</div>
+            {/* origin='boletin' no conoce la ignición real (startedAt = lunes de la
+                semana del boletín): «sin dato» antes que una fecha inventada. */}
+            {origin === 'boletin' ? (
+              <div className="mt-1 font-mono text-[15px] font-semibold text-fg-mute">{d.kpis.noData}</div>
+            ) : (
+              <>
+                <div className="mt-1 font-mono text-[15px] font-semibold">{dateFmt(fire.startedAt)}</div>
+                <div className="font-mono text-[9.5px] text-fg-mute">{timeAgo(fire.startedAt, now, locale)}</div>
+              </>
+            )}
           </div>
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.resources}</div>
@@ -281,25 +358,30 @@ export function FichaScreen({ fire }: { fire: Fire }) {
 
         {/* Acciones */}
         <div className="flex flex-none gap-2 border-t px-4 py-2.5">
-          <button
-            type="button"
-            onClick={() => toggleFollow({ slug: fire.slug, name: fire.name, region: fire.region })}
-            aria-pressed={following}
-            className={cn(
-              'flex h-10 flex-1 items-center justify-center rounded-btn border text-[12.5px] font-semibold',
-              following ? 'text-ok-text' : 'text-action-text',
-            )}
-            style={{
-              backgroundColor: mix(following ? V.ok : V.action, 16),
-              borderColor: mix(following ? V.ok : V.action, 55),
-            }}
-          >
-            {following ? `✓ ${d.fire.following}` : d.fire.follow}
-          </button>
+          {!historical && (
+            <button
+              type="button"
+              onClick={() => toggleFollow({ slug: fire.slug, name: fire.name, region: fire.region })}
+              aria-pressed={following}
+              className={cn(
+                'flex h-10 flex-1 items-center justify-center rounded-btn border text-[12.5px] font-semibold',
+                following ? 'text-ok-text' : 'text-action-text',
+              )}
+              style={{
+                backgroundColor: mix(following ? V.ok : V.action, 16),
+                borderColor: mix(following ? V.ok : V.action, 55),
+              }}
+            >
+              {following ? `✓ ${d.fire.following}` : d.fire.follow}
+            </button>
+          )}
           <button
             type="button"
             onClick={share}
-            className="flex h-10 w-[120px] items-center justify-center rounded-btn border border-strong text-[12.5px] font-semibold text-fg-secondary"
+            className={cn(
+              'flex h-10 items-center justify-center rounded-btn border border-strong text-[12.5px] font-semibold text-fg-secondary',
+              historical ? 'flex-1' : 'w-[120px]',
+            )}
           >
             {copied ? d.fire.copied : d.fire.shareCta}
           </button>

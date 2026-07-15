@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { getFire } from '@/lib/data';
+import { resolveFire } from '@/lib/fires/resolve';
 import { dark } from '@/lib/design/tokens';
 import { formatNumber } from '@/lib/utils/format';
 
@@ -18,7 +18,9 @@ const STATE_COLOR: Record<string, string> = {
 
 export default async function OgImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const fire = await getFire(slug);
+  const resolved = await resolveFire(slug);
+  const fire = resolved?.fire ?? null;
+  const historical = Boolean(resolved && resolved.origin !== 'live');
 
   const stamped = new Date().toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -55,7 +57,10 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <span style={{ fontSize: 30, color: dark.text.secondary }}>
-            {fire ? `${fire.municipality} · ${fire.province}` : 'Incendio'}
+            {fire
+              ? [fire.municipality, fire.province].filter((x) => x && x !== '—').join(' · ') ||
+                fire.region.replace(/\s*\(PT\)/, '')
+              : 'Incendio'}
           </span>
           <span style={{ fontSize: 72, fontWeight: 700, letterSpacing: '-0.02em' }}>
             {fire ? `Incendio de ${fire.name}` : 'No encontrado'}
@@ -69,7 +74,8 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
                   gap: 14,
                   fontSize: 34,
                   fontWeight: 600,
-                  color: STATE_COLOR[fire.state] ?? dark.text.primary,
+                  // Histórico: color neutro (no rojo) para no leerse como activo en vivo.
+                  color: historical ? dark.text.mute : (STATE_COLOR[fire.state] ?? dark.text.primary),
                 }}
               >
                 <span
@@ -77,7 +83,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
                     width: 22,
                     height: 22,
                     borderRadius: '50%',
-                    background: STATE_COLOR[fire.state] ?? dark.text.primary,
+                    background: historical ? dark.text.mute : (STATE_COLOR[fire.state] ?? dark.text.primary),
                   }}
                 />
                 {fire.state.toUpperCase()}
@@ -90,7 +96,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
         </div>
 
         <span style={{ fontSize: 24, color: dark.text.mute }}>
-          Estado a las {stamped} · No sustituye al 112
+          {historical ? 'Histórico' : `Estado a las ${stamped}`} · No sustituye al 112
         </span>
       </div>
     ),

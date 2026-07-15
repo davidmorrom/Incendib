@@ -6,7 +6,7 @@
 
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Boletin } from '@/types/boletin';
+import type { Boletin, BoletinHighlight } from '@/types/boletin';
 
 const DIR = path.join(process.cwd(), 'src/content/boletines');
 
@@ -49,4 +49,23 @@ export function adjacentBoletines(id: string): { older: Boletin | null; newer: B
   const i = items.findIndex((b) => b.id === id);
   if (i < 0) return { older: null, newer: null };
   return { older: items[i + 1] ?? null, newer: items[i - 1] ?? null };
+}
+
+/**
+ * Busca un slug entre los destacados de cualquier edición. Sirve para recuperar
+ * la ficha de un incendio ya extinguido que un boletín referencia (los boletines
+ * viven en git para siempre, así que este es el suelo permanente de esos enlaces).
+ * Devuelve la coincidencia más reciente (la lista va de más reciente a más antigua).
+ */
+export function findHighlight(slug: string): { highlight: BoletinHighlight; boletin: Boletin } | null {
+  for (const b of listBoletines()) {
+    const highlight = b.highlights.find((h) => h.slug === slug);
+    if (highlight) return { highlight, boletin: b };
+  }
+  return null;
+}
+
+/** Slugs únicos referenciados en destacados de boletines (para prerender y sitemap). */
+export function allHighlightSlugs(): string[] {
+  return [...new Set(listBoletines().flatMap((b) => b.highlights.map((h) => h.slug)))];
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getFires } from '@/lib/data';
-import { listBoletines } from '@/lib/boletin/store';
+import { listBoletines, allHighlightSlugs } from '@/lib/boletin/store';
 
 // Dominio canónico del proyecto (custom domain), sobreescribible por entorno.
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://incendib.es';
@@ -38,12 +38,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let fireRoutes: MetadataRoute.Sitemap = [];
   try {
     const fires = await getFires();
+    const liveSlugs = new Set(fires.map((f) => f.slug));
     fireRoutes = fires.map((f) => ({
       url: `${SITE}/f/${f.slug}`,
       lastModified: safeDate(f.updatedAt) ?? now,
       changeFrequency: 'hourly',
       priority: 0.5,
     }));
+    // Fichas históricas de incendios referenciados en boletines (resuelven de
+    // forma permanente vía el destacado en git); indexables y citables.
+    for (const slug of allHighlightSlugs()) {
+      if (liveSlugs.has(slug)) continue;
+      fireRoutes.push({
+        url: `${SITE}/f/${slug}`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: 0.3,
+      });
+    }
   } catch {
     /* una fuente caída no debe romper el sitemap */
   }
