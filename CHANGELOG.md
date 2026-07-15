@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.20.0] - 2026-07-16
+
+### Añadido
+
+- **Banner de aviso global** (consumo del panel privado). El panel escribe
+  `override:banner` en el mismo Upstash; el visor lo LEE en el layout de la app
+  (`src/lib/overrides/store.ts`, patrón null-safe como `history/store.ts`, lectura
+  cacheada con `unstable_cache` + etiqueta) y lo pinta con `<SiteBanner/>`: banda en
+  el flujo (no tapa el contenido), color por nivel (info/aviso/crítico), i18n con
+  respaldo a ES, descartable (recordado por `updatedAt`) y con `aria-live`. Nunca
+  sustituye el disclaimer 112; si no hay banner activo, no se muestra nada (inerte).
+- **`POST /api/admin/revalidate`** (Bearer `PANEL_TOKEN`, fail-closed): el panel lo
+  llama tras publicar para invalidar la caché del banner sin esperar al TTL (5 min).
+  Es el primer slice de la capa de overrides (los overrides por incendio llegarán
+  después). Ver `Incendib-Panel/docs/INTEGRACION-INCENDIB.md`.
+
 ## [0.19.1] - 2026-07-16
 
 ### Añadido

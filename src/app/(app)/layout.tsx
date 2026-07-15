@@ -2,7 +2,9 @@ import { I18nProvider } from '@/components/i18n/I18nProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { DesktopTopNav } from '@/components/layout/DesktopTopNav';
 import { NetworkStatus } from '@/components/layout/NetworkStatus';
+import { SiteBanner } from '@/components/layout/SiteBanner';
 import { SkipLink } from '@/components/layout/SkipLink';
+import { getBannerCached } from '@/lib/overrides/store';
 
 /**
  * Shell de la app: marco de altura de viewport con área de contenido scrollable
@@ -10,7 +12,8 @@ import { SkipLink } from '@/components/layout/SkipLink';
  * componentes cliente. La ficha /f/{slug} vive fuera de este grupo (pantalla
  * completa, sin barra inferior).
  */
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const banner = await getBannerCached();
   return (
     <I18nProvider>
       <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg print:block print:h-auto print:overflow-visible">
@@ -18,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="print:hidden">
           <NetworkStatus />
         </div>
+        <SiteBanner banner={banner} />
         <DesktopTopNav className="hidden lg:flex print:!hidden" />
         <main
           id="contenido"
