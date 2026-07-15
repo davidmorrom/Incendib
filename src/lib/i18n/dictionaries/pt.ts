@@ -79,6 +79,7 @@ const pt: Dictionary = {
     historicalNote: 'Ficha histórica: este incêndio já não consta nas fontes em direto.',
     historicalAsOf: 'Último dado: {date}.',
     historicalFromBoletin: 'Segundo o boletim semanal',
+    noLocation: 'Localização não disponível',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sem avanço 24 h',
     approx: 'estimativa satélite',

@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.20.1] - 2026-07-16
+
+### Corregido
+
+- **Ficha histórica sin ubicación**: los incendios destacados en un boletín
+  anterior al archivo (extinguidos antes de que se guardara su ubicación) no
+  tienen coordenadas recuperables. En lugar de un mapa vacío, la ficha muestra
+  ahora un estado sobrio «Ubicación no disponible». Los incendios que se extingan
+  de aquí en adelante conservan su mapa (el archivo guarda las coordenadas).
+
 ## [0.20.0] - 2026-07-16
 
 ### Añadido
