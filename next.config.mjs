@@ -54,6 +54,19 @@ const nextConfig = {
   // maplibre-gl / react-map-gl ship modern ESM (la lógica v8 vive en
   // @vis.gl/react-maplibre); transpilarlos evita errores de ESM sin procesar.
   transpilePackages: ['maplibre-gl', 'react-map-gl', '@vis.gl/react-maplibre'],
+  async redirects() {
+    return [
+      {
+        // La edición 2026-w27 se retiró (era una foto en vivo del 12-jul mal
+        // etiquetada como semana ISO 27). Su URL era pública y citable, así que
+        // redirigimos al índice en lugar de dejar un enlace muerto o seguir
+        // sirviendo la página estática cacheada.
+        source: '/boletin/2026-w27',
+        destination: '/boletines',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
