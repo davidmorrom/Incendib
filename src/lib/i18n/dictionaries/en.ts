@@ -79,6 +79,7 @@ const en: Dictionary = {
     historicalNote: 'Historical record: this fire is no longer in the live sources.',
     historicalAsOf: 'Last data: {date}.',
     historicalFromBoletin: 'Per the weekly bulletin',
+    noLocation: 'Location unavailable',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'no spread 24 h',
     approx: 'satellite estimate',

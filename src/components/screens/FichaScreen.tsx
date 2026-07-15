@@ -101,8 +101,23 @@ export function FichaScreen({
         {hasLocation ? (
           <FireMiniMapClient fire={fire} />
         ) : (
-          <div className="grid h-full place-items-center px-6 text-center">
-            <span className="font-mono text-[11px] text-fg-mute">
+          // Sin coordenadas (dato histórico del boletín): estado claro y sobrio en
+          // vez de un mapa vacío o uno en una ubicación inventada.
+          <div className="grid h-full place-items-center gap-1.5 px-6 text-center">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--text-mute)"
+              strokeWidth="1.4"
+              aria-hidden
+            >
+              <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z" />
+              <line x1="3" y1="3" x2="21" y2="21" />
+            </svg>
+            <span className="text-[12px] font-medium text-fg-secondary">{d.fire.noLocation}</span>
+            <span className="font-mono text-[10px] text-fg-mute">
               {fire.region.replace(/\s*\(PT\)/, '')}
             </span>
           </div>

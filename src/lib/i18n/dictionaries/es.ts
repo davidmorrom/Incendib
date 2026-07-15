@@ -78,6 +78,7 @@ const es = {
     historicalNote: 'Ficha histórica: este incendio ya no figura en las fuentes en vivo.',
     historicalAsOf: 'Último dato: {date}.',
     historicalFromBoletin: 'Según el boletín semanal',
+    noLocation: 'Ubicación no disponible',
     delta24h: '▲ {n} / 24 h',
     noProgress: 'sin avance 24 h',
     approx: 'estimación satélite',
