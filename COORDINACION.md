@@ -303,6 +303,37 @@ dentro de `recordFireHistory`, que el cron ya invoca) ni el esquema/JSON del bol
 en git (`src/content/archive/<slug>.json`) escrito al publicar el boletín, para
 conservar mapa/timeline/medios «años, no meses» de los destacados.
 
+### 2026-07-16 — Agente D (panel↔visor): banner global (v0.20.0)
+
+**Tarea:** consumir en el visor el **banner global** que escribe el panel privado
+(`Incendib-Panel`, Fase 3). Primer slice de la capa de overrides; solo lectura.
+
+**Hecho e integrado en `main` (verificado: typecheck + lint + 123 tests + build; y
+recorrido real local contra el Upstash compartido — set banner → SSR lo pinta;
+revalidate 401/200; borrado → inerte):**
+
+1. `src/lib/overrides/store.ts` (**nuevo**): `getBanner()` null-safe (patrón de
+   `history/store.ts`), lectura cacheada `getBannerCached` (`unstable_cache`, tag
+   `override:banner`, TTL 5 min) y helpers puros (`bannerText`, `shouldShowBanner`)
+   + test.
+2. `src/components/layout/SiteBanner.tsx` (**nuevo**): banda en flujo, color por
+   nivel (tokens), i18n con respaldo a ES, descartable, `aria-live`. No toca el 112.
+3. `src/app/api/admin/revalidate/route.ts` (**nuevo**): Bearer `PANEL_TOKEN`,
+   fail-closed; `revalidateTag('override:banner')`.
+4. ⚠️ **Fichero compartido**: `src/app/(app)/layout.tsx` — cambio **mínimo y
+   aditivo**: lo hago `async`, leo `getBannerCached()` y renderizo `<SiteBanner/>`
+   justo tras `NetworkStatus`. No toco vuestra estructura ni las clases `print:`.
+
+**Inerte por defecto**: sin banner activo en Redis no se muestra nada; el deploy no
+cambia incendib.es hasta que el propietario publique un banner desde el panel.
+**Acción del propietario:** definir `PANEL_TOKEN` en Vercel (Production) del visor
+—el mismo valor que en el panel— para que la revalidación tras publicar funcione.
+
+**Tocado (rutas explícitas):** `src/lib/overrides/*` (nuevo), `src/components/layout/SiteBanner.tsx`
+(nuevo), `src/app/api/admin/revalidate/route.ts` (nuevo), `src/app/(app)/layout.tsx`,
+`CHANGELOG.md`, `package.json`, este `COORDINACION.md`. **No he tocado** adapters,
+boletín, screens, i18n. **Versión:** tomo **v0.20.0**. **Siguiente tag libre: 0.20.1.**
+
 ### 2026-07-16 — Agente A, Fase 2 hecha (v0.19.1) — archivo permanente en git
 
 El propietario la aprobó. Instantáneas ricas de los destacados en
