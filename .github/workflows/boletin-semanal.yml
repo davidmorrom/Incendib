@@ -48,12 +48,19 @@ jobs:
           rm -f edicion.json
           echo "BOLETIN_ID=$ID" >> "$GITHUB_ENV"
 
+      # Instantánea rica y permanente de los incendios destacados (ficha histórica
+      # que sobrevive «años, no meses»). No-fatal: nunca debe bloquear la publicación.
+      - name: Archivar destacados
+        continue-on-error: true
+        run: node scripts/snapshot-archive.mjs "${BOLETIN_ID}"
+
       - name: Commit y push si es nueva
         run: |
           set -euo pipefail
           git config user.name "David Moreno Romero"
           git config user.email "david.morrom.contact@gmail.com"
           git add "src/content/boletines/${BOLETIN_ID}.json"
+          git add src/content/archive/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "La edición ${BOLETIN_ID} ya estaba publicada; nada que hacer."
           else

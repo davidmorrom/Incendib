@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { getFire } from '@/lib/data';
 import { getArchivedFire } from '@/lib/history/store';
+import { readArchivedFireGit } from '@/lib/history/archive-git';
 import { findHighlight } from '@/lib/boletin/store';
 import type { Fire } from '@/types/fire';
 import type { Boletin, BoletinHighlight } from '@/types/boletin';
@@ -51,12 +52,14 @@ export function fireFromHighlight(h: BoletinHighlight, b: Boletin): Fire {
 
 /**
  * Resuelve la ficha de un incendio por slug con permanencia en cascada:
- *   1) en vivo (getFire)              → estado actual, como hoy
- *   2) archivo Redis (getArchivedFire)→ última foto rica congelada (mapa incluido)
- *   3) destacado del boletín (git)    → dato slim permanente; recupera enlaces viejos
- *   4) null                           → 404
- * Envuelta en cache() para deduplicar dentro de una misma request (page +
- * generateMetadata comparten el resultado). Nunca lanza (cada capa es null-safe).
+ *   1) en vivo (getFire)                  → estado actual, como hoy
+ *   2) archivo Redis (getArchivedFire)    → última foto rica congelada (mapa); ~1 año
+ *   3) archivo git (readArchivedFireGit)  → instantánea rica PERMANENTE (destacados)
+ *   4) destacado del boletín (findHighlight) → dato slim permanente; recupera enlaces viejos
+ *   5) null                               → 404
+ * Redis va antes que git porque captura la última foto (más fresca, hasta la
+ * extinción); git es el suelo permanente cuando Redis ya caducó. Envuelta en
+ * cache() para deduplicar dentro de una misma request. Nunca lanza.
  */
 export const resolveFire = cache(async (slug: string): Promise<ResolvedFire | null> => {
   const live = await getFire(slug);
@@ -65,6 +68,11 @@ export const resolveFire = cache(async (slug: string): Promise<ResolvedFire | nu
   const archived = await getArchivedFire(slug);
   if (archived) {
     return { fire: archived, origin: 'archive', asOf: archived.updatedAt, hasLocation: hasRealLocation(archived) };
+  }
+
+  const git = readArchivedFireGit(slug);
+  if (git) {
+    return { fire: git, origin: 'archive', asOf: git.updatedAt, hasLocation: hasRealLocation(git) };
   }
 
   const found = findHighlight(slug);

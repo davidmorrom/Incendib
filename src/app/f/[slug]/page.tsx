@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getFires, getWeather, getNews } from '@/lib/data';
 import { resolveFire } from '@/lib/fires/resolve';
 import { allHighlightSlugs } from '@/lib/boletin/store';
+import { listArchivedGitSlugs } from '@/lib/history/archive-git';
 import { relatedNews } from '@/lib/fires/news-match';
 import { getFireEvents } from '@/lib/history/store';
 import { FichaScreen } from '@/components/screens/FichaScreen';
@@ -21,7 +22,11 @@ export async function generateStaticParams() {
   // (dynamicParams por defecto). Nunca rompe el build si una fuente falla.
   try {
     const fires = await getFires();
-    const slugs = new Set<string>([...fires.map((f) => f.slug), ...allHighlightSlugs()]);
+    const slugs = new Set<string>([
+      ...fires.map((f) => f.slug),
+      ...allHighlightSlugs(),
+      ...listArchivedGitSlugs(),
+    ]);
     return [...slugs].map((slug) => ({ slug }));
   } catch {
     return [];
