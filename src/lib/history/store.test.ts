@@ -3,7 +3,7 @@ import { fireChangeEvents, snapOf, type FireSnap } from './store';
 import type { Fire } from '@/types/fire';
 
 const AT = '2026-07-12T18:00:00Z';
-const base: FireSnap = { state: 'activo', level: 1, aerial: 0, ground: 0, personnel: 0 };
+const base: FireSnap = { state: 'activo', level: 1, aerial: 0, ground: 0, personnel: 0, hectares: 0 };
 
 describe('fireChangeEvents', () => {
   it('registra la bajada de nivel', () => {
@@ -61,8 +61,9 @@ describe('snapOf', () => {
     const f = {
       state: 'controlado',
       level: 1,
+      hectares: 42,
       resources: { aerial: 4, ground: 3, personnel: 20 },
     } as Fire;
-    expect(snapOf(f)).toEqual({ state: 'controlado', level: 1, aerial: 4, ground: 3, personnel: 20 });
+    expect(snapOf(f)).toEqual({ state: 'controlado', level: 1, aerial: 4, ground: 3, personnel: 20, hectares: 42 });
   });
 });

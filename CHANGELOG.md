@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.19.0] - 2026-07-16
+
+### Añadido
+
+- **Histórico de fichas de incendio.** Las fichas `/f/[slug]` dejan de dar 404
+  cuando el incendio se extingue y sale de las fuentes en vivo (rompía los enlaces
+  a incendios destacados en el boletín). Ahora resuelven en cascada: dato **en
+  vivo** → **archivo** (el cron guarda la última foto conocida de cada incendio,
+  solo cuando cambia algo) → **destacado del boletín** (dato permanente en git) →
+  404. Las fichas históricas se marcan con un banner sobrio («ya no figura en las
+  fuentes en vivo»), con el chip de estado en neutro y sin las señales de actividad
+  actual (meteo, confirmación satelital, avance 24 h, botón de seguimiento); la
+  imagen para compartir estampa «Histórico». Los enlaces de incendios del boletín
+  quedan indexables en el sitemap.
+
 ## [0.18.0] - 2026-07-14
 
 ### Añadido

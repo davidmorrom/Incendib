@@ -17,6 +17,10 @@ const SNAP_KEY = 'hist:snap'; // map slug → FireSnap (última foto)
 const EV_PREFIX = 'hist:ev:'; // por incendio: lista de eventos (JSON)
 const MAX_EVENTS = 15;
 const TTL_S = 21 * 24 * 3600; // 21 días
+// Archivo del Fire completo por incendio: última foto conocida, para que la ficha
+// /f/[slug] sobreviva a la extinción (cuando el incendio sale del feed en vivo).
+const ARCHIVE_PREFIX = 'hist:fire:';
+const ARCHIVE_TTL_S = 365 * 24 * 3600; // 1 año desde el último cambio (un incendio nunca dura tanto)
 
 let client: Redis | null | undefined;
 function redis(): Redis | null {
@@ -33,6 +37,8 @@ export interface FireSnap {
   aerial: number;
   ground: number;
   personnel: number;
+  /** Superficie: parte de la firma de cambio para refrescar el archivo cuando crece. */
+  hectares: number;
 }
 
 export function snapOf(f: Fire): FireSnap {
@@ -42,6 +48,50 @@ export function snapOf(f: Fire): FireSnap {
     aerial: f.resources?.aerial ?? 0,
     ground: f.resources?.ground ?? 0,
     personnel: f.resources?.personnel ?? 0,
+    hectares: f.hectares ?? 0,
+  };
+}
+
+/** Cambió algo relevante entre dos fotos (estado, nivel, medios o superficie).
+ * Gobierna cuándo se reescribe el archivo del incendio: solo ante un cambio real,
+ * no en cada pasada del cron (acota la cuota de comandos de Upstash). */
+function snapChanged(a: FireSnap, b: FireSnap): boolean {
+  return (
+    a.state !== b.state ||
+    a.level !== b.level ||
+    a.aerial !== b.aerial ||
+    a.ground !== b.ground ||
+    a.personnel !== b.personnel ||
+    a.hectares !== b.hectares
+  );
+}
+
+/** Fire para el archivo: sin las señales de «ahora» (meteo, confirmación satelital,
+ * delta 24 h) y con el timeline capado. Es la última foto conocida de la ficha. */
+function slimForArchive(f: Fire): Fire {
+  return {
+    slug: f.slug,
+    name: f.name,
+    municipality: f.municipality,
+    province: f.province,
+    region: f.region,
+    country: f.country,
+    ptState: f.ptState,
+    state: f.state,
+    level: f.level,
+    type: f.type,
+    hectares: f.hectares,
+    hectaresApprox: f.hectaresApprox,
+    coordinates: f.coordinates,
+    startedAt: f.startedAt,
+    updatedAt: f.updatedAt,
+    resources: f.resources,
+    evacuation: f.evacuation,
+    sources: f.sources,
+    timeline: f.timeline?.slice(-20),
+    fwi: f.fwi,
+    perimeter: f.perimeter,
+    // omitidos a propósito: weather, satelliteConfirmed, hotspotKm, delta24h (señales de «ahora»)
   };
 }
 
@@ -81,7 +131,9 @@ export function fireChangeEvents(prev: FireSnap, cur: FireSnap, atIso: string): 
 
 /**
  * Fotografía los incendios y registra los cambios detectados respecto a la
- * última pasada. Pensado para llamarse desde el cron. No lanza.
+ * última pasada. Además, archiva el Fire completo (hist:fire:<slug>) la primera
+ * vez que se ve y cuando cambia algo relevante, para que la ficha sobreviva a la
+ * extinción. Pensado para llamarse desde el cron. No lanza.
  */
 export async function recordFireHistory(fires: Fire[], atIso: string): Promise<void> {
   const r = redis();
@@ -89,20 +141,45 @@ export async function recordFireHistory(fires: Fire[], atIso: string): Promise<v
   try {
     const prevSnap = (await r.get<Record<string, FireSnap>>(SNAP_KEY)) ?? {};
     const nextSnap: Record<string, FireSnap> = {};
+    const toArchive: Fire[] = [];
     for (const f of fires) {
       const cur = snapOf(f);
       nextSnap[f.slug] = cur;
       const prev = prevSnap[f.slug];
+      // Archivo: primera vez o cambio real. NO en cada pasada (acota la cuota de
+      // comandos de Upstash y evita alargar el cron de alertas).
+      if (!prev || snapChanged(prev, cur)) toArchive.push(f);
       if (!prev) continue; // primera vez: sin eventos (la declaración es oficial)
       const evs = fireChangeEvents(prev, cur, atIso);
-      if (!evs.length) continue;
-      const key = `${EV_PREFIX}${f.slug}`;
-      const existing = (await r.get<TimelineEntry[]>(key)) ?? [];
-      await r.set(key, [...existing, ...evs].slice(-MAX_EVENTS), { ex: TTL_S });
+      if (evs.length) {
+        const key = `${EV_PREFIX}${f.slug}`;
+        const existing = (await r.get<TimelineEntry[]>(key)) ?? [];
+        await r.set(key, [...existing, ...evs].slice(-MAX_EVENTS), { ex: TTL_S });
+      }
     }
     await r.set(SNAP_KEY, nextSnap);
+    // Escritura del archivo en un solo round-trip (pipeline).
+    if (toArchive.length) {
+      const p = r.pipeline();
+      for (const f of toArchive) {
+        p.set(`${ARCHIVE_PREFIX}${f.slug}`, slimForArchive(f), { ex: ARCHIVE_TTL_S });
+      }
+      await p.exec();
+    }
   } catch {
     /* el histórico nunca debe romper el cron ni la ficha */
+  }
+}
+
+/** Último Fire conocido de un incendio (para la ficha histórica tras la extinción).
+ * null si no hay archivo o no hay Redis. Nunca lanza. */
+export async function getArchivedFire(slug: string): Promise<Fire | null> {
+  const r = redis();
+  if (!r) return null;
+  try {
+    return (await r.get<Fire>(`${ARCHIVE_PREFIX}${slug}`)) ?? null;
+  } catch {
+    return null;
   }
 }
 
