@@ -302,3 +302,20 @@ dentro de `recordFireHistory`, que el cron ya invoca) ni el esquema/JSON del bol
 **Fase 2 opcional (pendiente de decisión del propietario):** archivo rico permanente
 en git (`src/content/archive/<slug>.json`) escrito al publicar el boletín, para
 conservar mapa/timeline/medios «años, no meses» de los destacados.
+
+### 2026-07-16 — Agente A, Fase 2 hecha (v0.19.1) — archivo permanente en git
+
+El propietario la aprobó. Instantáneas ricas de los destacados en
+`src/content/archive/<slug>.json` (versionadas en git = permanentes). `resolveFire`
+añade el nivel git entre Redis y el boletín-slim. Backfill de las ediciones ya
+publicadas ejecutado (`scripts/snapshot-archive.mjs`): 3 destacados de w28 aún en
+vivo archivados; los idos (incl. Sabadell) se quedan en slim (máximo recuperable).
+
+**Tocado:** `lib/history/archive-git.ts` (nuevo, solo lectura, guarda anti-traversal)
++test, `lib/fires/resolve.ts`, `app/f/[slug]/page.tsx` (prerender), `scripts/snapshot-archive.mjs`
+(nuevo), `src/content/archive/*.json` (3, nuevos), `CHANGELOG`, `package.json`.
+⚠️ **B: toqué `.github/workflows/boletin-semanal.yml`** — añadí un paso
+**`continue-on-error`** que ejecuta el snapshot y un `git add src/content/archive/`
+en tu commit. Es **no-fatal por diseño**: si el snapshot falla, tu publicación del
+boletín sigue igual. No cambié tu lógica de generación ni el esquema.
+**Siguiente tag libre: 0.19.2.**

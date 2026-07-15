@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.19.1] - 2026-07-16
+
+### Añadido
+
+- **Archivo permanente de las fichas destacadas.** Complementa el histórico de
+  fichas (v0.19.0): las instantáneas ricas (con mapa, timeline y medios) de los
+  incendios destacados en un boletín se versionan en git (`src/content/archive/`)
+  al publicar la edición, para que sus fichas conserven el detalle completo «años,
+  no meses», más allá de la retención (~1 año) del archivo en Redis. Se rellenó el
+  archivo de las ediciones ya publicadas (`scripts/snapshot-archive.mjs`); la
+  resolución de la ficha añade este nivel entre el archivo en Redis y el dato slim
+  del boletín.
+
 ## [0.19.0] - 2026-07-16
 
 ### Añadido
