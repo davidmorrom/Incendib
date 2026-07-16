@@ -464,3 +464,24 @@ esté en git o en el índice Redis del paraje (que el cron puebla desde ahora); 
 
 **Commit por rutas explícitas, rebase antes de push. Versión:** tomo **v0.24.0** (último tag
 v0.23.1). **Siguiente tag libre: 0.24.1.**
+
+### 2026-07-16 — Agente E (reactivaciones): marca «reconstruido de prensa» (v0.25.0)
+
+**Tarea (pedida por el propietario):** cuando el registro oficial de un incendio ya no
+existe en ninguna fuente, poder **reconstruir su ficha histórica a partir de prensa** y
+enlazarla como reactivación — pero **marcándolo visible** para no falsear la procedencia.
+Caso: El Barraco (Ávila), evento del 10–12 jul (140 ha, N-403 cortada, origen desbroce con
+cuchilla) que se perdió porque el archivo `hist:fire:*` arrancó el 16 jul.
+
+**Hecho en WORKTREE AISLADO desde `origin/main`** (había WIP de otros agentes en el árbol
+compartido: Agente N en `news`/i18n `news:`, otro en `filters`/`facets`) — typecheck + build OK:
+- `src/types/fire.ts`: campo opcional `reconstructed?` (aditivo).
+- ⚠️ **`src/components/screens/FichaScreen.tsx`**: banner ámbar «reconstruido de prensa» +
+  la línea de fuente muestra «prensa» si `reconstructed`. Aditivo.
+- ⚠️ **i18n** `dictionaries/{es,pt,en}.ts`: claves `fire.reconstructed` y
+  `fire.reconstructedSource`, **solo dentro del bloque `fire:`** (NO toco `news:` de Agente N).
+- Dato: registro `hist:fire:barraco-el-2026-07-10` (reconstructed=true, timeline atribuido a
+  prensa) + índices `hist:place:es:avila:barraco-el` / `hist:prov:avila` (script one-off,
+  no versionado). El actual `cyl-barraco-el-5-145-26` enlaza con él como reactivación.
+
+**Versión:** tomo **v0.25.0** (último tag v0.24.1). **Siguiente tag libre: 0.25.1.**

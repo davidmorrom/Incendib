@@ -185,6 +185,13 @@ export interface Fire {
    */
   edited?: boolean;
   overriddenFields?: string[];
+  /**
+   * Ficha reconstruida a partir de fuentes de PRENSA (no es un parte oficial): se
+   * usa cuando el registro oficial de un incendio ya no existe en ninguna fuente
+   * y se recompone con noticias verificables (cada hito va atribuido en el
+   * timeline). La UI lo marca de forma visible para no falsear la procedencia.
+   */
+  reconstructed?: boolean;
 }
 
 /**

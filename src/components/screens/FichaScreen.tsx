@@ -175,6 +175,19 @@ export function FichaScreen({
       <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card">
         <div className="mx-auto mt-2 h-1 w-9 flex-none rounded-full" style={{ background: 'var(--border-strong)' }} aria-hidden />
 
+        {/* Procedencia: ficha reconstruida a partir de prensa (no oficial). Marca
+            visible y sobria para no falsear el origen del dato. */}
+        {fire.reconstructed && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.controlado, 55), background: mix(V.controlado, 10) }}
+          >
+            <p className="text-[11px] font-semibold leading-snug text-state-controlado-text">
+              ⚠ {d.fire.reconstructed}
+            </p>
+          </div>
+        )}
+
         {/* Reactivación: enlaza este episodio con el incidente actual (si se
             reactivó) o con el anterior (si es él mismo una reactivación). */}
         {reactCurrent && (
@@ -278,7 +291,8 @@ export function FichaScreen({
             {fire.municipality} · {fire.province} · {fire.region.replace(/\s*\(PT\)/, '')}
           </p>
           <p className="mt-1.5 font-mono text-[9.5px] text-fg-mute">
-            {d.fire.source}: {fire.sources.map((s) => SOURCES[s].label).join(' · ')} —{' '}
+            {d.fire.source}:{' '}
+            {fire.reconstructed ? d.fire.reconstructedSource : fire.sources.map((s) => SOURCES[s].label).join(' · ')} —{' '}
             {historical
               ? asOf
                 ? interpolate(d.fire.historicalAsOf, { date: dateFmt(asOf) })

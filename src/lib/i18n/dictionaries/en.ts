@@ -92,6 +92,8 @@ const en: Dictionary = {
     episodeOngoing: 'ongoing',
     episodeHistorical: 'historical',
     viewProvince: 'View fires in {province}',
+    reconstructed: 'Reconstructed from press reports — not an official report.',
+    reconstructedSource: 'press',
   },
   resources: {
     heading: 'Deployed resources',

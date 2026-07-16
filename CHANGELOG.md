@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.25.0] - 2026-07-16
+
+### Añadido
+
+- **Marca «reconstruido de prensa» en la ficha.** Nuevo campo opcional
+  `Fire.reconstructed`: cuando el registro oficial de un incendio ya no existe en
+  ninguna fuente y se recompone a partir de noticias verificables, la ficha lo
+  señala de forma visible (banner ámbar «Reconstruido a partir de prensa — no es
+  un parte oficial») y la línea de fuente muestra «prensa» en vez de un organismo
+  oficial. Cada hito del timeline va atribuido y enlazado a su medio. Preserva la
+  honestidad de procedencia del proyecto (el dato reconstruido se declara, no se
+  disfraza de oficial). i18n ES/PT/EN. Inerte por defecto (sin el campo, nada cambia).
+
 ## [0.24.1] - 2026-07-16
 
 ### Cambiado

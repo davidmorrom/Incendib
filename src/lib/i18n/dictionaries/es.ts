@@ -91,6 +91,8 @@ const es = {
     episodeOngoing: 'en curso',
     episodeHistorical: 'histórico',
     viewProvince: 'Ver incendios de {province}',
+    reconstructed: 'Reconstruido a partir de prensa — no es un parte oficial.',
+    reconstructedSource: 'prensa',
   },
   resources: {
     heading: 'Medios desplegados',
