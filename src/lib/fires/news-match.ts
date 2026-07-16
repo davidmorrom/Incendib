@@ -10,32 +10,12 @@
 
 import type { Fire, TimelineEntry } from '@/types/fire';
 import type { NewsItem } from '@/lib/data/news';
+import { norm, keyToken } from '@/lib/news/text';
 
-const ARTICLES = new Set(['el', 'la', 'los', 'las', 'de', 'del', 'y', 'e', 'en', 'a']);
-/** Palabras comunes que también son topónimos → falsos positivos si se usan solas. */
-const AMBIGUOUS = new Set([
-  'guardia', 'civil', 'real', 'monte', 'sierra', 'vega', 'puerto', 'campo', 'valle',
-  'nuevo', 'nueva', 'villa', 'santa', 'santo', 'aldea', 'torre', 'fuente', 'cerro',
-]);
-
-function norm(s: string): string {
-  // NFD separa los acentos; el filtro [^a-z0-9\s] los elimina junto al resto.
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** Token distintivo de un topónimo (≥5 chars, sin artículos ni ambiguos). */
-export function keyToken(place: string): string | null {
-  const toks = norm(place)
-    .split(' ')
-    .filter((t) => t.length >= 5 && !ARTICLES.has(t) && !AMBIGUOUS.has(t));
-  toks.sort((a, b) => b.length - a.length);
-  return toks[0] ?? null;
-}
+// `keyToken` vive ahora en el módulo compartido de texto (lo usan también el
+// panel de noticias y el agrupado de historias). Se re-exporta para no romper a
+// quien lo importaba desde aquí.
+export { keyToken };
 
 /** Noticias de prensa relacionadas con el incendio, como entradas de timeline. */
 export function relatedNews(fire: Fire, news: NewsItem[], max = 4): TimelineEntry[] {

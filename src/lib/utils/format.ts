@@ -65,3 +65,21 @@ export function formatClock(ms: number): string {
     timeZone: 'Europe/Madrid',
   }).format(ms);
 }
+
+/**
+ * Fecha y hora absolutas y legibles (Europe/Madrid), p. ej. "10 jul, 14:14".
+ * Para el `title`/tooltip de un `<time>` (el relativo oculta la obsolescencia).
+ * Determinista (TZ fija) en server y cliente.
+ */
+export function formatDateTime(iso: string, locale: Locale = 'es'): string {
+  const ms = new Date(iso).getTime();
+  if (Number.isNaN(ms)) return '';
+  return new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/Madrid',
+  }).format(ms);
+}

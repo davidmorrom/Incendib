@@ -5,6 +5,43 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.26.0] - 2026-07-16
+
+### Añadido
+
+- **Panel de noticias avanzado (`/noticias`)**: de lista plana de titulares a una
+  consola de situación.
+  - **Agrupado de historias**: los titulares casi idénticos del mismo suceso
+    (varios medios) se colapsan en una sola tarjeta con «N medios» desplegable
+    (todos los enlaces originales accesibles). La amplitud de cobertura como señal
+    de relevancia, no de gravedad. Núcleo puro y testeado en `src/lib/news/`.
+  - **Enlace titular ↔ incendio**: cada historia se cruza con los incendios que
+    rastreamos (matcher conservador `keyToken`, palabra completa) y muestra un chip
+    con el estado real (color + forma) que enlaza a `/f/{slug}`.
+  - **Facetas y búsqueda en cliente**: país (ES/PT), zonas con recuento, «con
+    evacuación/descontrol», «vinculados a incendio» y búsqueda por texto; recuento
+    de resultados anunciado por `aria-live`.
+  - **Bandas de recencia** (última hora / hoy / ayer / anteriores) y rail
+    **«Incendios con cobertura»** (vista por incendio, seleccionar filtra el feed).
+
+### Cambiado
+
+- **Integridad del dato en noticias**: se retira la etiqueta «EFFIS FireNews» (no
+  se consumía); los titulares sin fecha ya no fingen ser recientes («sin fecha»);
+  la criticidad deja de teñir de rojo y pasa a un marcador etiquetado «menciona
+  evacuación/descontrol · según el titular»; el color se reserva al estado real
+  del incendio enlazado; cuota por país en el feed para no sesgar ES/PT.
+- **Accesibilidad**: `lang` por titular (ES/PT), `<time datetime>` con hora
+  absoluta en el tooltip, aviso de enlace externo, aviso 112 presente, y directo
+  honesto (sin `autoplay`, sin badge «EN DIRECTO» animado ni sobrepromesa).
+
+### Corregido
+
+- **Bug latente de normalización de texto** (`norm`): las marcas diacríticas
+  partían la palabra («Aragón» → «arago n»), lo que impedía emparejar topónimos
+  acentuados. Ahora se eliminan; mejora también el emparejamiento de prensa de la
+  ficha (`relatedNews`) y la detección de zona de las noticias.
+
 ## [0.25.0] - 2026-07-16
 
 ### Añadido

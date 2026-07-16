@@ -23,7 +23,7 @@ function fire(p: Partial<Fire>): Fire {
 }
 
 function news(title: string, at = '2026-07-10T10:00:00Z'): NewsItem {
-  return { id: title, region: 'X', tone: 'warn', at, source: 'RTVE', title, url: `https://news/${encodeURIComponent(title)}` };
+  return { id: title, region: 'X', country: 'ES', tone: 'warn', at, source: 'RTVE', title, url: `https://news/${encodeURIComponent(title)}` };
 }
 
 describe('keyToken', () => {
