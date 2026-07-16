@@ -69,3 +69,66 @@ export function shouldShowBanner(
   if (banner.dismissible && dismissedValue === String(banner.updatedAt)) return false;
   return true;
 }
+
+// ── Overrides por incendio ────────────────────────────────────────────────────────
+/**
+ * Estado de overrides que el panel escribe en `override:state`. Por ahora el visor
+ * SOLO aplica los ocultamientos (`hidden`/`hiddenHotspots`/`hiddenBurned`); las
+ * ediciones por campo (`patches`) y las altas manuales (`manualFires`) se transportan
+ * en el tipo pero se aplicarán en un slice posterior (necesitan sello «corregido a
+ * mano» en la UI). Todo es **inerte por defecto**: sin overrides, los datos salen igual.
+ */
+export type FirePatch = Record<string, unknown>;
+
+export interface OverrideState {
+  hidden: string[]; // slugs de incidentes a ocultar
+  hiddenHotspots: string[]; // ids de focos FIRMS a ocultar
+  hiddenBurned: string[]; // slugs de áreas quemadas (EFFIS) a ocultar
+  patches: Record<string, FirePatch>; // (aún no aplicado por el visor)
+  manualFires: unknown[]; // (aún no aplicado por el visor)
+  updatedAt: number;
+}
+
+const STATE_KEY = 'override:state';
+/** Etiqueta de caché; el panel la invalida vía `POST /api/admin/revalidate`. */
+export const STATE_TAG = 'override:state';
+
+export const EMPTY_STATE: OverrideState = {
+  hidden: [],
+  hiddenHotspots: [],
+  hiddenBurned: [],
+  patches: {},
+  manualFires: [],
+  updatedAt: 0,
+};
+
+/** Estado de overrides vigente, o `EMPTY_STATE` si no hay (o no hay Redis). Nunca lanza. */
+export async function getOverrides(): Promise<OverrideState> {
+  const r = redis();
+  if (!r) return EMPTY_STATE;
+  try {
+    return (await r.get<OverrideState>(STATE_KEY)) ?? EMPTY_STATE;
+  } catch {
+    return EMPTY_STATE;
+  }
+}
+
+/** Lectura cacheada para el hot path (`getFires`); refrescada por tag o cada 5 min. */
+export const getOverridesCached = unstable_cache(async () => getOverrides(), ['override-state'], {
+  tags: [STATE_TAG],
+  revalidate: 300,
+});
+
+/** Quita los elementos cuyo `slug` esté en la lista. Identidad si la lista está vacía. Puro. */
+export function filterOutSlugs<T extends { slug: string }>(items: T[], slugs: string[]): T[] {
+  if (!slugs.length) return items;
+  const hide = new Set(slugs);
+  return items.filter((i) => !hide.has(i.slug));
+}
+
+/** Quita los elementos cuyo `id` esté en la lista. Identidad si la lista está vacía. Puro. */
+export function filterOutIds<T extends { id: string }>(items: T[], ids: string[]): T[] {
+  if (!ids.length) return items;
+  const hide = new Set(ids);
+  return items.filter((i) => !hide.has(i.id));
+}

@@ -21,6 +21,13 @@ import {
   attachPerimeters,
   confirmWithHotspots,
 } from './adapters';
+import {
+  getOverridesCached,
+  filterOutSlugs,
+  filterOutIds,
+  EMPTY_STATE,
+  type OverrideState,
+} from '@/lib/overrides/store';
 
 export type DataMode = 'mock' | 'live';
 
@@ -49,6 +56,7 @@ export function getDataMode(): DataMode {
  * reales). Ver `fetchInfocamFires` — solo re-activar con validación por FIRMS.
  */
 export async function getFires(): Promise<Fire[]> {
+  let fires: Fire[];
   if (getDataMode() === 'live') {
     const [pt, cyl, and, cat, hotspots, perimeters] = await Promise.all([
       fetchFogosActive(),
@@ -58,11 +66,28 @@ export async function getFires(): Promise<Fire[]> {
       fetchFirmsHotspots({ days: 2 }),
       fetchEffisPerimeters(),
     ]);
-    const fires = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    const merged = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
     // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
-    return confirmWithHotspots(fires, hotspots);
+    fires = confirmWithHotspots(merged, hotspots);
+  } else {
+    fires = MOCK_FIRES;
   }
-  return MOCK_FIRES;
+  // Overrides manuales del panel: por ahora, ocultar incidentes. Inerte si no hay.
+  return filterOutSlugs(fires, (await safeOverrides()).hidden);
+}
+
+/**
+ * Estado de overrides tolerante a contextos sin caché de Next. `getOverridesCached`
+ * usa `unstable_cache`, que lanza fuera de un request/prerender (tests unitarios,
+ * scripts). Aquí se degrada a `EMPTY_STATE` para preservar el contrato «nunca lanza»
+ * de `getFires`/`getHotspots`/`getBurnedAreas` (sin overrides = datos tal cual).
+ */
+async function safeOverrides(): Promise<OverrideState> {
+  try {
+    return await getOverridesCached();
+  } catch {
+    return EMPTY_STATE;
+  }
 }
 
 /** Dedup por slug (las fuentes PT/ES no se solapan, pero por seguridad). */
@@ -88,12 +113,10 @@ export async function getFire(slug: string): Promise<Fire | null> {
  * devuelve un cúmulo determinista. Nunca lanza: ante fallo devuelve [].
  */
 export async function getHotspots(): Promise<Hotspot[]> {
-  if (getDataMode() === 'live') {
-    // 2 días: robusto ante ventanas VIIRS/NRT vacías (madrugada). El mapa los
-    // atenúa por antigüedad y el KPI "Focos 24 h" cuenta solo las últimas 24 h.
-    return fetchFirmsHotspots({ days: 2 });
-  }
-  return MOCK_HOTSPOTS;
+  // 2 días: robusto ante ventanas VIIRS/NRT vacías (madrugada). El mapa los
+  // atenúa por antigüedad y el KPI "Focos 24 h" cuenta solo las últimas 24 h.
+  const hotspots = getDataMode() === 'live' ? await fetchFirmsHotspots({ days: 2 }) : MOCK_HOTSPOTS;
+  return filterOutIds(hotspots, (await safeOverrides()).hiddenHotspots);
 }
 
 /**
@@ -106,7 +129,8 @@ export async function getBurnedAreas(): Promise<Fire[]> {
   if (getDataMode() !== 'live') return [];
   const areas = await fetchEffisPerimeters();
   // Cap por higiene visual/perf; ya vienen ordenadas por actualización reciente.
-  return areas.slice(0, 250);
+  const capped = areas.slice(0, 250);
+  return filterOutSlugs(capped, (await safeOverrides()).hiddenBurned);
 }
 
 /**
