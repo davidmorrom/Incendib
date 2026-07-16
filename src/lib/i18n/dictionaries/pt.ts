@@ -92,6 +92,8 @@ const pt: Dictionary = {
     episodeOngoing: 'em curso',
     episodeHistorical: 'histórico',
     viewProvince: 'Ver incêndios de {province}',
+    reconstructed: 'Reconstruído a partir de imprensa — não é um comunicado oficial.',
+    reconstructedSource: 'imprensa',
   },
   resources: {
     heading: 'Meios mobilizados',
