@@ -3,11 +3,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { es, getDictionary, isLocale, type Dictionary } from '@/lib/i18n';
 import { useUIStore } from '@/lib/store';
+import { isBasemap } from '@/lib/map/config';
 
 const DictContext = createContext<Dictionary>(es);
 
 const THEME_KEY = 'incendib-theme';
 const LOCALE_KEY = 'incendib-locale';
+const BASEMAP_KEY = 'incendib-basemap';
 
 /**
  * Provee el diccionario del idioma activo a los componentes cliente y
@@ -22,6 +24,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const setLocale = useUIStore((s) => s.setLocale);
   const setTheme = useUIStore((s) => s.setTheme);
   const theme = useUIStore((s) => s.theme);
+  const setBasemap = useUIStore((s) => s.setBasemap);
+  const basemap = useUIStore((s) => s.basemap);
 
   const [dict, setDict] = useState<Dictionary>(es);
   // Estado (no ref): al cambiar provoca re-render, de modo que los efectos de
@@ -38,11 +42,13 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       if (l && isLocale(l)) setLocale(l);
       const t = localStorage.getItem(THEME_KEY);
       if (t === 'dark' || t === 'light') setTheme(t);
+      const b = localStorage.getItem(BASEMAP_KEY);
+      if (isBasemap(b)) setBasemap(b);
     } catch {
       /* almacenamiento no disponible: seguimos con los valores por defecto */
     }
     setHydrated(true);
-  }, [setLocale, setTheme]);
+  }, [setLocale, setTheme, setBasemap]);
 
   // Cargar el diccionario del idioma activo.
   useEffect(() => {
@@ -84,6 +90,16 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       /* noop */
     }
   }, [locale, hydrated]);
+
+  // Persistir mapa base.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(BASEMAP_KEY, basemap);
+    } catch {
+      /* noop */
+    }
+  }, [basemap, hydrated]);
 
   return <DictContext.Provider value={dict}>{children}</DictContext.Provider>;
 }

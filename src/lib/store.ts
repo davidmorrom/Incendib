@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import type { Theme } from '@/lib/design/tokens';
 import type { Locale } from '@/lib/i18n/config';
+import type { Basemap } from '@/lib/map/config';
 
 /** Pestaña activa de la barra inferior. */
 export type Tab = 'mapa' | 'informe' | 'noticias' | 'fuentes' | 'historico';
@@ -28,6 +29,8 @@ interface UIState {
   perimetersVisible: boolean;
   /** Capa de focos satelitales (FIRMS) visible en el mapa. */
   hotspotsVisible: boolean;
+  /** Mapa base elegido (claro/satélite/relieve/oscuro); `auto` sigue el tema. */
+  basemap: Basemap;
   network: NetworkState;
   /** null = seguir preferencia del sistema. */
   theme: Theme | null;
@@ -39,6 +42,7 @@ interface UIState {
   toggleLegend: () => void;
   togglePerimeters: () => void;
   toggleHotspots: () => void;
+  setBasemap: (b: Basemap) => void;
   openShare: () => void;
   closeShare: () => void;
   setCopied: (v: boolean) => void;
@@ -56,6 +60,7 @@ export const useUIStore = create<UIState>((set) => ({
   copied: false,
   perimetersVisible: true,
   hotspotsVisible: true,
+  basemap: 'auto',
   network: 'loading',
   theme: null,
   locale: 'es',
@@ -66,6 +71,7 @@ export const useUIStore = create<UIState>((set) => ({
   toggleLegend: () => set((s) => ({ legendOpen: !s.legendOpen })),
   togglePerimeters: () => set((s) => ({ perimetersVisible: !s.perimetersVisible })),
   toggleHotspots: () => set((s) => ({ hotspotsVisible: !s.hotspotsVisible })),
+  setBasemap: (basemap) => set({ basemap }),
   openShare: () => set({ shareOpen: true, copied: false }),
   closeShare: () => set({ shareOpen: false }),
   setCopied: (copied) => set({ copied }),
