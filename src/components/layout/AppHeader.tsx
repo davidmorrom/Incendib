@@ -12,7 +12,7 @@ const btn =
   'grid h-8 w-8 flex-none place-items-center rounded-[6px] border border-default text-fg-secondary';
 
 /**
- * Cabecera del mapa (2a): marca + buscador + selector de idioma + tema.
+ * Cabecera del mapa (2a): marca + alertas + selector de idioma + tema.
  * El idioma cicla ES→PT→EN; el tema alterna claro/oscuro (persistido).
  */
 export function AppHeader() {
@@ -33,13 +33,6 @@ export function AppHeader() {
       <Logo size={24} />
       <Wordmark className="text-title" />
       <div className="flex-1" />
-
-      <button type="button" className={btn} aria-label={d.map.searchAria}>
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
-          <circle cx="8" cy="8" r="5" />
-          <path d="M12 12 L16 16" />
-        </svg>
-      </button>
 
       <Link href="/alertas" className={btn} aria-label={d.alerts.aria}>
         <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">

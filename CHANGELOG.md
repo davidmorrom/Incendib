@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.23.1] - 2026-07-16
+
+### Corregido
+
+- **Filtros avanzados accesibles en móvil.** La barra de filtros (estado, país,
+  nivel, periodo, superficie) era solo de escritorio; en móvil el chip «+ Filtros»
+  del listado no hacía nada. Ahora abre esos filtros en un panel/modal, así que en
+  móvil también se puede filtrar por más que los cuatro chips rápidos.
+- **Retirados dos controles de búsqueda sin función**: el botón de lupa de la
+  cabecera del mapa y la caja «Buscar lugar…» de la barra superior de escritorio
+  no estaban conectados a ninguna búsqueda (no ocurría nada al usarlos). Se retiran
+  hasta que exista una búsqueda real, para no prometer una acción inexistente.
+
 ## [0.23.0] - 2026-07-16
 
 ### Añadido

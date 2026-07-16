@@ -57,6 +57,7 @@ export function FireListSheet({
   onSelect,
   onHover,
   hoveredSlug,
+  onOpenFilters,
 }: {
   className?: string;
   fires: Fire[];
@@ -66,6 +67,8 @@ export function FireListSheet({
   onSelect: (f: Fire) => void;
   onHover?: (slug: string | null) => void;
   hoveredSlug?: string | null;
+  /** Abre el panel de filtros avanzados (modal en móvil). */
+  onOpenFilters?: () => void;
 }) {
   const d = useDict();
   const now = useNow();
@@ -119,9 +122,13 @@ export function FireListSheet({
           active={filters.country === 'es'}
           onClick={() => onChange({ country: filters.country === 'es' ? 'todos' : 'es' })}
         />
-        <span className={cn(chipBase, 'border-strong text-fg-secondary opacity-70')}>
+        <button
+          type="button"
+          onClick={onOpenFilters}
+          className={cn(chipBase, 'flex-none border-strong text-fg-secondary')}
+        >
           + {d.map.moreFilters}
-        </span>
+        </button>
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto">

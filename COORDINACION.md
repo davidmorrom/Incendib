@@ -410,3 +410,20 @@ Dos cosas pedidas por el propietario:
 (fallback a `EMPTY_STATE`) para que `getFires/getHotspots/getBurnedAreas` no lancen
 sin contexto de Next (tests). **Perfecto — NO lo he tocado** (mi versión era redundante).
 Su fix ya está en `main`. **Siguiente tag libre: 0.22.1.**
+
+### 2026-07-16 — Agente A, v0.23.1 — auditoría de UI muerta (mapa/nav)
+
+Barrido de pantallas (pedido por el propietario) buscando UI muerta como los botones
+que arreglé en Fuentes. Confirmados y arreglados 3:
+1. **Filtros en móvil**: `FiltersSidebar` era `lg:` only → en móvil no había acceso a
+   los filtros avanzados. El chip «+ Filtros» de `FireListSheet` estaba muerto (`<span>`).
+   Ahora es `<button>` que abre `FiltersSidebar` en un modal (estado en `MapaScreen`).
+2. **Búsqueda muerta retirada**: botón lupa de `AppHeader` y caja «Buscar lugar…» de
+   `DesktopTopNav` no hacían nada (no hay búsqueda implementada). Retirados.
+
+**Tocado:** `FireListSheet.tsx`, `MapaScreen.tsx`, `AppHeader.tsx`, `DesktopTopNav.tsx`,
+i18n es/pt/en (+`filters.close`). **NO toqué** `data/index.ts` ni overrides (vi que el
+panel ya blindó `getFires` con su `safeOverrides` y añadió `editedManually` en slice 3;
+integré contra origin para no revertirlo). **Siguiente tag libre: 0.23.2.**
+Nota para el propietario: la búsqueda de lugares/incendios queda como posible feature
+futura (necesitaría un geocoder + ampliar la CSP); dime si la quieres y la monto.

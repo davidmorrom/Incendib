@@ -12,6 +12,7 @@ import { DesktopFireList } from '@/components/fires/DesktopFireList';
 import { computeKpis, sortByGravity } from '@/lib/fires/derive';
 import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
 import { useNow } from '@/components/time/NowProvider';
+import { useDict } from '@/components/i18n/I18nProvider';
 import type { Fire, Hotspot } from '@/types/fire';
 
 /**
@@ -32,8 +33,12 @@ export function MapaScreen({
 }) {
   const router = useRouter();
   const now = useNow();
+  const d = useDict();
   const [filters, setFilters] = useState<FireFilters>(DEFAULT_FILTERS);
   const [hovered, setHovered] = useState<string | null>(null);
+  // En móvil no hay barra lateral de filtros (es `lg:` only): el chip «+ Filtros»
+  // del sheet abre este panel para dar acceso a los filtros avanzados.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const kpis = useMemo(() => computeKpis(fires), [fires]);
   const activeCount = kpis.activos;
@@ -93,7 +98,36 @@ export function MapaScreen({
         onSelect={select}
         onHover={setHovered}
         hoveredSlug={hovered}
+        onOpenFilters={() => setFiltersOpen(true)}
       />
+
+      {/* Móvil: filtros avanzados en modal (la barra lateral es solo desktop) */}
+      {filtersOpen && (
+        <div className="fixed inset-0 z-[60] flex flex-col justify-end lg:hidden">
+          <button
+            type="button"
+            aria-label={d.filters.close}
+            onClick={() => setFiltersOpen(false)}
+            className="absolute inset-0 bg-black/40"
+          />
+          <div className="relative flex max-h-[82dvh] flex-col rounded-t-[16px] border-t bg-bg-raised">
+            <div
+              className="mx-auto mt-2 h-1 w-9 flex-none rounded-full"
+              style={{ background: 'var(--border-strong)' }}
+              aria-hidden
+            />
+            <FiltersSidebar
+              className="flex min-h-0 flex-1 border-r-0"
+              fires={fires}
+              filters={filters}
+              onChange={patch}
+              onReset={reset}
+              visible={visible.length}
+              total={fires.length}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Desktop: lista derecha */}
       <DesktopFireList

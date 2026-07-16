@@ -22,7 +22,7 @@ const TABS = [
   { href: '/fuentes', key: 'fuentes' },
 ] as const;
 
-/** Barra superior del panel desktop: marca, buscador, pestañas, idioma y tema.
+/** Barra superior del panel desktop: marca, pestañas, idioma y tema.
  * Solo visible en `lg:`; en móvil manda la barra inferior. */
 export function DesktopTopNav({ className }: { className?: string }) {
   const d = useDict();
@@ -37,14 +37,6 @@ export function DesktopTopNav({ className }: { className?: string }) {
         <Logo size={24} />
         <Wordmark className="text-title" />
       </Link>
-
-      <div className="flex h-8 w-[300px] flex-none items-center gap-2 rounded-btn border border-default bg-bg-sunken px-2.5">
-        <svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="var(--text-mute)" strokeWidth="1.6" className="flex-none">
-          <circle cx="8" cy="8" r="5" />
-          <path d="M12 12 L16 16" />
-        </svg>
-        <span className="truncate text-[12px] text-fg-mute">{d.map.searchAria}…</span>
-      </div>
 
       <nav className="flex items-center gap-0.5 rounded-btn border border-subtle bg-bg-raised p-0.5">
         {TABS.map((t) => {
