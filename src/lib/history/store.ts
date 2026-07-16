@@ -11,7 +11,8 @@
  */
 
 import { Redis } from '@upstash/redis';
-import type { Fire, TimelineEntry } from '@/types/fire';
+import type { Country, Fire, FireState, PtState, SeverityLevel, SourceId, TimelineEntry } from '@/types/fire';
+import { placeKey, provinceSlug } from '@/lib/fires/place';
 
 const SNAP_KEY = 'hist:snap'; // map slug → FireSnap (última foto)
 const EV_PREFIX = 'hist:ev:'; // por incendio: lista de eventos (JSON)
@@ -21,6 +22,13 @@ const TTL_S = 21 * 24 * 3600; // 21 días
 // /f/[slug] sobreviva a la extinción (cuando el incendio sale del feed en vivo).
 const ARCHIVE_PREFIX = 'hist:fire:';
 const ARCHIVE_TTL_S = 365 * 24 * 3600; // 1 año desde el último cambio (un incendio nunca dura tanto)
+// Índices enumerables (para la página de provincia y el descubrimiento de
+// reactivaciones): resúmenes compactos de episodios por provincia y por paraje.
+// Hacen que el archivo de ~1 año sea listable sin tener que escanear Redis.
+const PROV_PREFIX = 'hist:prov:'; // por provincia (slug): EpisodeSnapshot[]
+const PLACE_PREFIX = 'hist:place:'; // por paraje (placeKey): EpisodeSnapshot[]
+const PROV_CAP = 300; // tope de episodios por provincia (higiene de cuota)
+const PLACE_CAP = 30; // tope de episodios por paraje
 
 let client: Redis | null | undefined;
 function redis(): Redis | null {
@@ -96,6 +104,99 @@ function slimForArchive(f: Fire): Fire {
 }
 
 /**
+ * Resumen compacto de un episodio para los índices por provincia/paraje. Contiene
+ * los campos necesarios para (a) pintar una fila del listado y (b) recomputar
+ * `placeKey`. Es un superconjunto de los campos obligatorios de `Fire`, así que
+ * los lectores lo devuelven como `Fire` sin más.
+ */
+export interface EpisodeSnapshot {
+  slug: string;
+  name: string;
+  municipality: string;
+  province: string;
+  region: string;
+  country: Country;
+  state: FireState;
+  level: SeverityLevel;
+  hectares: number;
+  hectaresApprox?: boolean;
+  ptState?: PtState;
+  coordinates: [number, number];
+  startedAt: string;
+  updatedAt: string;
+  sources: SourceId[];
+}
+
+function episodeOf(f: Fire): EpisodeSnapshot {
+  return {
+    slug: f.slug,
+    name: f.name,
+    municipality: f.municipality,
+    province: f.province,
+    region: f.region,
+    country: f.country,
+    state: f.state,
+    level: f.level,
+    hectares: f.hectares,
+    hectaresApprox: f.hectaresApprox,
+    ptState: f.ptState,
+    coordinates: f.coordinates,
+    startedAt: f.startedAt,
+    updatedAt: f.updatedAt,
+    sources: f.sources,
+  };
+}
+
+/** Momento de un episodio (inicio, con respaldo a la última actualización). */
+function episodeMs(e: EpisodeSnapshot): number {
+  const s = Date.parse(e.startedAt);
+  if (Number.isFinite(s)) return s;
+  const u = Date.parse(e.updatedAt);
+  return Number.isFinite(u) ? u : 0;
+}
+
+/**
+ * Fusiona episodios entrantes sobre los existentes (dedup por slug; el entrante
+ * gana, por ser más fresco), ordena de más reciente a más antiguo y recorta a
+ * `cap`. Puro y testeable.
+ */
+export function upsertEpisodes(
+  existing: EpisodeSnapshot[],
+  incoming: EpisodeSnapshot[],
+  cap: number,
+): EpisodeSnapshot[] {
+  const bySlug = new Map<string, EpisodeSnapshot>();
+  for (const e of existing) bySlug.set(e.slug, e);
+  for (const e of incoming) bySlug.set(e.slug, e);
+  return [...bySlug.values()].sort((a, b) => episodeMs(b) - episodeMs(a)).slice(0, cap);
+}
+
+/**
+ * Actualiza los índices por provincia y por paraje con los episodios recién
+ * archivados. Un `get`+`set` por clave única (pocas, porque solo se archiva lo
+ * nuevo o cambiado). Best-effort: cualquier fallo se ignora (nunca rompe el cron).
+ */
+async function updateIndexes(r: Redis, fires: Fire[]): Promise<void> {
+  const byProv = new Map<string, EpisodeSnapshot[]>();
+  const byPlace = new Map<string, EpisodeSnapshot[]>();
+  for (const f of fires) {
+    const ep = episodeOf(f);
+    const pslug = provinceSlug(f.province);
+    if (pslug) (byProv.get(pslug) ?? byProv.set(pslug, []).get(pslug)!).push(ep);
+    const key = placeKey(f);
+    if (key) (byPlace.get(key) ?? byPlace.set(key, []).get(key)!).push(ep);
+  }
+  for (const [pslug, eps] of byProv) {
+    const existing = (await r.get<EpisodeSnapshot[]>(`${PROV_PREFIX}${pslug}`)) ?? [];
+    await r.set(`${PROV_PREFIX}${pslug}`, upsertEpisodes(existing, eps, PROV_CAP), { ex: ARCHIVE_TTL_S });
+  }
+  for (const [key, eps] of byPlace) {
+    const existing = (await r.get<EpisodeSnapshot[]>(`${PLACE_PREFIX}${key}`)) ?? [];
+    await r.set(`${PLACE_PREFIX}${key}`, upsertEpisodes(existing, eps, PLACE_CAP), { ex: ARCHIVE_TTL_S });
+  }
+}
+
+/**
  * Eventos derivados de comparar la foto anterior con la actual. Solo lo que las
  * APIs NO dan como evento fechado: cambios de nivel (sube/baja) y de medios
  * (refuerzo/retirada). Los cambios de estado (estabilizado/controlado) ya vienen
@@ -165,6 +266,9 @@ export async function recordFireHistory(fires: Fire[], atIso: string): Promise<v
         p.set(`${ARCHIVE_PREFIX}${f.slug}`, slimForArchive(f), { ex: ARCHIVE_TTL_S });
       }
       await p.exec();
+      // Índices enumerables por provincia/paraje (para /p/[provincia] y el enlace
+      // de reactivaciones); solo lo nuevo o cambiado, para acotar la cuota.
+      await updateIndexes(r, toArchive);
     }
   } catch {
     /* el histórico nunca debe romper el cron ni la ficha */
@@ -191,6 +295,36 @@ export async function getFireEvents(slug: string): Promise<TimelineEntry[]> {
     const evs = (await r.get<TimelineEntry[]>(`${EV_PREFIX}${slug}`)) ?? [];
     // Marca como "detectado" (hora aproximada, no oficial) para distinguirlos.
     return evs.map((e) => ({ ...e, detected: true }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Episodios archivados de una provincia (índice `hist:prov:<slug>`), como `Fire`.
+ * Complementa —en producción— a lo que hay en vivo, en git y en EFFIS para el
+ * listado de `/p/[provincia]`. [] si no hay índice o no hay Redis. Nunca lanza.
+ */
+export async function getProvinceArchivedFires(pslug: string): Promise<Fire[]> {
+  const r = redis();
+  if (!r || !pslug) return [];
+  try {
+    return ((await r.get<EpisodeSnapshot[]>(`${PROV_PREFIX}${pslug}`)) ?? []) as Fire[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Episodios archivados de un paraje (índice `hist:place:<key>`), como `Fire`.
+ * Sirve para descubrir reactivaciones: episodios anteriores del mismo lugar que
+ * ya salieron del feed en vivo. [] si no hay índice o no hay Redis. Nunca lanza.
+ */
+export async function getPlaceEpisodes(key: string): Promise<Fire[]> {
+  const r = redis();
+  if (!r || !key) return [];
+  try {
+    return ((await r.get<EpisodeSnapshot[]>(`${PLACE_PREFIX}${key}`)) ?? []) as Fire[];
   } catch {
     return [];
   }

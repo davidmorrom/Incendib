@@ -6,6 +6,8 @@ import { allHighlightSlugs } from '@/lib/boletin/store';
 import { listArchivedGitSlugs } from '@/lib/history/archive-git';
 import { relatedNews } from '@/lib/fires/news-match';
 import { getFireEvents } from '@/lib/history/store';
+import { getPlacePool } from '@/lib/fires/history-pool';
+import { findEpisodeLinks } from '@/lib/fires/reactivation';
 import { FichaScreen } from '@/components/screens/FichaScreen';
 import type { TimelineEntry } from '@/types/fire';
 
@@ -78,6 +80,13 @@ export default async function FichaPage({ params }: Params) {
   }
   const timeline = parts.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
 
+  // Episodios del mismo paraje (reactivaciones): conecta la ficha con incendios
+  // anteriores/posteriores del lugar. Determinista sobre el pool enumerable
+  // (vivo + archivo git + índice Redis del paraje). null si no hay identidad de
+  // lugar o no hay más episodios.
+  const pool = await getPlacePool(fire);
+  const related = findEpisodeLinks({ fire, origin }, pool) ?? undefined;
+
   return (
     <FichaScreen
       fire={{ ...fire, weather, timeline: timeline.length ? timeline : fire.timeline }}
@@ -85,6 +94,7 @@ export default async function FichaPage({ params }: Params) {
       asOf={asOf}
       boletinId={boletinId}
       hasLocation={hasLocation}
+      related={related}
     />
   );
 }

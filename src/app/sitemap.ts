@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getFires } from '@/lib/data';
+import { provinceSlug } from '@/lib/fires/place';
 import { listBoletines, allHighlightSlugs } from '@/lib/boletin/store';
 
 // Dominio canónico del proyecto (custom domain), sobreescribible por entorno.
@@ -38,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   let fireRoutes: MetadataRoute.Sitemap = [];
+  let provinceRoutes: MetadataRoute.Sitemap = [];
   try {
     const fires = await getFires();
     const liveSlugs = new Set(fires.map((f) => f.slug));
@@ -45,6 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE}/f/${f.slug}`,
       lastModified: safeDate(f.updatedAt) ?? now,
       changeFrequency: 'hourly',
+      priority: 0.5,
+    }));
+    // Páginas de provincia (`/p/[provincia]`) de las provincias con incendios ahora.
+    const provSlugs = new Set(fires.map((f) => provinceSlug(f.province)).filter(Boolean));
+    provinceRoutes = [...provSlugs].map((slug) => ({
+      url: `${SITE}/p/${slug}`,
+      lastModified: now,
+      changeFrequency: 'daily',
       priority: 0.5,
     }));
     // Fichas históricas de incendios referenciados en boletines (resuelven de
@@ -74,5 +84,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* sin ediciones aún */
   }
 
-  return [...staticRoutes, ...fireRoutes, ...boletinRoutes];
+  return [...staticRoutes, ...fireRoutes, ...provinceRoutes, ...boletinRoutes];
 }

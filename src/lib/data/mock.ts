@@ -250,6 +250,60 @@ const RAW_FIRES: Fire[] = [
     resources: { raw: '—' },
     sources: ['jcyl'],
   },
+  // ── El Barraco (Ávila): reactivación ──────────────────────────────────────
+  // Mismo paraje, dos incidentes distintos (la fuente reinicia el ID al
+  // reactivarse). Comparten placeKey `es:avila:el-barraco`: la ficha los enlaza
+  // y la provincia los agrupa. Reproduce el caso real de julio de 2026.
+  {
+    slug: 'el-barraco-junio',
+    name: 'El Barraco',
+    municipality: 'El Barraco',
+    province: 'Ávila',
+    region: 'Castilla y León',
+    country: 'ES',
+    state: 'extinguido',
+    level: 0,
+    type: 'forestal',
+    hectares: 184,
+    coordinates: [-4.72, 40.44],
+    startedAt: '2026-06-18T13:10:00+02:00',
+    updatedAt: '2026-06-24T20:05:00+02:00',
+    resources: { raw: '—' },
+    sources: ['jcyl'],
+    timeline: [
+      { at: '2026-06-24T20:05:00+02:00', label: 'Extinguido', state: 'extinguido' },
+      { at: '2026-06-20T09:30:00+02:00', label: 'Controlado', state: 'controlado' },
+      { at: '2026-06-18T13:10:00+02:00', label: 'Declarado', state: 'activo' },
+    ],
+  },
+  {
+    slug: 'el-barraco-julio',
+    name: 'El Barraco',
+    municipality: 'El Barraco',
+    province: 'Ávila',
+    region: 'Castilla y León',
+    country: 'ES',
+    state: 'activo',
+    level: 1,
+    type: 'forestal',
+    hectares: 326,
+    delta24h: 140,
+    coordinates: [-4.723, 40.443],
+    startedAt: '2026-07-09T15:35:00+02:00',
+    updatedAt: '2026-07-10T14:12:00+02:00',
+    resources: {
+      aerial: 3,
+      ground: 12,
+      personnel: 68,
+      aerialUnits: [{ kind: 'helicoptero', count: 3 }],
+      groundUnits: [
+        { kind: 'brigada', count: 7 },
+        { kind: 'autobomba', count: 5 },
+      ],
+    },
+    sources: ['jcyl', 'effis'],
+    timeline: [{ at: '2026-07-09T15:35:00+02:00', label: 'Declarado', state: 'activo' }],
+  },
 ];
 
 /**

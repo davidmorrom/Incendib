@@ -427,3 +427,40 @@ panel ya blindó `getFires` con su `safeOverrides` y añadió `editedManually` e
 integré contra origin para no revertirlo). **Siguiente tag libre: 0.23.2.**
 Nota para el propietario: la búsqueda de lugares/incendios queda como posible feature
 futura (necesitaría un geocoder + ampliar la CSP); dime si la quieres y la monto.
+
+### 2026-07-16 — Agente E (reactivaciones + provincias), v0.24.0
+
+**Tarea (pedida por el propietario):** (1) al reactivarse un incendio, **conectar**
+la ficha nueva con la antigua y añadir la reactivación al histórico; (2) separar los
+incendios **por provincia** con ruta propia. Decisión del propietario: ruta **`/p/[provincia]`**
+(no `/f/`), y **enlazar ambas fichas** (no redirigir).
+
+**Diseño:** clave de lugar estable `placeKey` = `país:provincia:municipio` (independiente
+del ID de incidente de la fuente) → reconoce episodios del mismo paraje. Descubrimiento
+determinista sobre pool enumerable (vivo + archivo git + EFFIS); en prod se enriquece con
+índices Redis best-effort por provincia/paraje.
+
+**Hecho (typecheck + lint + 151 tests + build OK; verificado en headless claro/oscuro con
+el caso real El Barraco/Ávila en mock):**
+- **Nuevos:** `lib/utils/slug.ts`, `lib/geo/provinces.ts` (catálogo ES+PT),
+  `lib/fires/place.ts`(+test), `lib/fires/reactivation.ts`(+test), `lib/fires/history-pool.ts`,
+  `components/screens/ProvinciaScreen.tsx`, `app/(app)/p/[provincia]/page.tsx`.
+- ⚠️ **`lib/history/store.ts`** (carril A/seguridad): **aditivo** — índices enumerables
+  `hist:prov:*`/`hist:place:*` (poblados dentro de `recordFireHistory`, que ya llama el cron;
+  no toco su authz), `EpisodeSnapshot`+`upsertEpisodes`(puro, testeado)+lectores. Null-safe.
+- ⚠️ **`app/f/[slug]/page.tsx`** y **`components/screens/FichaScreen.tsx`**: banners de
+  reactivación + «otros episodios» + enlace a provincia (prop `related`, aditiva).
+- ⚠️ **`components/screens/IncendiosHoyScreen.tsx`**: provincia → enlace `/p/[slug]`.
+- ⚠️ **i18n** `dicts/{es,pt,en}.ts`: namespace `province` + claves `fire.reactivation*`/
+  `fire.viewProvince`/`fire.otherEpisodes` + `today.viewProvince` (aditivo).
+- ⚠️ **`app/sitemap.ts`**: rutas `/p/[slug]` de provincias con actividad.
+- **`lib/data/mock.ts`**: escenario El Barraco (junio extinguido + julio reactivado) para
+  verificar en local.
+
+**Limitación conocida:** el enlace «ficha nueva → anterior» requiere que el episodio antiguo
+esté en git o en el índice Redis del paraje (que el cron puebla desde ahora); el enlace
+«antigua → actual» siempre funciona (el feed en vivo es enumerable). Cataluña sin provincia
+(`—`) no aparece en páginas de provincia (la fuente no la publica).
+
+**Commit por rutas explícitas, rebase antes de push. Versión:** tomo **v0.24.0** (último tag
+v0.23.1). **Siguiente tag libre: 0.24.1.**
