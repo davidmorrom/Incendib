@@ -5,6 +5,33 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.28.0] - 2026-07-16
+
+### Añadido
+
+- **Informe de situación avanzado (`/informe`)**: de tabla con filtro por país a
+  un panel analítico completo.
+  - **Filtros** (barra lateral en desktop, bottom-sheet accesible en móvil):
+    búsqueda por texto, estado operativo, país, **comunidad autónoma y provincia**
+    (facetas con recuento y buscador; la provincia se acota a la CCAA elegida),
+    **nivel de gravedad**, tipo, **medios** (con aéreos/terrestres/ayuda
+    internacional/evacuación), efectivos mínimos, **«en expansión»** (Δ24 h > 0),
+    superficie (rango mín/máx), periodo, confirmación satelital y fuente. Motor
+    unificado `FireFilters`/`applyFilters` (compartido con el mapa).
+  - **KPIs y gráficos recalculados sobre el conjunto filtrado**: activos,
+    superficie, focos 24 h, nivel máx., con evacuación, medios aéreos, efectivos
+    y crecimiento 24 h; indicador de **cobertura de dato** y distribución por
+    estado y por comunidad (barras; el color codifica el dato).
+  - **Tabla densa**: columnas configurables (provincia, CCAA, nivel, tipo, Δ24 h,
+    medios, personal, fuente, inicio), orden por columna con los «sin dato» al
+    final, **agrupación** por CCAA/provincia/estado con subtotales, densidad
+    ajustable y «—» neutro para el dato ausente.
+  - **Exportar / compartir**: descarga **CSV**, copiar tabla (TSV) y **enlace
+    compartible** (el estado del panel viaja en la URL); **vistas rápidas**
+    (activos, nivel ≥ 2, grandes, con evacuación, en expansión, Portugal).
+  - «Sin dato» con dignidad, disclaimer 112 y «detección satelital ≠ incendio
+    confirmado» presentes; accesibilidad WCAG 2.2 AA; i18n ES/PT/EN.
+
 ## [0.27.0] - 2026-07-16
 
 ### Añadido
