@@ -485,3 +485,39 @@ compartido: Agente N en `news`/i18n `news:`, otro en `filters`/`facets`) — typ
   no versionado). El actual `cyl-barraco-el-5-145-26` enlaza con él como reactivación.
 
 **Versión:** tomo **v0.25.0** (último tag v0.24.1). **Siguiente tag libre: 0.25.1.**
+
+### 2026-07-16 — Agente F (informe): panel de situación avanzado (v0.28.0)
+
+**Tarea (pedida por el propietario):** convertir el **Informe** en un panel mucho más
+avanzado (filtrar por provincias, comunidades, nivel de riesgo, medios… «todo lo posible»),
+tras mandar agentes a investigar funcionalidades (workflow de research + síntesis + crítica
+adversarial; 131 propuestas → spec priorizada).
+
+**Área que tomo:** la pantalla **Informe** — `components/screens/InformeScreen.tsx`,
+todo `components/fires/report/*` (nuevo), y `lib/fires/{filters,facets,report-url,report-export,report-presets}`.
+**Retiro** `components/fires/ReportTable.tsx` y `ReportKpis.tsx` (sustituidos). NO toco
+adapters, noticias, boletín, mapa ni el store global.
+
+**Hecho en WORKTREE AISLADO desde `origin/main`** (el árbol compartido tenía WIP de otro
+agente en noticias) — typecheck + lint + 196 tests + build OK; verificado en headless
+(claro/oscuro, móvil/desktop, sheet de filtros):
+- **Motor:** amplío `FireFilters`/`applyFilters` (territorio CCAA+provincia, tipo, medios,
+  personal, `growing` Δ24h>0, satélite, fuente, búsqueda) **retrocompatible con el mapa**;
+  `facets.ts` (facetas con recuento + stats agregadas), `report-url.ts` (estado del panel en
+  la URL, compartible), `report-export.ts` (CSV/TSV), `report-presets.ts` (vistas rápidas).
+  Todo puro y testeado (+45 tests).
+- **UI:** panel de filtros (sidebar desktop / bottom-sheet móvil), KPIs+gráficos sobre el
+  conjunto filtrado con indicador de cobertura, tabla configurable/ordenable/agrupable con
+  subtotales y export/compartir. «Sin dato» con dignidad; disclaimer 112 y «satélite ≠
+  confirmado» presentes; WCAG 2.2 AA.
+- ⚠️ **i18n** `dictionaries/{es,pt,en}.ts`: **namespace nuevo `panel`** (aditivo, al final;
+  no toca `news:` ni el resto). Rebase limpio sobre las noticias de otro agente.
+
+**Nota Cataluña:** su fuente no publica provincia (`province: '—'`); se trata como bucket
+«sin dato» con dignidad (no contamina). EFFIS (región fantasma) NO afecta: `getFires` no lo
+incluye (va por `getBurnedAreas`/histórico).
+
+**Versión:** tomo **v0.28.0** (último tag v0.27.0). **Siguiente tag libre: 0.28.1.**
+**Pendiente (P1/P2 documentado en el research):** sección separada de focos FIRMS
+(huérfanos + recencia), fila expandible con detalle, imprimir/PDF, GeoJSON, agrupar por
+paraje/reactivación, persistir en localStorage.
