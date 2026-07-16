@@ -186,6 +186,7 @@ const es = {
   filters: {
     title: 'Filtros',
     reset: 'Restablecer',
+    close: 'Cerrar',
     country: 'País',
     state: 'Estado operativo',
     level: 'Nivel de gravedad (ES)',

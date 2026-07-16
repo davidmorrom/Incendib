@@ -187,6 +187,7 @@ const en: Dictionary = {
   filters: {
     title: 'Filters',
     reset: 'Reset',
+    close: 'Close',
     country: 'Country',
     state: 'Operational status',
     level: 'Severity level (ES)',

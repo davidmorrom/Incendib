@@ -187,6 +187,7 @@ const pt: Dictionary = {
   filters: {
     title: 'Filtros',
     reset: 'Repor',
+    close: 'Fechar',
     country: 'País',
     state: 'Estado operacional',
     level: 'Nível de gravidade (ES)',
