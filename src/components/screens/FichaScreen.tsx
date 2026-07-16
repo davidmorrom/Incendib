@@ -241,6 +241,11 @@ export function FichaScreen({
                 : d.fire.historicalNote
               : interpolate(d.status.updatedAgo, { when: timeAgo(fire.updatedAt, now, locale) })}
           </p>
+          {fire.edited && (
+            <p className="mt-1 font-mono text-[9.5px] text-warn" title={fire.overriddenFields?.join(', ')}>
+              ✎ {d.fire.editedManually}
+            </p>
+          )}
         </div>
 
         {/* Stats 2×2 */}

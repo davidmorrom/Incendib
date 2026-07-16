@@ -60,6 +60,7 @@ const es = {
     resources: 'Medios',
     weather: 'Meteo local',
     source: 'Fuente',
+    editedManually: 'Corregido a mano',
     share: 'Compartir este incendio',
     shareCta: 'Compartir…',
     copy: 'Copiar',

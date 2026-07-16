@@ -61,6 +61,7 @@ const en: Dictionary = {
     resources: 'Resources',
     weather: 'Local weather',
     source: 'Source',
+    editedManually: 'Manually corrected',
     share: 'Share this fire',
     shareCta: 'Share…',
     copy: 'Copy',

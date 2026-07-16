@@ -61,6 +61,7 @@ const pt: Dictionary = {
     resources: 'Meios',
     weather: 'Meteo local',
     source: 'Fonte',
+    editedManually: 'Corrigido à mão',
     share: 'Partilhar este incêndio',
     shareCta: 'Partilhar…',
     copy: 'Copiar',
