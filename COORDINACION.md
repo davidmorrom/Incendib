@@ -31,6 +31,40 @@
 
 ## Log
 
+### 2026-07-16 — Agente P (alertas): panel avanzado — INTEGRADO (v0.29.0)
+
+**Tarea (propietario):** rehacer `/alertas` (7a) → **panel avanzado**: zonas
+vigiladas múltiples (ubicación/provincia, radio, conteo en vivo, pausa/edición/
+borrado), tipos de alerta independientes, umbral, horario de silencio y avisos por
+incendio seguido. **Integrado en `main` vía worktree aislado + parche 3-way** (mi
+base local iba por detrás de origin/main). Verificado: typecheck + lint + **277
+tests** + **build** en verde y **captura headless claro/oscuro** (panel, alta de
+zona por provincia con conteo en vivo, selector de provincia y aviso de focos).
+
+Diseño e implementación **validados con dos workflows adversariales** (crítica de
+diseño → 2 blockers + majors; revisión de implementación → 5 hallazgos CONFIRMADOS
+corregidos): migración v1→v2 en LECTURA (no romper suscriptores viejos), no exponer
+PII por endpoint (se descartó el query de prefs; localStorage = verdad en el
+dispositivo), pausar-todas-las-zonas ya NO abre la manguera nacional, focos
+satelitales avisan de que requieren zona geográfica, y push localizadas.
+
+**Áreas tocadas (todas mías / aditivas):**
+- NUEVO `src/lib/alerts/` (`prefs.ts`, `match.ts`, `storage.ts` + tests puros).
+- `src/lib/push/*` (store con migración en lectura + `getSubscription` + tope; el
+  `clampPrefs` v1 se retiró de `validate.ts` → su lógica vive en `alerts/prefs`;
+  **`isSafePushEndpoint` INTACTO**, carril seguridad de C).
+- `src/app/api/push/*` (subscribe: merge anti-clobber + validación de claves;
+  test/cron: matcher v2, focos gated, payloads localizados).
+- `src/components/screens/AlertasScreen.tsx` (reescritura), `src/lib/follow.ts`
+  (aditivo: sincroniza seguidos al push).
+- ⚠️ **i18n** `dicts/{es,pt,en}.ts`: **solo el bloque `alerts:`** (reescrito;
+  aplicado con parche 3-way sobre `news:`/`map:` de N y M sin pisarlos).
+
+**Pendiente/decisión del propietario:** confirmar `CRON_SECRET` y VAPID/Upstash en
+Vercel (ya documentado por C/A). **Residual conocido no tocado** (carril de C):
+`isSafePushEndpoint` no resuelve DNS (rebinding teórico) — lo dejo a seguridad.
+**Siguiente tag libre: 0.29.1.**
+
 ### 2026-07-16 — Agente D (panel↔visor): corregir a mano (v0.23.0)
 
 **Tarea:** tercer slice de overrides — aplicar `patches` (correcciones por campo:
