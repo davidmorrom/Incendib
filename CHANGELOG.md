@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.24.1] - 2026-07-16
+
+### Cambiado
+
+- **Ruta `/p/[provincia]`**: normaliza el segmento a slug canónico (acentos y
+  mayúsculas → `avila`), así una URL escrita a mano resuelve a los mismos datos;
+  los enlaces internos ya usan el slug canónico. Se retira el `revalidate` fijo:
+  la frescura la marcan los `fetch` de datos (~2 min, más fresco), como en
+  `/f/[slug]`. Nota: bajo el shell `(app)` (streaming), una provincia inexistente
+  responde con la página 404 (mismo comportamiento que `/boletin/[id]`).
+
 ## [0.24.0] - 2026-07-16
 
 ### Añadido

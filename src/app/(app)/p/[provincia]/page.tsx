@@ -13,7 +13,8 @@ import {
 // Listado por provincia (/p/[provincia]): incendios que ha habido y está habiendo
 // en la provincia, agrupados por paraje (las reactivaciones quedan juntas). Reúne
 // dato en vivo, archivo de fichas (git + Redis) y áreas quemadas por satélite.
-export const revalidate = 900; // ISR: 15 min
+// Sin `revalidate` propio (como /f/[slug]): la frescura la marcan los fetch de
+// getFires (~2 min) y así notFound()/redirect() fijan bien el status (no soft-404).
 
 type Params = { params: Promise<{ provincia: string }> };
 
@@ -31,7 +32,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { provincia } = await params;
-  const ref = findProvince(provincia.toLowerCase());
+  const ref = findProvince(provinceSlug(provincia));
   const name = ref?.name ?? provincia;
   const title = `Incendios en ${name}`;
   const description = ref?.region
@@ -47,7 +48,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ProvinciaPage({ params }: Params) {
   const { provincia } = await params;
-  const pslug = provincia.toLowerCase();
+  // Normaliza a slug canónico (acentos/mayúsculas → `avila`), para que una URL
+  // no canónica (p. ej. /p/Ávila escrita a mano) resuelva a los mismos datos. Los
+  // enlaces internos siempre usan ya el slug canónico. No usamos redirect() porque
+  // bajo el layout `(app)` (streaming) no fija el status; mejor servir el contenido.
+  const pslug = provinceSlug(provincia);
 
   const pool = await getProvincePool(pslug);
   const ref = findProvince(pslug);
