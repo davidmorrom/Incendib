@@ -132,3 +132,24 @@ export function filterOutIds<T extends { id: string }>(items: T[], ids: string[]
   const hide = new Set(ids);
   return items.filter((i) => !hide.has(i.id));
 }
+
+/**
+ * Aplica las correcciones manuales por slug: fusiona el parche sobre el incendio y lo
+ * marca `edited` con la lista de campos tocados (para el sello de transparencia).
+ * Identidad si no hay parches. Puro (testable). El parche es laxo por diseño (el
+ * panel valida qué campos son editables antes de escribirlo).
+ */
+export function applyPatches<T extends { slug: string }>(
+  items: T[],
+  patches: Record<string, FirePatch>,
+): (T & { edited?: boolean; overriddenFields?: string[] })[] {
+  if (!patches || !Object.keys(patches).length) return items;
+  return items.map((f) => {
+    const p = patches[f.slug];
+    if (!p || !Object.keys(p).length) return f;
+    return { ...f, ...p, edited: true, overriddenFields: Object.keys(p) } as T & {
+      edited?: boolean;
+      overriddenFields?: string[];
+    };
+  });
+}

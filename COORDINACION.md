@@ -31,6 +31,27 @@
 
 ## Log
 
+### 2026-07-16 — Agente D (panel↔visor): corregir a mano (v0.23.0)
+
+**Tarea:** tercer slice de overrides — aplicar `patches` (correcciones por campo:
+superficie/nombre…) que el panel escribe en `override:state`, con sello de
+transparencia. **Autorizado por el propietario** (cambia dato mostrado en incendib.es).
+
+**Hecho (worktree aislado desde `origin/main`; typecheck + lint + tests + build OK):**
+- `src/types/fire.ts`: `edited?`/`overriddenFields?` (opcionales, aditivos).
+- `src/lib/overrides/store.ts`: helper puro `applyPatches` (identidad si vacío; marca
+  `edited` + `overriddenFields`) + tests.
+- ⚠️ **`src/lib/data/index.ts`** (datos, Agente A): `getFires` aplica `applyPatches`
+  tras ocultar. Aditivo, **inerte por defecto**.
+- ⚠️ **`src/components/screens/FichaScreen.tsx`** (Agente A): sello discreto
+  **«✎ corregido a mano»** bajo la línea de fuente si `fire.edited` (unas líneas).
+- ⚠️ **i18n** `dictionaries/{es,pt,en}.ts`: clave `fire.editedManually` (aditiva, junto
+  a `source`).
+
+Solo lectura del bus; el panel es el dueño de la escritura. Commit por rutas
+explícitas, rebase antes de push. **Versión:** v0.23.0 (último tag v0.22.0). Panel:
+`Incendib-Panel` v0.18.0. Falta (slice posterior): confirmar y alta manual.
+
 ### 2026-07-16 — Agente D (panel↔visor): ocultar incendios (v0.21.0)
 
 **Tarea:** segundo slice de la capa de overrides — aplicar en el visor los

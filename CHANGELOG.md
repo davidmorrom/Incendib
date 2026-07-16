@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.23.0] - 2026-07-16
+
+### Añadido
+
+- **Corregir a mano incendios desde el panel** (tercer slice de la capa de overrides).
+  `getFires()` aplica las correcciones por campo (`patches`) que el panel escribe en
+  `override:state` (superficie, nombre…): fusiona el parche sobre el dato de la fuente
+  y marca el incendio `edited` con `overriddenFields`. La ficha muestra un sello
+  discreto **«✎ corregido a mano»** (i18n ES/PT/EN) por transparencia, coherente con
+  la ética del proyecto (el dato tocado se declara, no se disimula). **Inerte por
+  defecto**: sin `patches`, la salida es idéntica. Es reversible desde el panel.
+  `applyPatches` es puro y testeado (identidad si vacío; parche vacío no marca edited).
+
 ## [0.22.0] - 2026-07-16
 
 ### Añadido

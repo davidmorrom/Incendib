@@ -6,6 +6,7 @@ import {
   getOverrides,
   filterOutSlugs,
   filterOutIds,
+  applyPatches,
   EMPTY_STATE,
   type SiteBanner,
 } from './store';
@@ -73,5 +74,34 @@ describe('overrides · ocultar (hide)', () => {
 
   it('getOverrides es null-safe sin Redis (devuelve EMPTY_STATE)', async () => {
     expect(await getOverrides()).toEqual(EMPTY_STATE);
+  });
+});
+
+describe('overrides · corregir (patches)', () => {
+  const fires = [
+    { slug: 'a', name: 'A', hectares: 10 },
+    { slug: 'b', name: 'B', hectares: 20 },
+  ];
+
+  it('sin parches es IDENTIDAD (misma referencia)', () => {
+    expect(applyPatches(fires, {})).toBe(fires);
+  });
+
+  it('fusiona el parche y marca edited + overriddenFields', () => {
+    const out = applyPatches(fires, { a: { hectares: 99, hectaresApprox: false } });
+    expect(out[0]).toMatchObject({ slug: 'a', name: 'A', hectares: 99, edited: true });
+    expect(out[0]!.overriddenFields).toEqual(['hectares', 'hectaresApprox']);
+    // los no parcheados quedan intactos y sin edited
+    expect(out[1]).toEqual({ slug: 'b', name: 'B', hectares: 20 });
+    expect((out[1] as { edited?: boolean }).edited).toBeUndefined();
+  });
+
+  it('un parche vacío no marca el incendio como editado', () => {
+    const out = applyPatches(fires, { a: {} });
+    expect(out[0]).toEqual({ slug: 'a', name: 'A', hectares: 10 });
+  });
+
+  it('un slug de parche que no existe no crea incendios', () => {
+    expect(applyPatches(fires, { zzz: { hectares: 1 } })).toHaveLength(2);
   });
 });

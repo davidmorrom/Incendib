@@ -25,6 +25,7 @@ import {
   getOverridesCached,
   filterOutSlugs,
   filterOutIds,
+  applyPatches,
   EMPTY_STATE,
   type OverrideState,
 } from '@/lib/overrides/store';
@@ -72,8 +73,10 @@ export async function getFires(): Promise<Fire[]> {
   } else {
     fires = MOCK_FIRES;
   }
-  // Overrides manuales del panel: por ahora, ocultar incidentes. Inerte si no hay.
-  return filterOutSlugs(fires, (await safeOverrides()).hidden);
+  // Overrides manuales del panel: ocultar incidentes y aplicar correcciones por
+  // campo (marcadas `edited`). Inerte si no hay overrides.
+  const state = await safeOverrides();
+  return applyPatches(filterOutSlugs(fires, state.hidden), state.patches);
 }
 
 /**

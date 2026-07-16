@@ -178,6 +178,13 @@ export interface Fire {
    * los focos pequeños o muy recientes no siempre tienen perímetro mapeado.
    */
   perimeter?: [number, number][];
+  /**
+   * Corregido a mano desde el panel privado (override): al menos un campo se editó
+   * respecto al dato de la fuente. La UI lo señala («corregido a mano») por
+   * transparencia. `overriddenFields` lista qué campos se tocaron.
+   */
+  edited?: boolean;
+  overriddenFields?: string[];
 }
 
 /**
