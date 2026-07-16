@@ -8,5 +8,7 @@ export const metadata = { title: 'Noticias y directos' };
 
 export default async function NoticiasPage() {
   const [fires, news] = await Promise.all([getFires(), getNews()]);
-  return <NoticiasScreen fires={fires} news={news} />;
+  // Sello de frescura: con ISR (~15 min) refleja cuándo se construyó este snapshot.
+  const fetchedAt = new Date().toISOString();
+  return <NoticiasScreen fires={fires} news={news} fetchedAt={fetchedAt} />;
 }

@@ -6,22 +6,26 @@ import { LIVE_CHANNELS } from '@/lib/data/news';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
 
-/** Directo 24 h: póster con play; carga el iframe de YouTube (nocookie) al
- * pulsar (privacidad + no bloquea el render). Conmutable entre canales. */
+/**
+ * Canal de noticias 24 h. Póster con play que carga el iframe (nocookie) SOLO al
+ * pulsar (privacidad + no bloquea el render, y sin autoplay: WCAG 1.4.2). Se
+ * rotula con honestidad: es un canal genérico 24 h, no un directo verificado de
+ * incendios; los canales sin `channelId` se declaran «sin directo verificado».
+ */
 export function LiveEmbed() {
   const d = useDict();
   const [channel, setChannel] = useState(LIVE_CHANNELS[0]!);
   const [playing, setPlaying] = useState(false);
 
   const embedUrl = channel.channelId
-    ? `https://www.youtube-nocookie.com/embed/live_stream?channel=${channel.channelId}&autoplay=1`
+    ? `https://www.youtube-nocookie.com/embed/live_stream?channel=${channel.channelId}`
     : null;
 
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
         <span className="font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
-          {d.news.live24h}
+          {d.news.live}
         </span>
         <div className="flex gap-1.5">
           {LIVE_CHANNELS.map((c) => {
@@ -53,7 +57,7 @@ export function LiveEmbed() {
           <iframe
             src={embedUrl}
             title={channel.title}
-            allow="autoplay; encrypted-media; picture-in-picture"
+            allow="encrypted-media; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 h-full w-full"
           />
@@ -61,8 +65,9 @@ export function LiveEmbed() {
           <button
             type="button"
             onClick={() => embedUrl && setPlaying(true)}
-            aria-label={d.news.playLive}
-            className="absolute inset-0 grid place-items-center"
+            disabled={!embedUrl}
+            aria-label={embedUrl ? d.news.playLive : d.news.notAvailable}
+            className="absolute inset-0 grid place-items-center disabled:cursor-not-allowed"
           >
             <div
               className="absolute inset-0"
@@ -70,14 +75,13 @@ export function LiveEmbed() {
               aria-hidden
             />
             <div className="relative flex flex-col items-center gap-2">
-              <span
-                className="grid h-[46px] w-[46px] place-items-center rounded-full"
-                style={{ background: mix(V.activo, 90) }}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="#fff">
-                  <path d="M5 3 L15 9 L5 15 Z" />
-                </svg>
-              </span>
+              {embedUrl && (
+                <span className="grid h-[46px] w-[46px] place-items-center rounded-full" style={{ background: mix(V.activo, 90) }}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="#fff" aria-hidden>
+                    <path d="M5 3 L15 9 L5 15 Z" />
+                  </svg>
+                </span>
+              )}
               <span className="font-mono text-[10px] text-fg-secondary">
                 {embedUrl ? d.news.embedNote : d.news.notAvailable}
               </span>
@@ -86,25 +90,16 @@ export function LiveEmbed() {
         )}
 
         {!playing && (
-          <>
-            <div
-              className="absolute left-2 top-2 flex items-center gap-1.5 rounded-chip px-[7px] py-[3px]"
-              style={{ background: 'rgba(12,17,23,.82)' }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-state-activo animate-shimmer motion-reduce:animate-none" aria-hidden />
-              <span className="font-mono text-[9px] font-semibold tracking-[0.08em] text-state-activo-text">
-                {d.news.onAir}
-              </span>
-            </div>
-            <div
-              className="absolute inset-x-0 bottom-0 px-3 pb-2 pt-5 text-[11px] text-fg-body"
-              style={{ background: 'linear-gradient(transparent,rgba(0,0,0,.72))' }}
-            >
-              {channel.title}
-            </div>
-          </>
+          <div
+            className="absolute inset-x-0 bottom-0 px-3 pb-2 pt-5 text-[11px] text-fg-body"
+            style={{ background: 'linear-gradient(transparent,rgba(0,0,0,.72))' }}
+          >
+            {channel.title}
+          </div>
         )}
       </div>
+
+      <p className="mt-1.5 text-[10px] leading-relaxed text-fg-mute">{d.news.liveNote}</p>
     </div>
   );
 }
