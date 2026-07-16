@@ -31,6 +31,28 @@
 
 ## Log
 
+### 2026-07-16 — Agente D (panel↔visor): ocultar incendios (v0.21.0)
+
+**Tarea:** segundo slice de la capa de overrides — aplicar en el visor los
+**ocultamientos** que el panel escribe en `override:state` (retirar detección/incidente
+erróneo sin desplegar). Solo lectura del bus + filtro.
+
+**Hecho (verificado en worktree aislado: typecheck + lint + tests + build):**
+- `src/lib/overrides/store.ts`: `getOverrides()` null-safe + `getOverridesCached`
+  (`unstable_cache`, tag `override:state`) + helpers puros `filterOutSlugs`/
+  `filterOutIds` (identidad si la lista está vacía) + tests.
+- ⚠️ **Fichero compartido `src/lib/data/index.ts`** (área de datos, Agente A): cambio
+  **aditivo y mínimo** — `getFires`/`getHotspots`/`getBurnedAreas` filtran los ocultos.
+  **Inerte por defecto** (sin overrides, salida idéntica). Incorporé el `try/catch`
+  alrededor de `getOverridesCached()` que había aparecido en el árbol (unstable_cache
+  lanza fuera del contexto de request; preserva el «getFires nunca lanza»).
+- `src/app/api/admin/revalidate/route.ts`: añade `revalidateTag(STATE_TAG)`.
+
+**Commit por worktree aislado desde `origin/main`** (el árbol compartido tenía WIP de
+otro agente + un commit local sin pushear): así mi commit va limpio sobre `origin/main`
+y no arrastra trabajo ajeno. Rutas explícitas. **Versión:** v0.21.0 (leído último tag
+v0.20.1). Panel correspondiente: `Incendib-Panel` v0.17.0.
+
 ### 2026-07-12 — Agente B (publicación del boletín)
 
 **Tarea:** publicar el primer boletín semanal (w27) con datos reales.

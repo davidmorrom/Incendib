@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.21.0] - 2026-07-16
+
+### Añadido
+
+- **Ocultar incendios/focos desde el panel** (segundo slice de la capa de overrides).
+  `getFires()`/`getHotspots()`/`getBurnedAreas()` aplican los ocultamientos que el
+  panel escribe en `override:state` (Upstash), leídos con `unstable_cache` (tag
+  `override:state`) y filtrados con helpers puros. **Inerte por defecto**: sin
+  overrides, los datos salen exactamente igual (filtro identidad + lectura null-safe).
+  `POST /api/admin/revalidate` invalida también este estado. Sirve para retirar una
+  detección satelital errónea o un incidente mal geolocalizado sin desplegar. Las
+  ediciones por campo y el sello «corregido a mano» llegan en un slice posterior.
+
 ## [0.20.1] - 2026-07-16
 
 ### Corregido
