@@ -56,6 +56,7 @@ function toHighlight(f: Fire): BoletinHighlight {
     hectares: f.hectares,
     level: f.level,
     state: f.state,
+    coordinates: f.coordinates,
   };
 }
 

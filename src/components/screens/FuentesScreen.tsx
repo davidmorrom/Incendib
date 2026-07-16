@@ -110,18 +110,18 @@ export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
           <div className={cn(SECTION, 'mb-2')}>{d.sources.attributionHeading}</div>
           <p className="font-mono text-[10px] leading-relaxed text-fg-secondary">{FULL_ATTRIBUTION}</p>
           <div className="mt-2.5 flex gap-2">
-            <button
-              type="button"
-              className="flex-1 rounded-btn border border-strong py-[7px] text-[11px] font-semibold text-fg-secondary"
+            <Link
+              href="/acerca"
+              className="flex flex-1 items-center justify-center rounded-btn border border-strong py-[7px] text-[11px] font-semibold text-fg-secondary"
             >
               {d.sources.about}
-            </button>
-            <button
-              type="button"
-              className="flex-1 rounded-btn border border-strong py-[7px] text-[11px] font-semibold text-fg-secondary"
+            </Link>
+            <Link
+              href="/metodologia"
+              className="flex flex-1 items-center justify-center rounded-btn border border-strong py-[7px] text-[11px] font-semibold text-fg-secondary"
             >
               {d.sources.methodology}
-            </button>
+            </Link>
           </div>
           <Link
             href="/legal"

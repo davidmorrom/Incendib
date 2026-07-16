@@ -31,6 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/historico`, lastModified: now, changeFrequency: 'daily', priority: 0.6 },
     { url: `${SITE}/noticias`, lastModified: now, changeFrequency: 'hourly', priority: 0.6 },
     { url: `${SITE}/fuentes`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
+    { url: `${SITE}/acerca`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${SITE}/metodologia`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE}/alertas`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE}/legal`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];

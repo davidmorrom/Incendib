@@ -43,8 +43,13 @@ describe('fireFromHighlight', () => {
     expect(fire.sources).toEqual(['jcyl', 'firms']);
   });
 
-  it('usa centinela [0,0] en coordenadas (sin ubicación real)', () => {
+  it('usa centinela [0,0] cuando el destacado no guardó coordenadas', () => {
     expect(fire.coordinates).toEqual([0, 0]);
+  });
+
+  it('usa las coordenadas reales del destacado cuando existen', () => {
+    const conCoords = fireFromHighlight({ ...highlight, coordinates: [2.1, 41.5] }, boletin);
+    expect(conCoords.coordinates).toEqual([2.1, 41.5]);
   });
 
   it('marca municipio/provincia como desconocidos', () => {
