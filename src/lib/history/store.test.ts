@@ -1,6 +1,24 @@
 import { describe, it, expect } from 'vitest';
-import { fireChangeEvents, snapOf, type FireSnap } from './store';
+import { fireChangeEvents, snapOf, upsertEpisodes, type EpisodeSnapshot, type FireSnap } from './store';
 import type { Fire } from '@/types/fire';
+
+function ep(slug: string, startedAt: string, extra: Partial<EpisodeSnapshot> = {}): EpisodeSnapshot {
+  return {
+    slug,
+    name: extra.name ?? slug,
+    municipality: extra.municipality ?? '—',
+    province: extra.province ?? 'Ávila',
+    region: extra.region ?? 'Castilla y León',
+    country: extra.country ?? 'ES',
+    state: extra.state ?? 'activo',
+    level: extra.level ?? null,
+    hectares: extra.hectares ?? 0,
+    coordinates: extra.coordinates ?? [-4.72, 40.44],
+    startedAt,
+    updatedAt: extra.updatedAt ?? startedAt,
+    sources: extra.sources ?? ['jcyl'],
+  };
+}
 
 const AT = '2026-07-12T18:00:00Z';
 const base: FireSnap = { state: 'activo', level: 1, aerial: 0, ground: 0, personnel: 0, hectares: 0 };
@@ -65,5 +83,28 @@ describe('snapOf', () => {
       resources: { aerial: 4, ground: 3, personnel: 20 },
     } as Fire;
     expect(snapOf(f)).toEqual({ state: 'controlado', level: 1, aerial: 4, ground: 3, personnel: 20, hectares: 42 });
+  });
+});
+
+describe('upsertEpisodes', () => {
+  it('fusiona por slug (el entrante gana) y ordena de reciente a antiguo', () => {
+    const existing = [ep('a', '2026-06-01T00:00:00Z', { hectares: 10 })];
+    const incoming = [
+      ep('a', '2026-06-01T00:00:00Z', { hectares: 99 }), // mismo slug: dato más fresco
+      ep('b', '2026-07-01T00:00:00Z'),
+    ];
+    const out = upsertEpisodes(existing, incoming, 50);
+    expect(out.map((e) => e.slug)).toEqual(['b', 'a']); // b más reciente
+    expect(out.find((e) => e.slug === 'a')!.hectares).toBe(99);
+  });
+
+  it('recorta al tope conservando los más recientes', () => {
+    const eps = [
+      ep('a', '2026-05-01T00:00:00Z'),
+      ep('b', '2026-06-01T00:00:00Z'),
+      ep('c', '2026-07-01T00:00:00Z'),
+    ];
+    const out = upsertEpisodes([], eps, 2);
+    expect(out.map((e) => e.slug)).toEqual(['c', 'b']);
   });
 });

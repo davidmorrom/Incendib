@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
@@ -14,9 +15,11 @@ import { interpolate } from '@/lib/i18n';
 import { STATE_LABEL_KEY, STATE_TEXT_CLASS } from '@/lib/fires/style';
 import { PT_TEXT } from '@/lib/fires/labels';
 import { SOURCES } from '@/lib/data/sources';
+import { provinceSlug } from '@/lib/fires/place';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
 import type { Fire, FireState } from '@/types/fire';
+import type { EpisodeLinks } from '@/lib/fires/reactivation';
 
 const STAT_LABEL = 'font-sans text-[9px] font-semibold uppercase tracking-[0.1em] text-fg-mute';
 
@@ -30,6 +33,7 @@ export function FichaScreen({
   asOf,
   boletinId,
   hasLocation = true,
+  related,
 }: {
   fire: Fire;
   /** Procedencia del dato: en vivo, archivo o destacado del boletín. */
@@ -40,6 +44,8 @@ export function FichaScreen({
   boletinId?: string;
   /** Hay coordenadas reales (si no, se oculta el mapa). */
   hasLocation?: boolean;
+  /** Episodios del mismo paraje (reactivaciones), si los hay. */
+  related?: EpisodeLinks;
 }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
@@ -55,6 +61,13 @@ export function FichaScreen({
   // último dato conocido, sin señales de «ahora» (meteo, confirmación satelital,
   // avance 24 h) y con banner sobrio.
   const historical = origin !== 'live';
+
+  // Reactivación: si este incendio se reactivó, apuntamos al incidente actual;
+  // si es él mismo una reactivación, apuntamos al episodio anterior. (Excluyentes.)
+  const reactCurrent = related?.current;
+  const reactEarlier = !reactCurrent ? related?.prior?.[0] : undefined;
+  const otherEpisodes = related?.related ?? [];
+  const provSlug = fire.province && fire.province !== '—' ? provinceSlug(fire.province) : null;
 
   const stateLabel =
     fire.country === 'PT' && fire.ptState ? PT_TEXT[fire.ptState] : d.states[STATE_LABEL_KEY[fire.state]];
@@ -162,6 +175,37 @@ export function FichaScreen({
       <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card">
         <div className="mx-auto mt-2 h-1 w-9 flex-none rounded-full" style={{ background: 'var(--border-strong)' }} aria-hidden />
 
+        {/* Reactivación: enlaza este episodio con el incidente actual (si se
+            reactivó) o con el anterior (si es él mismo una reactivación). */}
+        {reactCurrent && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.activo, 45), background: mix(V.activo, 8) }}
+          >
+            <p className="text-[11px] font-semibold leading-snug text-fg">{d.fire.reactivationHistorical}</p>
+            <Link
+              href={`/f/${reactCurrent.slug}`}
+              className="mt-0.5 inline-block font-mono text-[10px] font-semibold text-action-text"
+            >
+              {d.fire.viewCurrentIncident} ↗
+            </Link>
+          </div>
+        )}
+        {reactEarlier && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.foco, 45), background: mix(V.foco, 8) }}
+          >
+            <p className="text-[11px] font-semibold leading-snug text-fg">{d.fire.reactivationLive}</p>
+            <Link
+              href={`/f/${reactEarlier.slug}`}
+              className="mt-0.5 inline-block font-mono text-[10px] font-semibold text-action-text"
+            >
+              {d.fire.viewEarlierIncident} ↗
+            </Link>
+          </div>
+        )}
+
         {historical && (
           <div
             className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
@@ -245,6 +289,14 @@ export function FichaScreen({
             <p className="mt-1 font-mono text-[9.5px] text-warn" title={fire.overriddenFields?.join(', ')}>
               ✎ {d.fire.editedManually}
             </p>
+          )}
+          {provSlug && (
+            <Link
+              href={`/p/${provSlug}`}
+              className="mt-1.5 inline-block font-mono text-[10px] font-semibold text-action-text"
+            >
+              {interpolate(d.fire.viewProvince, { province: fire.province })} ↗
+            </Link>
           )}
         </div>
 
@@ -374,6 +426,28 @@ export function FichaScreen({
               </ol>
             </>
           ) : null}
+
+          {otherEpisodes.length > 0 && (
+            <>
+              <div className="mt-4 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
+                {d.fire.otherEpisodes}
+              </div>
+              <ul className="mt-2">
+                {otherEpisodes.slice(0, 6).map((e) => (
+                  <li key={e.slug}>
+                    <Link href={`/f/${e.slug}`} className="flex items-center gap-2 py-1.5">
+                      <StateGlyph state={e.state} size={11} className="flex-none" />
+                      <span className="min-w-0 flex-1 truncate text-[11.5px] text-fg-body">{e.name}</span>
+                      <span className="flex-none font-mono text-[9.5px] text-fg-mute">{dateFmt(e.startedAt)}</span>
+                      <span className="flex-none font-mono text-[9px] uppercase tracking-[0.05em] text-fg-mute">
+                        {e.historical ? d.fire.episodeHistorical : d.fire.episodeOngoing}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
 
         {/* Acciones */}

@@ -7,6 +7,7 @@ import { LangButton } from '@/components/layout/LangButton';
 import { LevelBadge } from '@/components/ui/LevelBadge';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { rankByProvince } from '@/lib/fires/ranking';
+import { provinceSlug } from '@/lib/fires/place';
 import { formatNumber, formatHa } from '@/lib/utils/format';
 import { interpolate } from '@/lib/i18n';
 import type { Fire } from '@/types/fire';
@@ -64,11 +65,19 @@ export function IncendiosHoyScreen({ fires, focos24h }: { fires: Fire[]; focos24
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const pslug = provinceSlug(r.province);
+                  return (
                   <tr key={`${r.country}-${r.region}-${r.province}`} className="border-b">
                     <td className="px-screen py-2 align-top">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-body font-semibold text-fg">{r.province}</span>
+                        {pslug ? (
+                          <Link href={`/p/${pslug}`} className="text-body font-semibold text-action-text">
+                            {r.province}
+                          </Link>
+                        ) : (
+                          <span className="text-body font-semibold text-fg">{r.province}</span>
+                        )}
                         <LevelBadge level={r.maxLevel} country={r.country} />
                       </div>
                       <span className="text-[10.5px] text-fg-mute">{r.region}</span>
@@ -89,7 +98,8 @@ export function IncendiosHoyScreen({ fires, focos24h }: { fires: Fire[]; focos24
                       {r.hectares > 0 ? `${r.hectaresApprox ? '~' : ''}${formatHa(r.hectares)}` : '—'}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

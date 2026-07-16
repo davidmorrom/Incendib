@@ -5,6 +5,32 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.24.0] - 2026-07-16
+
+### Añadido
+
+- **Reactivación de incendios enlazada.** Cuando un incendio se reactiva, la
+  fuente abre un incidente nuevo (nuevo ID → nuevo slug → nueva ficha) y el
+  anterior quedaba huérfano. Ahora ambas fichas se **conectan**: la histórica
+  muestra «Este incendio se ha reactivado → Ver incidente actual» y la nueva,
+  «Reactivación de un incendio anterior → Ver incendio anterior», con una lista
+  de **«Otros episodios en este paraje»**. La conexión se deriva de una **clave
+  de lugar estable** (`país:provincia:municipio`), independiente del ID de la
+  fuente (`src/lib/fires/place.ts`, `reactivation.ts`, puros y testeados). El
+  descubrimiento es determinista sobre el pool enumerable (vivo + archivo git +
+  áreas EFFIS) y, en producción, se enriquece con un índice Redis por paraje.
+- **Páginas de provincia `/p/[provincia]`.** Listado de los incendios que ha
+  habido y está habiendo en una provincia (o distrito PT), **agrupados por
+  paraje** para que las reactivaciones se vean juntas, con secciones «En curso»
+  e «Histórico reciente». Reúne dato en vivo, archivo de fichas (git + Redis) y
+  áreas quemadas por satélite (EFFIS). Catálogo canónico de provincias/distritos
+  (`src/lib/geo/provinces.ts`) para validar el slug y prerenderizar. Enlaces
+  añadidos desde «Incendios hoy» (cada provincia) y desde la ficha
+  («Ver incendios de {provincia}»). Ruta en el sitemap. i18n ES/PT/EN.
+- Índices Redis **best-effort** por provincia (`hist:prov:*`) y por paraje
+  (`hist:place:*`), poblados por el cron al archivar, para que el archivo de
+  ~1 año sea enumerable. Null-safe: sin Redis, todo es no-op.
+
 ## [0.23.1] - 2026-07-16
 
 ### Corregido
