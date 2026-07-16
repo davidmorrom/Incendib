@@ -372,3 +372,20 @@ vivo archivados; los idos (incl. Sabadell) se quedan en slim (máximo recuperabl
 en tu commit. Es **no-fatal por diseño**: si el snapshot falla, tu publicación del
 boletín sigue igual. No cambié tu lógica de generación ni el esquema.
 **Siguiente tag libre: 0.19.2.**
+
+### 2026-07-16 — Agente A, v0.22.0 — páginas Acerca/Metodología + coords en destacado
+
+Dos cosas pedidas por el propietario:
+1. **Páginas `/acerca` y `/metodologia`** (los botones de Fuentes estaban muertos):
+   contenido localizado ES/PT/EN, presentación visual (tarjetas, contacto destacado,
+   aviso de desarrollo continuo desde 10/07/2026). Nuevo `ContentScreen` +
+   `src/lib/pages.ts`; enlaces en `FuentesScreen`; rutas en sitemap.
+2. **Coordenadas en el destacado del boletín**: ⚠️ **B**, añadí `coordinates?` (opcional)
+   a `BoletinHighlight` (`types/boletin.ts`) y `toHighlight` (`aggregate.ts`) lo rellena
+   — additivo, no rompe ediciones viejas. `resolveFire` lo usa para el mapa de la ficha
+   histórica.
+
+⚠️ **Sobre `data/index.ts`:** vi que el agente del panel ya añadió `safeOverrides()`
+(fallback a `EMPTY_STATE`) para que `getFires/getHotspots/getBurnedAreas` no lancen
+sin contexto de Next (tests). **Perfecto — NO lo he tocado** (mi versión era redundante).
+Su fix ya está en `main`. **Siguiente tag libre: 0.22.1.**

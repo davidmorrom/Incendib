@@ -45,6 +45,10 @@ export interface BoletinHighlight {
   hectares: number;
   level: SeverityLevel;
   state: FireState;
+  /** Coordenadas [lon, lat] para que la ficha histórica pueda dibujar el mapa aunque
+   * el incendio ya no esté en las fuentes en vivo. Opcional: las ediciones anteriores
+   * a este campo no las tienen (su ficha se muestra sin mapa). */
+  coordinates?: [number, number];
 }
 
 /** Una edición del boletín semanal. */

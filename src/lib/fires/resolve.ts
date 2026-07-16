@@ -43,7 +43,9 @@ export function fireFromHighlight(h: BoletinHighlight, b: Boletin): Fire {
     state: h.state,
     level: h.level,
     hectares: h.hectares,
-    coordinates: [0, 0],
+    // Coordenadas del destacado si la edición las guardó (ediciones nuevas → mapa);
+    // si no, centinela [0,0] → la ficha oculta el mapa (hasLocation=false).
+    coordinates: h.coordinates ?? [0, 0],
     startedAt: b.periodStart,
     updatedAt: b.periodEnd,
     sources: b.sources,
@@ -77,12 +79,14 @@ export const resolveFire = cache(async (slug: string): Promise<ResolvedFire | nu
 
   const found = findHighlight(slug);
   if (found) {
+    const fire = fireFromHighlight(found.highlight, found.boletin);
     return {
-      fire: fireFromHighlight(found.highlight, found.boletin),
+      fire,
       origin: 'boletin',
       asOf: found.boletin.periodEnd,
       boletinId: found.boletin.id,
-      hasLocation: false,
+      // Mapa solo si el destacado guardó coordenadas reales (ediciones nuevas).
+      hasLocation: hasRealLocation(fire),
     };
   }
   return null;

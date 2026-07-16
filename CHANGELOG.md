@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.22.0] - 2026-07-16
+
+### Añadido
+
+- **Páginas «Acerca del proyecto» (`/acerca`) y «Metodología» (`/metodologia`)**,
+  antes eran botones sin efecto en Fuentes. Presentación visual y escaneable
+  (intro destacada, secciones en tarjetas numeradas, aviso de proyecto en
+  desarrollo continuo desde el 10/07/2026 y bloque de contacto destacado con enlace
+  `mailto`). Contenido localizado ES/PT/EN; detallan qué es y qué NO es el proyecto,
+  las fuentes, el tratamiento de la superficie, la detección satelital, el histórico
+  y las limitaciones conocidas. Enlazadas desde Fuentes y añadidas al sitemap.
+- **Coordenadas en los incendios destacados del boletín**: las ediciones nuevas
+  guardan la posición del incendio, de modo que su ficha histórica podrá dibujar el
+  mapa aunque el incendio ya no esté en las fuentes en vivo (las ediciones anteriores
+  a este campo siguen mostrándose sin mapa).
+
 ## [0.21.0] - 2026-07-16
 
 ### Añadido
