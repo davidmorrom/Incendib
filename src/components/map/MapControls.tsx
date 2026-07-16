@@ -1,13 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
+import { useEffectiveTheme } from '@/lib/hooks/useTheme';
+import { BASEMAP_OPTIONS, resolveBasemap, type ResolvedBasemap } from '@/lib/map/config';
 import { cn } from '@/lib/utils/cn';
 
 const btn = 'if-overlay grid h-9 w-9 place-items-center rounded-card';
 
-/** Fila-conmutador de una capa dentro del panel. */
+/** Clave i18n de la etiqueta de cada mapa base. */
+const BASEMAP_LABEL: Record<ResolvedBasemap, keyof ReturnType<typeof useDict>['map']> = {
+  claro: 'basemapClaro',
+  satelite: 'basemapSatelite',
+  relieve: 'basemapRelieve',
+  oscuro: 'basemapOscuro',
+};
+
+/** Miniatura CSS representativa de cada base (mnemónico, no dato). */
+const BASEMAP_PREVIEW: Record<ResolvedBasemap, string> = {
+  claro: 'linear-gradient(135deg,#F4F2EC,#D9D3C4)',
+  satelite: 'linear-gradient(135deg,#16324a 0%,#2f5a3a 55%,#6b5a38 100%)',
+  relieve: 'linear-gradient(135deg,#e7ddc1,#b7c299 55%,#8fa06f)',
+  oscuro: 'linear-gradient(135deg,#0C1117,#1e2a3a)',
+};
+
+/** Fila-conmutador de una capa (dato superpuesto) dentro del panel. */
 function LayerToggle({
   label,
   on,
@@ -50,6 +68,79 @@ function LayerToggle({
   );
 }
 
+/** Etiqueta de sección (mayúsculas mono, como el resto de overlays). */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-fg-mute">
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Selector de mapa base (radiogroup accesible). Independiente del tema de la UI:
+ * la UI sigue clara por defecto, pero el mapa puede verse en satélite/relieve.
+ * La opción resaltada es la resuelta según el tema cuando la preferencia es
+ * `auto`. Flechas para navegar; Enter/Espacio para elegir.
+ */
+function BasemapPicker() {
+  const d = useDict();
+  const theme = useEffectiveTheme();
+  const basemap = useUIStore((s) => s.basemap);
+  const setBasemap = useUIStore((s) => s.setBasemap);
+  const selected = resolveBasemap(basemap, theme);
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const move = (i: number, delta: number) => {
+    const next = (i + delta + BASEMAP_OPTIONS.length) % BASEMAP_OPTIONS.length;
+    const opt = BASEMAP_OPTIONS[next]!;
+    setBasemap(opt);
+    refs.current[next]?.focus();
+  };
+
+  return (
+    <div role="radiogroup" aria-label={d.map.basemapTitle} className="grid grid-cols-2 gap-1.5 px-1 pb-1">
+      {BASEMAP_OPTIONS.map((opt, i) => {
+        const on = selected === opt;
+        return (
+          <button
+            key={opt}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={on ? 0 : -1}
+            onClick={() => setBasemap(opt)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                move(i, 1);
+              } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                move(i, -1);
+              }
+            }}
+            className={cn(
+              'flex flex-col gap-1 rounded-[7px] p-1 text-center transition-colors',
+              on ? 'text-fg' : 'text-fg-secondary hover:text-fg-body',
+            )}
+            style={on ? { boxShadow: '0 0 0 2px var(--action)' } : undefined}
+          >
+            <span
+              aria-hidden
+              className="h-[26px] w-full rounded-[5px] border border-[var(--border-subtle)]"
+              style={{ backgroundImage: BASEMAP_PREVIEW[opt] }}
+            />
+            <span className="text-[10.5px] font-medium leading-none">{d.map[BASEMAP_LABEL[opt]]}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Controles flotantes del mapa (arriba-derecha): capas + geolocalización. */
 export function MapControls({
   onLocate,
@@ -66,8 +157,12 @@ export function MapControls({
   const togglePerimeters = useUIStore((s) => s.togglePerimeters);
   const hotspotsVisible = useUIStore((s) => s.hotspotsVisible);
   const toggleHotspots = useUIStore((s) => s.toggleHotspots);
+  const basemap = useUIStore((s) => s.basemap);
 
-  const anyActive = (perimetersVisible && hasPerimeters) || (hotspotsVisible && hasHotspots);
+  const anyActive =
+    basemap !== 'auto' ||
+    (perimetersVisible && hasPerimeters) ||
+    (hotspotsVisible && hasHotspots);
 
   return (
     <div className="absolute right-[10px] top-[10px] z-[3] flex flex-col items-end gap-2">
@@ -89,12 +184,15 @@ export function MapControls({
         {open && (
           <div
             role="group"
-            aria-label={d.map.layersTitle}
-            className="if-overlay absolute right-0 top-[42px] w-[220px] rounded-card p-1.5"
+            aria-label={d.map.layersAria}
+            className="if-overlay absolute right-0 top-[42px] w-[224px] rounded-card p-1.5"
           >
-            <div className="px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-fg-mute">
-              {d.map.layersTitle}
-            </div>
+            <SectionLabel>{d.map.basemapTitle}</SectionLabel>
+            <BasemapPicker />
+
+            <div className="my-1 h-px bg-[var(--border-subtle)]" />
+
+            <SectionLabel>{d.map.layersTitle}</SectionLabel>
             <LayerToggle
               label={d.map.layerHotspots}
               on={hotspotsVisible && !!hasHotspots}

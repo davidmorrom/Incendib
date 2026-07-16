@@ -5,6 +5,34 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.27.0] - 2026-07-16
+
+### Añadido
+
+- **Selector de mapa base en el visor.** Nuevo control «Mapa base» (arriba-dcha,
+  junto a las capas) con cuatro opciones: **Claro** (por defecto), **Satélite**
+  (imagen real de superficie), **Relieve** y **Oscuro**. El tema de la UI sigue
+  siendo claro por defecto; el mapa base es una preferencia aparte que se
+  **persiste** (`incendib-basemap`). Radiogroup accesible (flechas + Enter).
+  - *Satélite*: mosaico **Sentinel-2 cloudless** (EOX, sin nubes, 10 m) con
+    etiquetas OSM superpuestas. *Relieve*: **EOX Terrain Light**. Ambos sin clave
+    de API. *Claro/Oscuro*: OpenFreeMap (positron/dark). Atribución dinámica
+    según la base y licencias anotadas en `docs/DATA-SOURCES.md` (Sentinel-2
+    cloudless es CC BY-NC-SA: uso no comercial, que es nuestro caso).
+
+### Cambiado
+
+- **Perímetros más legibles** (mapa y minimapa de la ficha). Nueva capa de
+  *casing* (trazo neutro ancho y semitransparente) bajo la línea del estado, con
+  grosor por zoom, para que el perímetro se lea con nitidez sobre cualquier base
+  (imagen de satélite oscura o mapa claro). El frente activo va más grueso y
+  opaco que el área ya quemada (distinción por color + grosor). Técnica inspirada
+  en geamap/EFFIS y firemap.
+- **Zoom máximo del mapa** de 12 a 14, para poder inspeccionar de cerca
+  perímetros e imagen de satélite.
+- **CSP**: `connect-src`/`img-src` permiten ahora las teselas de EOX
+  (`tiles.maps.eox.at`) además de OpenFreeMap.
+
 ## [0.26.0] - 2026-07-16
 
 ### Añadido

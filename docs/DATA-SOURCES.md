@@ -121,6 +121,12 @@
 - **NASA FIRMS**: dominio público, sin copyright; NASA pide reconocimiento como fuente (*"NASA supports an open data policy and we encourage the appropriate use of data and graphics from FIRMS"*). Cita recomendada de LANCE FIRMS.
 - **datos.gob.es / datos autonómicos**: reutilización libre (Ley 37/2007 y RD 1495/2011) con atribución y sin desnaturalizar; REDIAM Andalucía = libre con mención de autores.
 - **fogos.pt**: datos originales de ICNF/IPMA; API JSON para consulta; para uso comercial/redistribución hay que revisar términos de las fuentes originales; API en proceso de exigir registro.
+- **Teselas del mapa base** (selector «Mapa base» del visor):
+  - *Claro / Oscuro*: **OpenFreeMap** (positron/dark), vectorial sin clave, datos **© OpenStreetMap (ODbL)**, código MIT. Atribución: «© OpenStreetMap · OpenFreeMap».
+  - *Satélite*: **EOX Sentinel-2 cloudless** (`tiles.maps.eox.at`), mosaico anual sin nubes (10 m). El año usado (2024) es **CC BY-NC-SA 4.0** → **solo uso no comercial**, que es nuestro caso (proyecto sin ánimo de lucro). Atribución obligatoria: «Sentinel-2 cloudless <año> por EOX IT Services GmbH (Contains modified Copernicus Sentinel data)». Etiquetas: overlay EOX (© OpenStreetMap).
+  - *Relieve*: **EOX Terrain Light** (`tiles.maps.eox.at`), relieve suave. Atribución: «EOX Terrain Light · © OpenStreetMap · SRTM».
+  - **Descartado a propósito**: **Esri World Imagery** (server.arcgisonline.com). Aunque el endpoint responde sin clave, su uso queda **fuera de las condiciones de Esri** (el Master Agreement liga el uso de las teselas a productos/cuenta ArcGIS; contiene imagen premium Maxar/Vantor). No es un permiso «atribución→basta». El camino limpio sería una clave de ArcGIS Location Platform. Por eso el visor usa EOX (licencia CC clara para no comercial).
+  - **Operativa**: los endpoints gratuitos de EOX son *best-effort* (sin SLA) y EOX pide que el tráfico alto use su servicio de pago; adecuado para el tráfico modesto de este visor. Si crece, cachear/servir desde infraestructura propia o contactar con EOX.
 - **Conclusión legal**: para un proyecto sin ánimo de lucro basta con atribución correcta de cada fuente en un pie/página "Fuentes y licencias"; no se requiere permiso formal previo. Añadir disclaimer: "no sustituye a canales oficiales de emergencia; en caso de emergencia llamar al 112".
 
 ---

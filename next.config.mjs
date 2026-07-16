@@ -3,7 +3,9 @@
 const isProd = process.env.NODE_ENV === 'production';
 
 // Content-Security-Policy acotada a los orígenes que la app usa de verdad:
-//  - teselas del mapa (OpenFreeMap), iframe de directos (YouTube nocookie),
+//  - teselas del mapa: OpenFreeMap (vectorial claro/oscuro) y EOX (satélite
+//    Sentinel-2 + relieve Terrain Light, WMTS raster), iframe de directos
+//    (YouTube nocookie),
 //  - `blob:` para los workers de MapLibre, `data:` para iconos/marcadores SVG.
 // script-src/style-src incluyen 'unsafe-inline' porque Next inyecta scripts de
 // arranque sin nonce y el tema fija estilos en línea; 'unsafe-eval' solo en dev
@@ -16,15 +18,15 @@ const csp = [
   "form-action 'self'",
   `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isProd ? '' : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://tiles.openfreemap.org",
+  "img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.maps.eox.at",
   "font-src 'self' data:",
   "worker-src 'self' blob:",
   "child-src 'self' blob: https://www.youtube-nocookie.com",
   "frame-src 'self' https://www.youtube-nocookie.com",
   "media-src 'self' blob:",
   "manifest-src 'self'",
-  // Fetch/beacon: API propia, teselas del mapa y telemetría de Vercel.
-  "connect-src 'self' https://tiles.openfreemap.org https://*.vercel-insights.com",
+  // Fetch/beacon: API propia, teselas del mapa (OpenFreeMap + EOX) y telemetría.
+  "connect-src 'self' https://tiles.openfreemap.org https://tiles.maps.eox.at https://*.vercel-insights.com",
   ...(isProd ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 

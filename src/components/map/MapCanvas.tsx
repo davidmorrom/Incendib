@@ -28,11 +28,19 @@ import { useNow } from '@/components/time/NowProvider';
 import {
   GEO,
   INITIAL_VIEW,
-  MAP_STYLE,
   MAX_ZOOM,
   MIN_ZOOM,
+  basemapAttribution,
+  basemapStyle,
   maskPaint,
+  resolveBasemap,
 } from '@/lib/map/config';
+import {
+  PERIMETER_LINE_LAYOUT,
+  perimeterCasingPaint,
+  perimeterFillPaint,
+  perimeterLinePaint,
+} from '@/lib/map/perimeter';
 import { SOURCES } from '@/lib/data/sources';
 import type { Fire, Hotspot } from '@/types/fire';
 
@@ -67,7 +75,15 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   const now = useNow();
   const perimetersVisible = useUIStore((s) => s.perimetersVisible);
   const hotspotsVisible = useUIStore((s) => s.hotspotsVisible);
+  const basemap = useUIStore((s) => s.basemap);
   const theme = useEffectiveTheme();
+  const resolvedBasemap = useMemo(() => resolveBasemap(basemap, theme), [basemap, theme]);
+  const mapStyle = useMemo(() => basemapStyle(basemap, theme), [basemap, theme]);
+  // Opciones de contraste de los perímetros según la base activa.
+  const perimeterOpts = useMemo(
+    () => ({ imagery: resolvedBasemap === 'satelite', darkBase: resolvedBasemap === 'oscuro' }),
+    [resolvedBasemap],
+  );
   const mapRef = useRef<MapRef>(null);
   const [tip, setTip] = useState<string | null>(null);
   const [hotspotTip, setHotspotTip] = useState<HotspotTip | null>(null);
@@ -80,7 +96,7 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   } | null>(null);
   const [cursor, setCursor] = useState<'grab' | 'pointer'>('grab');
 
-  const paint = useMemo(() => maskPaint(theme), [theme]);
+  const paint = useMemo(() => maskPaint(resolvedBasemap), [resolvedBasemap]);
   const peninsular = useMemo(() => fires.filter((f) => !isIslandFire(f)), [fires]);
   const islands = useMemo(() => fires.filter(isIslandFire), [fires]);
   const tipFire = tip ? fires.find((f) => f.slug === tip) : null;
@@ -218,7 +234,7 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
         ...(perimetersVisible && hasPerimeters ? ['perimeter-fill'] : []),
         ...(showHotspots ? ['hotspot-clusters', 'hotspot-core'] : []),
       ]}
-      mapStyle={MAP_STYLE[theme]}
+      mapStyle={mapStyle}
       initialViewState={INITIAL_VIEW}
       minZoom={MIN_ZOOM}
       maxZoom={MAX_ZOOM}
@@ -227,10 +243,17 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       attributionControl={false}
       style={{ width: '100%', height: '100%' }}
     >
-      {/* Atribución obligatoria (OpenFreeMap/OSM), propia y discreta: arriba-izq
-          en móvil, abajo-centro en desktop (sin chocar con KPIs/leyenda/inset). */}
-      <div className="pointer-events-none absolute left-2 top-2 z-[1] font-mono text-[8px] leading-none text-fg-mute lg:left-1/2 lg:top-auto lg:bottom-1.5 lg:-translate-x-1/2">
-        © OpenStreetMap · OpenFreeMap
+      {/* Atribución obligatoria de la capa base (según el mapa base activo),
+          propia y discreta: arriba-izq en móvil, abajo-centro en desktop (sin
+          chocar con KPIs/leyenda/inset). */}
+      <div
+        className={`pointer-events-none absolute left-2 top-2 z-[1] max-w-[70vw] font-mono text-[8px] leading-tight lg:left-1/2 lg:top-auto lg:bottom-1.5 lg:max-w-none lg:-translate-x-1/2 ${
+          resolvedBasemap === 'satelite'
+            ? 'text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.85)]'
+            : 'text-fg-mute'
+        }`}
+      >
+        {basemapAttribution(resolvedBasemap)}
       </div>
       {/* Máscara: mundo atenuado, España+Portugal recortados */}
       <Source id="dim" type="geojson" data={GEO.mask}>
@@ -256,19 +279,24 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
         />
       </Source>
 
-      {/* Perímetros de área quemada (EFFIS): relleno traslúcido + borde definido */}
+      {/* Perímetros (EFFIS + frente activo): relleno traslúcido + casing neutro
+          (legible sobre cualquier base) + línea del color del estado. El orden
+          fill→casing→line deja el borde nítido encima. Los focos y marcadores
+          van después → siempre por encima de los polígonos. */}
       {perimetersVisible && hasPerimeters && (
         <Source id="perimeters" type="geojson" data={perimeters}>
+          <Layer id="perimeter-fill" type="fill" paint={perimeterFillPaint(perimeterOpts)} />
           <Layer
-            id="perimeter-fill"
-            type="fill"
-            paint={{ 'fill-color': ['get', 'color'], 'fill-opacity': 0.16 }}
+            id="perimeter-casing"
+            type="line"
+            layout={PERIMETER_LINE_LAYOUT}
+            paint={perimeterCasingPaint(perimeterOpts)}
           />
           <Layer
             id="perimeter-line"
             type="line"
-            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-            paint={{ 'line-color': ['get', 'color'], 'line-width': 1.6, 'line-opacity': 0.85 }}
+            layout={PERIMETER_LINE_LAYOUT}
+            paint={perimeterLinePaint(perimeterOpts)}
           />
         </Source>
       )}
@@ -303,8 +331,9 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
               'circle-color': foco,
               'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.95, 24, 0.75, 72, 0.45],
               'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 2.5, 50, 5, 150, 8],
-              'circle-stroke-color': theme === 'light' ? '#FFFFFF' : 'rgba(0,0,0,0.35)',
-              'circle-stroke-width': theme === 'light' ? 1 : 0.5,
+              'circle-stroke-color':
+                perimeterOpts.imagery || theme === 'light' ? '#FFFFFF' : 'rgba(0,0,0,0.35)',
+              'circle-stroke-width': perimeterOpts.imagery || theme === 'light' ? 1 : 0.5,
             }}
           />
           <Layer
