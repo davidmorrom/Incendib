@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { PushSubscription } from 'web-push';
-import { saveSubscription, deleteSubscription, type AlertPrefs } from '@/lib/push/store';
-import { isSafePushEndpoint, clampPrefs } from '@/lib/push/validate';
+import { saveSubscription, deleteSubscription, getSubscription } from '@/lib/push/store';
+import { mergePrefsForStorage, type AlertPrefs } from '@/lib/alerts/prefs';
+import { isSafePushEndpoint } from '@/lib/push/validate';
 import { allowRequest, clientIp } from '@/lib/push/ratelimit';
 
 export const runtime = 'nodejs';
@@ -42,8 +43,19 @@ export async function POST(req: Request) {
     if (!sub?.endpoint || !isSafePushEndpoint(sub.endpoint)) {
       return NextResponse.json({ ok: false, error: 'suscripción no válida' }, { status: 400 });
     }
-    const prefs: AlertPrefs = clampPrefs(body.prefs);
-    await saveSubscription({ subscription: sub, prefs, createdAt: Date.now() });
+    // Exige las claves de cifrado del Push API (p256dh ~65 B, auth 16 B en base64url):
+    // sin ellas `web-push` no puede firmar y solo guardaríamos basura.
+    const keys = (sub as { keys?: { p256dh?: unknown; auth?: unknown } }).keys;
+    const b64 = (v: unknown, min: number, max: number) =>
+      typeof v === 'string' && /^[A-Za-z0-9_-]+$/.test(v) && v.length >= min && v.length <= max;
+    if (!keys || !b64(keys.p256dh, 80, 100) || !b64(keys.auth, 16, 32)) {
+      return NextResponse.json({ ok: false, error: 'suscripción no válida' }, { status: 400 });
+    }
+    // Fusiona contra lo guardado: un cliente cacheado antiguo (forma v1) no debe
+    // borrar en silencio la configuración v2 (zonas/tipos/silencio) del usuario.
+    const existing = await getSubscription(sub.endpoint);
+    const prefs: AlertPrefs = mergePrefsForStorage(body.prefs, existing?.prefs ?? null);
+    await saveSubscription({ subscription: sub, prefs, createdAt: existing?.createdAt ?? Date.now() });
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });

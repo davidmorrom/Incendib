@@ -5,6 +5,40 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.29.0] - 2026-07-16
+
+### Añadido
+
+- **Panel de alertas avanzado (`/alertas`, pantalla 7a).** La pantalla pasa de una
+  lista plana de preferencias a un panel completo que recupera el diseño canónico
+  del handoff:
+  - **Zonas vigiladas** múltiples: por **ubicación** (radio ajustable) o por
+    **provincia/distrito** (buscador con el catálogo ES+PT). Cada zona se puede
+    renombrar, ajustar, **pausar** o eliminar, y muestra un **conteo en vivo** de
+    incendios activos en ella.
+  - **Tipos de alerta** independientes en «Avisarme cuando»: nuevo incendio, subida
+    de nivel operativo, **evacuaciones y cortes** (siempre activo) y **focos
+    satelitales** (opt-in, con el aviso «detección sin confirmar»).
+  - **Umbral de nivel** (0–3) y **horario de silencio** («No molestar»); la
+    evacuación suena siempre, también en silencio.
+  - **Incendios seguidos** integrados con las notificaciones: seguir un incendio en
+    su ficha ahora puede avisar de cambios de estado/nivel (sincronización con el
+    servidor cuando hay suscripción activa).
+- **Modelo de preferencias v2** (`src/lib/alerts/prefs.ts`, `match.ts`, puros y
+  testeados): matcher por zonas/tipos/silencio con una sola decisión por
+  (incendio, suscriptor), coincidencia de provincia con alias bilingües
+  (Orense↔Ourense, Lérida↔Lleida…), y horario de silencio evaluado en la zona
+  horaria del suscriptor (con cruce de medianoche y *fail-open* ante tz inválida).
+
+### Cambiado
+
+- **Migración transparente de suscripciones antiguas (v1→v2)** en la ruta de
+  lectura del almacén: los suscriptores existentes siguen funcionando sin
+  re-suscribirse. Notificaciones push **localizadas** (ES/PT/EN). Minimización de
+  datos: coordenadas redondeadas, zona horaria solo si hay silencio configurado.
+  Endurecimiento del alta (validación de claves de la suscripción y tope de
+  seguridad) manteniendo intacta la validación anti-SSRF existente.
+
 ## [0.28.0] - 2026-07-16
 
 ### Añadido

@@ -1,6 +1,8 @@
-import type { AlertPrefs } from './store';
-
 /**
+ * Validación de seguridad de endpoints Web Push (anti-SSRF). El saneado/migración
+ * de las **preferencias** de alerta se hace en `@/lib/alerts/prefs`
+ * (`normalizePrefs`/`mergePrefsForStorage`), no aquí.
+ *
  * Valida que un endpoint de Web Push es seguro antes de que el servidor le envíe
  * una petición (mitiga SSRF: el `endpoint` lo aporta el cliente y luego lo
  * consultamos desde `sendPush`). Exige `https:` y rechaza destinos internos o
@@ -42,27 +44,4 @@ export function isSafePushEndpoint(endpoint: string | undefined | null): boolean
   }
 
   return true;
-}
-
-/**
- * Acota las preferencias de alerta a rangos sanos (evita `Infinity`, negativos o
- * valores enormes que descuadren el matcher). Devuelve valores por defecto
- * seguros si el cliente manda basura.
- */
-export function clampPrefs(raw?: Partial<AlertPrefs>): AlertPrefs {
-  const num = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Number(v) : d);
-  const minLevel = Math.min(3, Math.max(0, Math.round(num(raw?.minLevel, 2))));
-  const radiusKm = Math.min(500, Math.max(1, num(raw?.radiusKm, 30)));
-  const silence = Boolean(raw?.silence ?? false);
-
-  let zone: AlertPrefs['zone'] = null;
-  const z = raw?.zone;
-  if (z != null) {
-    const lat = num(z.lat, NaN);
-    const lon = num(z.lon, NaN);
-    if (Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-      zone = { lat, lon };
-    }
-  }
-  return { minLevel, radiusKm, silence, zone };
 }
