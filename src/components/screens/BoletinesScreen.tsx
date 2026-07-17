@@ -32,6 +32,12 @@ export function BoletinesScreen({ boletines }: { boletines: Boletin[] }) {
           >
             {d.historico.link} →
           </Link>
+          <Link
+            href="/estadisticas"
+            className="mt-2 ml-4 inline-block font-mono text-[11px] font-semibold text-action-text"
+          >
+            {d.stats.title} →
+          </Link>
         </div>
 
         {boletines.length === 0 ? (

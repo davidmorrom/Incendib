@@ -1,0 +1,63 @@
+{
+  "series": [
+    { "year": 2006, "fires": 16334, "firesProvisional": false, "hectares": 155344.83, "hectaresProvisional": false },
+    { "year": 2007, "fires": 10936, "firesProvisional": false, "hectares": 86122.03, "hectaresProvisional": false },
+    { "year": 2008, "fires": 11655, "firesProvisional": false, "hectares": 50322.09, "hectaresProvisional": false },
+    { "year": 2009, "fires": 15643, "firesProvisional": false, "hectares": 120094.21, "hectaresProvisional": false },
+    { "year": 2010, "fires": 11721, "firesProvisional": false, "hectares": 54769.88, "hectaresProvisional": false },
+    { "year": 2011, "fires": 16414, "firesProvisional": false, "hectares": 102161.33, "hectaresProvisional": false },
+    { "year": 2012, "fires": 15997, "firesProvisional": false, "hectares": 218956.59, "hectaresProvisional": false },
+    { "year": 2013, "fires": 10797, "firesProvisional": false, "hectares": 61690.61, "hectaresProvisional": false },
+    { "year": 2014, "fires": 9806, "firesProvisional": false, "hectares": 48717.83, "hectaresProvisional": false },
+    { "year": 2015, "fires": 11810, "firesProvisional": false, "hectares": 109782.85, "hectaresProvisional": false },
+    { "year": 2016, "fires": 8817, "firesProvisional": true, "hectares": 69248.28, "hectaresProvisional": false },
+    { "year": 2017, "fires": 13793, "firesProvisional": true, "hectares": 183498.68, "hectaresProvisional": false },
+    { "year": 2018, "fires": 7143, "firesProvisional": true, "hectares": 26994.49, "hectaresProvisional": false },
+    { "year": 2019, "fires": 10883, "firesProvisional": true, "hectares": 86636.04, "hectaresProvisional": false },
+    { "year": 2020, "fires": 8068, "firesProvisional": true, "hectares": 70172.6, "hectaresProvisional": true },
+    { "year": 2021, "fires": 8780, "firesProvisional": true, "hectares": 90354.68, "hectaresProvisional": true },
+    { "year": 2022, "fires": 10507, "firesProvisional": true, "hectares": 265077.98, "hectaresProvisional": true },
+    { "year": 2023, "fires": 7748, "firesProvisional": true, "hectares": 89068.33, "hectaresProvisional": true },
+    { "year": 2024, "fires": 6134, "firesProvisional": true, "hectares": 47711.12, "hectaresProvisional": true }
+  ],
+  "topCcaa": {
+    "period": "2006-2015",
+    "provisional": false,
+    "items": [
+      { "name": "Galicia", "hectares": 226873.8 },
+      { "name": "Castilla y León", "hectares": 173339.15 },
+      { "name": "Asturias", "hectares": 97518.57 },
+      { "name": "Com. Valenciana", "hectares": 97315.36 },
+      { "name": "Cantabria", "hectares": 85023.26 },
+      { "name": "Andalucía", "hectares": 70826.3 },
+      { "name": "Canarias", "hectares": 54435.55 },
+      { "name": "Extremadura", "hectares": 54304.14 },
+      { "name": "Castilla-La Mancha", "hectares": 45380.68 },
+      { "name": "Aragón", "hectares": 45195.47 }
+    ]
+  },
+  "topProvincias": {
+    "period": "2006-2015",
+    "provisional": false,
+    "items": [
+      { "name": "Ourense", "hectares": 120329.12 },
+      { "name": "Asturias", "hectares": 97518.57 },
+      { "name": "Cantabria", "hectares": 85023.26 },
+      { "name": "Pontevedra", "hectares": 82596.68 },
+      { "name": "León", "hectares": 80217.15 },
+      { "name": "Valencia", "hectares": 58763.56 },
+      { "name": "Zamora", "hectares": 47125.04 },
+      { "name": "Cáceres", "hectares": 39954.99 },
+      { "name": "S. C. de Tenerife", "hectares": 35202.25 },
+      { "name": "A Coruña", "hectares": 34787.12 }
+    ]
+  },
+  "sources": [
+    { "name": "MITECO · Estadísticas de incendios forestales (portal EGIF)", "url": "https://www.miteco.gob.es/es/biodiversidad/temas/incendios-forestales/estadisticas-incendios.html" },
+    { "name": "MITECO · «Los incendios forestales en España. Decenio 2006-2015» (PDF)", "url": "https://www.miteco.gob.es/content/dam/miteco/es/biodiversidad/temas/incendios-forestales/incendios-decenio-2006-2015_tcm30-521617.pdf" },
+    { "name": "MITECO · Indicador IEPNB 06c «Superficie forestal afectada» (Excel)", "url": "https://www.miteco.gob.es/content/dam/miteco/es/biodiversidad/temas/inventarios-nacionales/iepnb/indicadores/tablas/06c_egif_datos.xlsx" },
+    { "name": "MITECO · Avances informativos (datos provisionales)", "url": "https://www.miteco.gob.es/es/biodiversidad/temas/incendios-forestales/estadisticas-avances.html" },
+    { "name": "MITECO · Memoria metodológica de la EGIF (PDF)", "url": "https://www.miteco.gob.es/content/dam/miteco/es/biodiversidad/temas/incendios-forestales/estad%C3%ADstica-iiff/Estad%C3%ADstica-General-IF-Metodolog%C3%ADa.pdf" }
+  ],
+  "dataNote": "Ámbito: todo el territorio nacional (península, Baleares y Canarias). «Superficie forestal» = arbolada + no arbolada; no incluye superficie agrícola. Datos definitivos: superficie 2006-2019 (indicador IEPNB 06c, act. dic-2024) y nº de siniestros 2006-2015 (informe decenal). El resto son avances provisionales de MITECO, sujetos a revisión al consolidarse (p. ej. 2017 pasó de 167 949 ha en el avance a 183 499 ha definitivas). Un «siniestro» agrupa conatos (<1 ha) e incendios (≥1 ha). Los rankings territoriales son del decenio consolidado 2006-2015 (el más reciente publicado con desglose provincial). Cifras redondeadas para mostrar; el valor exacto está en las fuentes citadas."
+}
