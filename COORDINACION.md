@@ -31,6 +31,29 @@
 
 ## Log
 
+### 2026-07-17 — Agente E (estadísticas): página `/estadisticas` F1 — INTEGRADO (v0.30.0)
+
+**Tarea (propietario):** Estadísticas F1 del research (doc 05): serie histórica
+oficial EGIF/MITECO (siniestros + superficie 2006-2024) y rankings top-10
+CCAA/provincias del decenio 2006-2015. **Datos reales recopilados y referenciados
+con un workflow de investigación** (fan-out por serie/ranking + metadatos; la fase
+de verificación adversarial quedó cortada por límite de sesión, pero cada cifra
+trae su PDF/Excel oficial de MITECO y hay verificación cruzada: la superficie
+2006-2015 suma exactamente el total nacional del decenio, 1 007 962 ha). Nada
+estimado; cortes definitivo/provisional marcados por métrica. Verificado:
+typecheck + lint + **282 tests** + **build** en verde y **captura headless
+claro/oscuro** (móvil + desktop); corregido recorte de etiqueta en el borde
+(dataviz: rotular solo el extremo).
+
+**Áreas tocadas (todas mías / aditivas salvo enlaces e i18n):**
+- Nuevo: `src/app/(app)/estadisticas/`, `src/components/screens/EstadisticasScreen.tsx`,
+  `src/components/stats/ColumnChart.tsx`, `src/lib/stats/egif.ts` (+test),
+  `src/content/estadisticas/egif.json`.
+- Modificado (aditivo, bloque `stats` + pestaña + enlaces): `src/lib/i18n/dictionaries/{es,pt,en}.ts`,
+  `src/components/screens/BoletinesScreen.tsx`, `src/components/screens/FuentesScreen.tsx`.
+- Docs: `CHANGELOG.md`, `package.json`, `CLAUDE.md`, `docs/PENDIENTE.md` (cabeceras
+  desfasadas «v0.17.x» actualizadas a v0.30.x).
+
 ### 2026-07-16 — Agente P (alertas): panel avanzado — INTEGRADO (v0.29.0)
 
 **Tarea (propietario):** rehacer `/alertas` (7a) → **panel avanzado**: zonas

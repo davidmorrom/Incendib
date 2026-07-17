@@ -1,9 +1,23 @@
 # Backlog / Pendiente — Incendib
 
-> Estado a **v0.17.x** (jul 2026). Fuente única de tareas pendientes. Complementa
+> Estado a **v0.30.x** (jul 2026). Fuente única de tareas pendientes. Complementa
 > `docs/notas-sesion-2026-07-12.md` (bitácora) y `COORDINACION.md` (multiagente).
 > Leyenda: 🧑 = requiere acción del propietario · 🤖 = desarrollo de agente ·
 > 🔒 = bloqueado (dato/decisión) · ✨ = pulido.
+
+## 0. Del research (mapasdeincendios) — estado
+
+- ✅ **Informe/boletín semanal** (P0), **Noticias avanzado**, **Informe avanzado**,
+  **Mapa: basemaps** (P2), **Alertas avanzado**, **`/incendios-hoy`** (P2),
+  **Acerca/Metodología** (P3), **páginas por provincia** (`/p/[provincia]`).
+- ✅ **Estadísticas F1** (P1, v0.30.0): serie histórica EGIF (siniestros +
+  superficie 2006-2024) y rankings top-10 CCAA/provincias del decenio 2006-2015.
+  Datos oficiales MITECO versionados, no fusiona fuentes. `/estadisticas`.
+- ⏳ **Estadísticas F2/F3**: FIRMS/día + incidentes por gravedad (derivados del
+  dato en vivo) y coroplético EFFIS por provincia + filtro territorial.
+- ⏳ **Territorios por CCAA/municipio** (P1): solo existe `/p/[provincia]`.
+- ⏳ **Selección de provincia en el mapa** (P2): falta capa de límites +
+  interacción (doc `docs/research/04-...`).
 
 ## 1. Desbloqueantes (acción del propietario) 🧑
 

@@ -124,19 +124,26 @@ El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
 4. Web Push + ajustes de alertas (7a–7c), histórico (10a–10b).
 5. Panel desktop (1d, 6a).
 
-## Estado actual (v0.17.x)
+## Estado actual (v0.30.x)
 
-- ✅ **Todas las pantallas** implementadas: Mapa (2a/1d), Informe (2b), Fuentes
-  (3b), Ficha (1c), Noticias (3a/6a), Alertas (7a), Legal, Boletines +
-  Boletín semanal (F1, edición w27 publicada), Histórico (10b).
+- ✅ **Todas las pantallas** implementadas: Mapa (2a/1d) con selector de mapa
+  base, Informe (2b) avanzado, Fuentes (3b), Ficha (1c), Noticias (3a/6a)
+  avanzado, Alertas (7a) avanzado (zonas/tipos/silencio), Legal, Boletines +
+  Boletín semanal (F1, edición publicada), Histórico (10b), **Estadísticas
+  (`/estadisticas`, F1: serie histórica oficial EGIF)**, `/incendios-hoy`,
+  Acerca/Metodología y páginas por provincia (`/p/[provincia]`).
 - ✅ **Datos en vivo en producción** (`live` en Vercel, `mock` en local):
   - Incidentes: fogos.pt (PT), INFORCYL (CyL), INFOCA (Andalucía), Bombers (Cataluña).
   - Satélite: FIRMS (focos), EFFIS (perímetros + área quemada, recortado a ES+PT).
   - Superficie: oficial donde la hay (INFORCYL) + estimación EFFIS marcada «~»;
     «sin dato» si no hay ninguna. Meteo local por incendio (Open-Meteo).
   - Noticias reales (Google News RSS ES+PT).
+  - **Estadísticas: serie histórica estática EGIF/MITECO** (no en vivo; datos
+    versionados en `src/content/estadisticas/egif.json`).
 - ✅ PWA (iconos, atajos), Web Push + alertas por zona (Upstash + QStash),
-  i18n ES/PT/EN, SEO (`sitemap.xml` + `robots.txt`), 67 tests.
+  i18n ES/PT/EN, SEO (`sitemap.xml` + `robots.txt`), 282 tests.
 - ⏳ Pendiente (bloqueado por dato/decisión, ver `docs/notas-sesion-*.md`): más
   regiones en vivo (requiere inspección de red en navegador), evacuación en vivo,
-  FWI, cámaras DGT reales, islas (fuera del bbox satelital).
+  FWI, cámaras DGT reales, islas (fuera del bbox satelital). Del research quedan
+  **Territorios por CCAA/municipio** y **Estadísticas F2/F3** (FIRMS/día,
+  gravedad, coroplético EFFIS) y **selección de provincia en el mapa**.

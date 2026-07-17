@@ -122,6 +122,12 @@ export function FuentesScreen({ sources }: { sources: SourceStatus[] }) {
             >
               {d.sources.methodology}
             </Link>
+            <Link
+              href="/estadisticas"
+              className="flex flex-1 items-center justify-center rounded-btn border border-strong py-[7px] text-[11px] font-semibold text-fg-secondary"
+            >
+              {d.stats.title}
+            </Link>
           </div>
           <Link
             href="/legal"

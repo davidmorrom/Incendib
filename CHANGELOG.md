@@ -5,6 +5,31 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.30.0] - 2026-07-17
+
+### Añadido
+
+- **Página de Estadísticas (`/estadisticas`, F1 del research)**: analítica
+  histórica oficial del fuego forestal en España a partir de la **Estadística
+  General de Incendios Forestales (EGIF · MITECO)**.
+  - **Serie anual 2006-2024** de **nº de siniestros** y **superficie forestal
+    quemada** (gráficos de columnas sobrios: un solo tono para la magnitud,
+    rejilla hairline, y **trama diagonal** para los años en avance/provisional —
+    nunca se depende solo del color). Cada año trae su carácter
+    (definitivo/provisional) también en una **tabla de datos accesible**.
+  - **Rankings territoriales** por superficie quemada (top-10 **comunidades** y
+    **provincias**) del decenio consolidado 2006-2015.
+  - **KPIs**: siniestros/año y superficie/año medios del periodo consolidado,
+    **peor año** (2022, 265 078 ha) y **último año** (2024).
+  - **Honestidad de dato (regla del proyecto)**: no se fusionan fuentes
+    (EGIF ≠ EFFIS ≠ FIRMS); cada cifra procede de un documento oficial de MITECO
+    citado; los cortes definitivo/provisional se marcan **por métrica** (superficie
+    definitiva hasta 2019, siniestros hasta 2015); nada estimado ni interpolado.
+    Verificación cruzada: la superficie 2006-2015 suma exactamente el total
+    nacional del decenio (1 007 962 ha) que publica el ranking de CCAA.
+  - Datos estáticos versionados en `src/content/estadisticas/egif.json` (build
+    estático); i18n ES/PT/EN; enlazada desde Boletines y Fuentes; 5 tests nuevos.
+
 ## [0.29.0] - 2026-07-16
 
 ### Añadido
