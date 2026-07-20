@@ -76,6 +76,9 @@ const pt: Dictionary = {
     fwi: 'FWI {level}',
     hotspots: '{n} focos VIIRS · última passagem {time}',
     satelliteConfirmed: 'Atividade térmica detetada · VIIRS a {km} km',
+    satelliteOnly: 'Deteção por satélite · sem parte oficial',
+    satelliteOnlyNote:
+      'Incidente detetado por satélite (FIRMS/EFFIS) numa zona sem fonte oficial em direto. Não é um parte confirmado por uma autoridade.',
     press: 'imprensa',
     tracked: 'monitorização',
     historicalNote: 'Ficha histórica: este incêndio já não consta nas fontes em direto.',

@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.31.0] - 2026-07-20
+
+### Añadido
+
+- **Incendios derivados por satélite en zonas sin fuente oficial**: un gran
+  incendio en una provincia sin API operativa en vivo (p. ej. Madrid o
+  Castilla-La Mancha / Guadalajara) ya no se ve solo como focos sueltos en el
+  mapa. `deriveSatelliteFires` agrupa los focos FIRMS activos en incidentes
+  provisionales y los enriquece con el área quemada EFFIS más cercana (perímetro,
+  superficie estimada «~» y municipio/provincia).
+  - Se marcan `satelliteOnly` y se comunican **siempre** como detección
+    satelital, **no** como parte oficial: chip en el mapa, aviso en la ficha,
+    etiqueta en la lista y fuente real (NASA FIRMS · EFFIS). Sin EFFIS no se
+    inventa superficie («sin dato»); un foco aislado no promueve (evita ruido de
+    quemas agrícolas): hace falta respaldo EFFIS o un clúster de focos.
+
 ## [0.30.0] - 2026-07-17
 
 ### Añadido
