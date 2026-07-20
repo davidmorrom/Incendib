@@ -75,6 +75,9 @@ const es = {
     fwi: 'FWI {level}',
     hotspots: '{n} focos VIIRS · última pasada {time}',
     satelliteConfirmed: 'Actividad térmica detectada · VIIRS a {km} km',
+    satelliteOnly: 'Detección satelital · sin parte oficial',
+    satelliteOnlyNote:
+      'Incidente detectado por satélite (FIRMS/EFFIS) en una zona sin fuente oficial en vivo. No es un parte confirmado por una autoridad.',
     press: 'prensa',
     tracked: 'seguimiento',
     historicalNote: 'Ficha histórica: este incendio ya no figura en las fuentes en vivo.',
