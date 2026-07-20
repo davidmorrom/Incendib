@@ -1,0 +1,164 @@
+{
+  "id": "2026-w29",
+  "isoWeek": 29,
+  "year": 2026,
+  "periodStart": "2026-07-13",
+  "periodEnd": "2026-07-19",
+  "publishedAt": "2026-07-20T08:06:02.624Z",
+  "status": "cerrado",
+  "kpi": {
+    "firmsWeek": 326,
+    "activeFires": 57,
+    "hectares": 23375,
+    "perimeters": 10,
+    "maxLevel": 1,
+    "maxLevelWhere": "Soto De Cerrato · Castilla y León"
+  },
+  "prevKpi": {
+    "firmsWeek": 1147,
+    "activeFires": 49,
+    "hectares": 5862.6,
+    "perimeters": 10,
+    "maxLevel": 1,
+    "maxLevelWhere": "Caboalles De Arriba · Castilla y León"
+  },
+  "ranking": [
+    {
+      "region": "Detección satelital",
+      "country": "ES",
+      "fires": 14,
+      "hectares": 22491
+    },
+    {
+      "region": "Cataluña",
+      "country": "ES",
+      "fires": 22,
+      "hectares": 544
+    },
+    {
+      "region": "Castilla y León",
+      "country": "ES",
+      "fires": 11,
+      "hectares": 325
+    },
+    {
+      "region": "Alto Minho (PT)",
+      "country": "PT",
+      "fires": 2,
+      "hectares": 12
+    },
+    {
+      "region": "Viseu Dão Lafões (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 3
+    },
+    {
+      "region": "Andalucía",
+      "country": "ES",
+      "fires": 4,
+      "hectares": 0
+    },
+    {
+      "region": "Região de Aveiro (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    },
+    {
+      "region": "Oeste (PT)",
+      "country": "PT",
+      "fires": 1,
+      "hectares": 0
+    }
+  ],
+  "highlights": [
+    {
+      "slug": "cyl-soto-de-cerrato-34-360-26",
+      "name": "Soto De Cerrato",
+      "region": "Castilla y León",
+      "country": "ES",
+      "hectares": 90,
+      "level": 1,
+      "state": "activo",
+      "coordinates": [
+        -4.417960875383184,
+        41.93657082684141
+      ]
+    },
+    {
+      "slug": "sat-effis-561620",
+      "name": "Mierla, La",
+      "region": "Detección satelital",
+      "country": "ES",
+      "hectares": 22491,
+      "level": null,
+      "state": "activo",
+      "coordinates": [
+        -3.2078325031994543,
+        40.984105078216494
+      ]
+    },
+    {
+      "slug": "cat-montornes-de-segarra-montornes-de-segarra",
+      "name": "Montornès De Segarra",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 380,
+      "level": null,
+      "state": "activo",
+      "coordinates": [
+        1.177966826806881,
+        41.60206755141137
+      ]
+    },
+    {
+      "slug": "cat-aiguamurcia-aiguamurcia",
+      "name": "Aiguamúrcia",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 155,
+      "level": null,
+      "state": "activo",
+      "coordinates": [
+        1.5077102795423611,
+        41.370628871819164
+      ]
+    },
+    {
+      "slug": "cat-el-prat-de-llobregat-el-prat-de-llobregat",
+      "name": "El Prat De Llobregat",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 8,
+      "level": null,
+      "state": "activo",
+      "coordinates": [
+        2.0885777193836548,
+        41.33500938356867
+      ]
+    },
+    {
+      "slug": "cat-rubio-rubio",
+      "name": "Rubió",
+      "region": "Cataluña",
+      "country": "ES",
+      "hectares": 1,
+      "level": null,
+      "state": "activo",
+      "coordinates": [
+        1.627742046245383,
+        41.68114750190185
+      ]
+    }
+  ],
+  "sources": [
+    "fogos",
+    "jcyl",
+    "infoca",
+    "catalunya",
+    "firms",
+    "effis"
+  ],
+  "note": "Las cifras reflejan la situación consolidada a fecha de cierre y una ventana móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el acotado exacto a la semana natural llegará cuando exista histórico persistido."
+}

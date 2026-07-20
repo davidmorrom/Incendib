@@ -1,0 +1,61 @@
+{
+  "slug": "cyl-soto-de-cerrato-34-360-26",
+  "name": "Soto De Cerrato",
+  "municipality": "Soto De Cerrato",
+  "province": "Palencia",
+  "region": "Castilla y León",
+  "country": "ES",
+  "state": "activo",
+  "level": 1,
+  "type": "forestal",
+  "hectares": 90,
+  "coordinates": [
+    -4.417960875383184,
+    41.93657082684141
+  ],
+  "startedAt": "2026-07-19T13:37:00.000Z",
+  "updatedAt": "2026-07-20T01:22:38.406Z",
+  "resources": {
+    "aerial": 6,
+    "ground": 15,
+    "personnel": 7,
+    "aerialUnits": [
+      {
+        "kind": "aereo",
+        "count": 6
+      }
+    ],
+    "groundUnits": [
+      {
+        "kind": "brigada",
+        "count": 7
+      },
+      {
+        "kind": "autobomba",
+        "count": 5
+      },
+      {
+        "kind": "maquinaria",
+        "count": 2
+      },
+      {
+        "kind": "gc",
+        "count": 1
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "at": "2026-07-19T16:36:00.000Z",
+      "label": "Nivel máximo 1"
+    },
+    {
+      "at": "2026-07-19T13:37:00.000Z",
+      "label": "Declarado",
+      "state": "activo"
+    }
+  ],
+  "sources": [
+    "jcyl"
+  ]
+}
