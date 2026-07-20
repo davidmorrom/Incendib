@@ -304,6 +304,28 @@ const RAW_FIRES: Fire[] = [
     sources: ['jcyl', 'effis'],
     timeline: [{ at: '2026-07-09T15:35:00+02:00', label: 'Declarado', state: 'activo' }],
   },
+  // ── Incidente derivado SOLO de satélite (zona sin fuente oficial) ─────────────
+  // Reproduce el caso real: un gran incendio en una provincia sin API operativa en
+  // vivo (Guadalajara / Castilla-La Mancha) que antes solo se veía como focos. Se
+  // promueve a incidente provisional (`satelliteOnly`) a partir de FIRMS + EFFIS.
+  {
+    slug: 'sat-guadalajara-molina',
+    name: 'Molina de Aragón',
+    municipality: 'Molina de Aragón',
+    province: 'Guadalajara',
+    region: 'Castilla-La Mancha',
+    country: 'ES',
+    state: 'activo',
+    level: null,
+    type: 'forestal',
+    hectares: 1840,
+    hectaresApprox: true,
+    satelliteOnly: true,
+    coordinates: [-1.885, 40.845],
+    startedAt: '2026-07-17T14:00:00+02:00',
+    updatedAt: '2026-07-20T11:20:00+02:00',
+    sources: ['effis', 'firms'],
+  },
 ];
 
 /**

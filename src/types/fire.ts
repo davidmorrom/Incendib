@@ -154,6 +154,15 @@ export interface Fire {
   satelliteConfirmed?: boolean;
   /** Distancia (km) al foco FIRMS más cercano cuando `satelliteConfirmed`. */
   hotspotKm?: number;
+  /**
+   * Incidente DERIVADO solo de satélite: no hay parte oficial de ninguna fuente
+   * operativa (autonómica/nacional). Se construye agrupando focos FIRMS activos en
+   * zonas sin cobertura oficial (p. ej. Madrid o Castilla-La Mancha) y, si existe,
+   * enriqueciendo con el área quemada EFFIS más cercana (perímetro, superficie,
+   * municipio/provincia). La UI debe comunicarlo SIEMPRE de forma explícita: es
+   * una detección satelital, NO un incendio confirmado por una autoridad.
+   */
+  satelliteOnly?: boolean;
   /** Variación en las últimas 24 h (ha). Positivo = crece. */
   delta24h?: number;
   /** Coordenadas [lon, lat] para el mapa. */
