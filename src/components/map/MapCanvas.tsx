@@ -130,8 +130,8 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   }, [fires, burnedAreas, theme]);
   const hasPerimeters = perimeters.features.length > 0;
 
-  // Focos satelitales (FIRMS): puntos naranja con glow, tamaño por FRP, con
-  // clustering. Detección térmica, NO incendio confirmado.
+  // Focos satelitales (FIRMS): color base para la densidad (heatmap) y los puntos
+  // sobrios al acercar. Detección térmica, NO incendio confirmado.
   const foco = useMemo(() => statePalette(theme).focoSatelital.base, [theme]);
   const ashColor = useMemo(() => statePalette(theme).extinguido.base, [theme]);
   // Edad en horas de cada foco (para atenuar los antiguos). Se recalcula cada
@@ -178,12 +178,8 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       }
       return;
     }
-    const coords = (f.geometry as Point).coordinates as [number, number];
-    if (f.layer?.id === 'hotspot-clusters') {
-      const z = mapRef.current?.getZoom() ?? INITIAL_VIEW.zoom;
-      mapRef.current?.easeTo({ center: coords, zoom: Math.min(z + 2, MAX_ZOOM), duration: 500 });
-      setHotspotTip(null);
-    } else if (f.layer?.id === 'hotspot-core') {
+    if (f.layer?.id === 'hotspot-core') {
+      const coords = (f.geometry as Point).coordinates as [number, number];
       setHotspotTip({
         lng: coords[0],
         lat: coords[1],
@@ -232,7 +228,7 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       cursor={cursor}
       interactiveLayerIds={[
         ...(perimetersVisible && hasPerimeters ? ['perimeter-fill'] : []),
-        ...(showHotspots ? ['hotspot-clusters', 'hotspot-core'] : []),
+        ...(showHotspots ? ['hotspot-core'] : []),
       ]}
       mapStyle={mapStyle}
       initialViewState={INITIAL_VIEW}
@@ -302,62 +298,68 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       )}
 
       {/* Focos satelitales (FIRMS): detección térmica, NO incendio confirmado.
-          Naranja con glow, tamaño por FRP, agrupados en cúmulos a poco zoom. */}
+          Para no saturar el mapa (~1000+ detecciones, muchas no son incendios) se
+          dibujan como DENSIDAD suave a poco zoom (heatmap tenue de un solo tono) y,
+          al acercar, como puntos pequeños y sobrios SIN halo. La transición
+          heatmap→puntos ocurre alrededor de z7.5–9. */}
       {showHotspots && (
-        <Source
-          id="hotspots"
-          type="geojson"
-          data={hotspotsGeo}
-          cluster
-          clusterRadius={42}
-          clusterMaxZoom={9}
-        >
+        <Source id="hotspots" type="geojson" data={hotspotsGeo}>
           <Layer
-            id="hotspot-glow"
-            type="circle"
-            filter={['!', ['has', 'point_count']]}
+            id="hotspot-heat"
+            type="heatmap"
             paint={{
-              'circle-color': foco,
-              'circle-blur': 1,
-              'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.32, 24, 0.2, 72, 0.08],
-              'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 6, 50, 12, 150, 20],
+              // Peso: por intensidad (FRP) y atenuado por antigüedad del foco.
+              'heatmap-weight': [
+                '*',
+                ['interpolate', ['linear'], ['get', 'frp'], 0, 0.35, 50, 0.7, 150, 1],
+                ['interpolate', ['linear'], ['get', 'ageH'], 0, 1, 24, 0.7, 72, 0.35],
+              ],
+              'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 4, 0.6, 9, 1.1],
+              // Rampa cálida de un solo tono, muy tenue en densidad baja (evita el
+              // "rojo alarma"): insinúa dónde hay actividad sin emborronar.
+              'heatmap-color': [
+                'interpolate',
+                ['linear'],
+                ['heatmap-density'],
+                0,
+                'rgba(0,0,0,0)',
+                0.15,
+                'rgba(255,170,90,0.20)',
+                0.4,
+                'rgba(255,140,60,0.45)',
+                0.7,
+                'rgba(240,105,40,0.72)',
+                1,
+                'rgba(217,83,30,0.9)',
+              ],
+              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 4, 8, 6, 14, 9, 22],
+              // Se desvanece al acercar, cuando toman el relevo los puntos.
+              'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.7, 7.5, 0.7, 9, 0],
             }}
           />
           <Layer
             id="hotspot-core"
             type="circle"
-            filter={['!', ['has', 'point_count']]}
             paint={{
               'circle-color': foco,
-              'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.95, 24, 0.75, 72, 0.45],
-              'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 2.5, 50, 5, 150, 8],
+              'circle-opacity': ['interpolate', ['linear'], ['get', 'ageH'], 0, 0.85, 24, 0.6, 72, 0.35],
+              // Radio 0 por debajo de z7 (a poco zoom manda el heatmap); al acercar
+              // crecen según FRP, pero pequeños y sobrios.
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                7,
+                0,
+                8.5,
+                ['interpolate', ['linear'], ['get', 'frp'], 0, 1.8, 50, 3, 150, 4.5],
+                14,
+                ['interpolate', ['linear'], ['get', 'frp'], 0, 3, 50, 5, 150, 7],
+              ],
               'circle-stroke-color':
                 perimeterOpts.imagery || theme === 'light' ? '#FFFFFF' : 'rgba(0,0,0,0.35)',
-              'circle-stroke-width': perimeterOpts.imagery || theme === 'light' ? 1 : 0.5,
+              'circle-stroke-width': perimeterOpts.imagery || theme === 'light' ? 0.75 : 0.4,
             }}
-          />
-          <Layer
-            id="hotspot-clusters"
-            type="circle"
-            filter={['has', 'point_count']}
-            paint={{
-              'circle-color': foco,
-              'circle-opacity': 0.85,
-              'circle-radius': ['step', ['get', 'point_count'], 11, 10, 15, 30, 21],
-              'circle-stroke-color': theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.3)',
-              'circle-stroke-width': 1.5,
-            }}
-          />
-          <Layer
-            id="hotspot-cluster-count"
-            type="symbol"
-            filter={['has', 'point_count']}
-            layout={{
-              'text-field': ['get', 'point_count_abbreviated'],
-              'text-font': ['Noto Sans Regular'],
-              'text-size': 11,
-            }}
-            paint={{ 'text-color': theme === 'light' ? '#FFFFFF' : '#2A1206' }}
           />
         </Source>
       )}

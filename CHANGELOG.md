@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.35.0] - 2026-07-22
+
+### Cambiado
+
+- **Focos satélite (FIRMS) rediseñados para quitar ruido visual del mapa.** Con
+  ~1000+ detecciones (muchas no son incendios: agrícolas, industria…), los puntos
+  naranjas con halo y las burbujas de cúmulo saturaban el mapa. Ahora:
+  - A poco zoom, una **capa de densidad suave** (heatmap de un solo tono cálido,
+    muy tenue en densidad baja) que insinúa dónde hay actividad térmica sin
+    emborronar; el foco visual queda en los incendios confirmados.
+  - Al acercar (~z8+), la densidad da paso a **puntos pequeños y sobrios SIN halo**,
+    con tamaño por FRP y atenuados por antigüedad.
+  - Se retiran la capa de halo/glow y las burbujas de cúmulo con recuento. El
+    recuento sigue disponible en el KPI «Focos 24 h» y cada foco se puede pulsar
+    (sigue comunicando «detección satelital, no confirmada»). Leyenda sin halo.
+
 ## [0.34.1] - 2026-07-22
 
 ### Arreglado

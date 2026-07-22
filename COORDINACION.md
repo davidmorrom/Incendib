@@ -31,6 +31,35 @@
 
 ## Log
 
+### 2026-07-22 — Agente A (mapa): focos como densidad suave (v0.35.0)
+
+**Encargo del propietario:** los focos «producen mucho ruido visual, da pereza
+visualizar el mapa». Decisión validada con él (AskUserQuestion): **densidad
+(heatmap)** + **visibles por defecto**.
+
+**Hecho (verificado): heatmap tenido de un solo tono a poco zoom → puntos pequeños
+y sobrios SIN halo al acercar** (transición ~z7.5–9). Se retiran las capas
+`hotspot-glow`, `hotspot-clusters` y `hotspot-cluster-count`; el `Source` deja de
+clusterizar. Verificado en navegador real (build de producción servida): mapa
+mucho más calmado, sin errores de MapLibre en consola; a z9.6 los puntos
+individuales renderizan (sobrios, radio por FRP). typecheck + lint + build en verde.
+
+⚠️ **COLISIÓN de fichero con otro agente:** otro agente está reescribiendo
+`src/components/map/MapCanvas.tsx` a la vez (clustering de MARCADORES de incendio:
+`useFireClusters.ts`/`FireClusterMarker.tsx`, sin commitear y con un error de tipos
+en curso). Para no arrastrar su WIP roto ni romper `main`, integré **mi cambio de
+focos desde un worktree aislado sobre `origin/main`** (solo mis capas de focos +
+leyenda). Al reconciliar, el otro agente encontrará mis cambios de la sección de
+focos ya en `origin/main`: conservar lo de arriba para las capas `hotspot-*` y
+mantener su clustering de marcadores (secciones distintas del componente).
+
+**Tocado (solo míos, por ruta):** `src/components/map/MapCanvas.tsx` (capas de
+focos + handler + comentario), `src/components/map/MapLegend.tsx` (foco sin halo),
+CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.35.0** (último tag v0.34.1). El clustering de marcadores del
+otro agente tomará el siguiente libre (0.35.1/0.36.0). Siguiente tag libre: 0.35.1.
+
 ### 2026-07-22 — Agente A (datos): dedup de área quemada EFFIS 1:1 (v0.34.1)
 
 **Encargo del propietario:** «el incendio de Guadalajara y el de Retortillo de

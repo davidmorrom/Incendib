@@ -30,7 +30,7 @@ export function MapLegend() {
         >
           {ENTRIES.map(({ state, key }) => (
             <div key={state} className="flex items-center gap-2">
-              <StateGlyph state={state} size={13} glow={state === 'foco'} />
+              <StateGlyph state={state} size={13} />
               <span className="text-[11px] text-fg-body">{d.legend[key]}</span>
             </div>
           ))}
