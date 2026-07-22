@@ -13,7 +13,7 @@ import { fetchNews } from './adapters/news';
 import { fetchWeather } from './adapters/weather';
 import {
   fetchFirmsHotspots,
-  fetchFogosActive,
+  fetchPortugalFires,
   fetchJcylFires,
   fetchInfocaFires,
   fetchCatalunyaFires,
@@ -45,8 +45,9 @@ export function getDataMode(): DataMode {
 /**
  * Incendios agregados y normalizados.
  *
- * En live combina las fuentes con datos reales usables: fogos.pt (Portugal),
- * Castilla y León (INFORCYL), Andalucía (INFOCA) y Cataluña (Bombers). El resto
+ * En live combina las fuentes con datos reales usables: ANEPC (Portugal, feed
+ * oficial; respaldo fogos.pt), Castilla y León (INFORCYL), Andalucía (INFOCA) y
+ * Cataluña (Bombers). El resto
  * de España no tiene API de incendios activos en tiempo real; ahí, en vez de dejar
  * solo focos satelitales sueltos, `deriveSatelliteFires` agrupa los focos FIRMS
  * activos en incidentes provisionales (marcados `satelliteOnly`) y los enriquece
@@ -64,7 +65,7 @@ export async function getFires(): Promise<Fire[]> {
   let fires: Fire[];
   if (getDataMode() === 'live') {
     const [pt, cyl, and, cat, hotspots, perimeters] = await Promise.all([
-      fetchFogosActive(),
+      fetchPortugalFires(),
       fetchJcylFires(),
       fetchInfocaFires(),
       fetchCatalunyaFires(),
@@ -191,7 +192,12 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
   const [fires, hotspots, burned] = await Promise.all([getFires(), getHotspots(), getBurnedAreas()]);
   const now = new Date().toISOString();
   const bySrc = (id: SourceId) => fires.filter((f) => f.sources.includes(id));
-  const pt = bySrc('fogos');
+  // Portugal: ANEPC (FeatureServer oficial) es la fuente primaria; fogos.pt queda
+  // de respaldo. Se muestra una sola fila de PT, identificando la que sirve el dato.
+  const ptAnepc = bySrc('anepc');
+  const ptFogos = bySrc('fogos');
+  const pt = [...ptAnepc, ...ptFogos];
+  const ptUsesFogos = ptFogos.length > 0 && ptAnepc.length === 0;
   const cyl = bySrc('jcyl');
   const and = bySrc('infoca');
   const cat = bySrc('catalunya');
@@ -215,8 +221,8 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
       lastUpdate: latestIso(hotspots.map((h) => h.acquiredAt), now),
     },
     {
-      id: 'fogos',
-      label: 'fogos.pt / ANEPC',
+      id: ptUsesFogos ? 'fogos' : 'anepc',
+      label: ptUsesFogos ? 'fogos.pt / ANEPC' : 'ANEPC · Proteção Civil',
       description: 'incidentes activos (PT)',
       status: 'ok',
       note: plural(pt.length, 'incidente activo'),

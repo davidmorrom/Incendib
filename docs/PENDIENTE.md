@@ -23,7 +23,8 @@
 
 - **Ampliar CCAA en vivo (las que faltan)**: capturar el endpoint de un visor
   oficial (F12 → Network → Fetch/XHR → recargar → copiar la URL que devuelve
-  incendios en `arcgis`/`FeatureServer`/`.json`). **Integradas: PT, CyL,
+  incendios en `arcgis`/`FeatureServer`/`.json`). **Integradas: PT (ANEPC oficial
+  vía FeatureServer SGIFR, respaldo fogos.pt), CyL,
   Andalucía, Cataluña.**
   - **Castilla-La Mancha (INFOCAM)**: endpoint público encontrado
     (`services-eu1.arcgis.com/.../V_Incendio/FeatureServer/0`) pero es un **log

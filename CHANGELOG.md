@@ -5,6 +5,32 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.32.0] - 2026-07-22
+
+### Añadido
+
+- **Portugal: fuente OFICIAL de la ANEPC (FeatureServer del SGIFR) como fuente
+  primaria**, facilitada por la AGIF (AGIF) y el ICNF (ICNF) en
+  respuesta a la solicitud de Incendib. Es la misma fuente subyacente que fogos.pt
+  (Sistema de Informação Operacional da ANEPC), pero desde el endpoint autoritativo
+  y sin registro. Nuevo adaptador `fetchAnepcFires` (filtra incendios reales por
+  `CodNatureza` 3101/3103/3105; estado operativo, medios, concelho/freguesia,
+  coordenadas y tipo por naturaleza) y dispatcher `fetchPortugalFires` (ANEPC
+  primaria → fogos.pt de respaldo, patrón INFORCYL→Opendatasoft). Atribución a
+  **ANEPC (prociv.gov.pt)**; cacheado del lado servidor (la BD se actualiza ~cada
+  10 min) por petición de la AGIF para no saturar el servicio en picos.
+- **Distrito por concelho para Portugal** (`src/lib/geo/pt-concelhos.ts`): mapa
+  concelho→distrito (CAOP/INE, 278 concelhos continentales) para asignar la
+  «provincia» a los incendios de la ANEPC, cuyo feed publica concelho/região pero
+  no distrito. Preserva las páginas `/p/[provincia]` y las facetas territoriales
+  del informe para Portugal.
+
+### Cambiado
+
+- La fila de estado de Portugal en `/fuentes` identifica la fuente en uso (ANEPC
+  o, si esta no responde, fogos.pt de respaldo). Atribución agregada actualizada
+  con la ANEPC / Proteção Civil (SGIFR).
+
 ## [0.31.0] - 2026-07-20
 
 ### Añadido

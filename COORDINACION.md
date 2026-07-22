@@ -31,6 +31,42 @@
 
 ## Log
 
+### 2026-07-22 — Agente A (datos): Portugal vía ANEPC oficial — INTEGRADO (v0.32.0)
+
+**Tarea (propietario):** integrar el FeatureServer OFICIAL de la ANEPC (facilitado
+por AGIF/ICNF; ver `docs/incendib-actualizacion-2026-07-{17,22}.json`) como fuente
+primaria de Portugal, en sustitución/complemento de fogos.pt.
+
+**Hecho e integrado en `main`** (typecheck + lint + **293 tests** + build OK;
+**verificado en vivo**: el build prerenderizó fichas reales de ANEPC —`/f/pt-vouzela-…`—
+y páginas de distrito —`/p/viseu`, `/p/aveiro`, `/p/leiria`—; endpoint consultado
+directamente por curl: 10 incendios reales con estado/medios/coords):
+- `src/lib/data/adapters/index.ts`: `fetchAnepcFires` (filtro `CodNatureza`
+  3101/3103/3105; estado PT, medios, concelho/freguesia, coords, tipo por naturaleza)
+  + `fetchPortugalFires` (ANEPC primaria → fogos.pt respaldo). **fogos.pt intacto**
+  como fallback.
+- `src/lib/geo/pt-concelhos.ts` (**NUEVO**): mapa concelho→distrito (CAOP/INE, 278
+  continentales) para la «provincia» de PT (el feed ANEPC no trae distrito).
+- ⚠️ **`src/lib/data/index.ts`** (compartido): `getFires` usa `fetchPortugalFires`;
+  `getSourceStatus` muestra ANEPC o fogos según cuál sirva el dato. Cambio mínimo,
+  respeta el `deriveSatelliteFires` recién añadido (no lo toco).
+- ⚠️ `src/types/fire.ts` (+`anepc` en `SourceId`), `src/lib/data/sources.ts` (entrada
+  `anepc` + `FULL_ATTRIBUTION`), **i18n** `dicts/{es,pt,en}.ts` (solo la clave
+  `panel.sourceNames.anepc`, aditiva).
+- Tests: `src/lib/data/adapters/sources.test.ts` (+ANEPC +dispatcher, 4 casos).
+- Docs: `DATA-SOURCES.md`, `CLAUDE.md`, `PENDIENTE.md`, `CHANGELOG`, `package.json`.
+
+**Atribución (condición de la AGIF):** ANEPC (`https://prociv.gov.pt`), NO AGIF ni
+fogos.pt para este servicio. Cacheado (~10 min) por petición de la AGIF.
+
+**Versión:** tomo **v0.32.0** (último TAG `v0.30.0`; `package.json` venía en 0.31.0
+sin taguear —feature de focos-satélite de otro agente, `b2bc140`—, así que **v0.31.0
+queda sin tag**). **Siguiente tag libre: 0.32.1.**
+
+**Pendiente (acción del PROPIETARIO, no código):** enviar los borradores de respuesta
+a AGIF/ICNF y escribir a ANEPC (`geral@prociv.pt`, ANEPC) para la
+evolución del perímetro de grandes incendios.
+
 ### 2026-07-17 — Agente E (estadísticas): página `/estadisticas` F1 — INTEGRADO (v0.30.0)
 
 **Tarea (propietario):** Estadísticas F1 del research (doc 05): serie histórica

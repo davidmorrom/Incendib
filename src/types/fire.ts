@@ -32,6 +32,7 @@ export type SourceId =
   | 'firms'
   | 'effis'
   | 'fogos'
+  | 'anepc'
   | 'icnf'
   | 'jcyl'
   | 'catalunya'

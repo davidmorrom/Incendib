@@ -463,6 +463,7 @@ const es = {
     sourceNames: {
       firms: 'NASA FIRMS',
       effis: 'EFFIS',
+      anepc: 'ANEPC',
       fogos: 'fogos.pt',
       icnf: 'ICNF',
       jcyl: 'INFORCYL',

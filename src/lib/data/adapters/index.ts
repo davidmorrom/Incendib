@@ -29,6 +29,7 @@ import type {
 } from '@/types/fire';
 import { inEsPt } from '@/lib/geo/point-in-region';
 import { utmToLonLat } from '@/lib/geo/utm';
+import { districtForConcelho } from '@/lib/geo/pt-concelhos';
 
 /**
  * Construye el timeline de evolución de un incendio a partir de los eventos
@@ -361,6 +362,172 @@ export async function fetchFogosActive(opts: FetchOptions = {}): Promise<Fire[]>
   } catch {
     return [];
   }
+}
+
+// ── Portugal: ANEPC / SGIFR (FeatureServer oficial de ocorrências) ────────────
+// Fuente OFICIAL facilitada a Incendib por la AGIF (AGIF) y el ICNF
+// (ICNF): el FeatureServer público de la ANEPC que alimenta el SIFOR /
+// GeoSIFOR (sgifr.gov.pt/fogos-incendios-rurais-ativos y geosifor.sgifr.gov.pt).
+// Es la MISMA fuente subyacente que fogos.pt (Sistema de Informação Operacional
+// da ANEPC), pero desde el endpoint autoritativo y sin registro: por eso pasa a
+// ser la fuente PRIMARIA de Portugal y fogos.pt queda de respaldo.
+//
+// Condiciones (AGIF/ICNF, jul 2026): no hay límite de peticiones configurado pero
+// el servicio se congestiona en picos de incendios → se cachea del lado servidor
+// (revalidate) y se consulta con moderación (la BD se actualiza ~cada 10 min).
+// Atribución: ANEPC (https://prociv.gov.pt); NO AGIF ni fogos.pt para este servicio.
+//
+// Filtro por campo `CodNatureza` (AGIF): 3101 povoamentos florestais, 3103 matos,
+// 3105 áreas agrícolas = incendios reales. 3107 rescaldo, 3109 fogo controlado,
+// 3111 queima y 4335 prevenção NO son incendios (se excluyen). El feed contiene
+// solo ocorrências actuales (verificado: no es un log acumulativo, no trae
+// «Encerrada»), a diferencia de INFOCAM.
+
+const ANEPC_QUERY =
+  'https://services-eu1.arcgis.com/VlrHb7fn5ewYhX6y/ArcGIS/rest/services' +
+  '/OcorrenciasSite/FeatureServer/0/query';
+
+/** CodNatureza que corresponden a incendios reales (AGIF): povoamentos/matos/agrícola. */
+const ANEPC_FIRE_NATUREZA = [3101, 3103, 3105] as const;
+
+interface AnepcAttrs {
+  Numero?: string | number;
+  ID?: string | number;
+  CodNatureza?: number;
+  EstadoOcorrencia?: string;
+  EstadoAgrupado?: string;
+  DataOcorrencia?: number; // epoch ms (início da ocorrência)
+  DataInicioOcorrencia?: string; // "DD/MM/YYYY HH:MM" (hora local)
+  DataDosDados?: number; // epoch ms (frescura del dato)
+  Regiao?: string;
+  SubRegiao?: string;
+  Concelho?: string;
+  Freguesia?: string;
+  Localidade?: string;
+  Operacionais?: number;
+  MeiosTerrestres?: number;
+  MeiosAereos?: number;
+  Latitude?: number;
+  Longitude?: number;
+}
+
+/** CodNatureza de incendio real → tipo. 3105 = áreas agrícolas; resto, forestal. */
+function anepcType(cod?: number): Fire['type'] {
+  return cod === 3105 ? 'agricola' : 'forestal';
+}
+
+/** Medios de la ANEPC: totales (operacionais / meios terrestres / meios aéreos). */
+function anepcResources(a: AnepcAttrs): Fire['resources'] {
+  const personnel = num(a.Operacionais);
+  const ground = num(a.MeiosTerrestres);
+  const aerial = num(a.MeiosAereos);
+  if (!personnel && !ground && !aerial) return undefined;
+  // La ANEPC da recuentos totales, sin desglosar tipo de aeronave ni de vehículo:
+  // aéreo genérico y terrestre como autobomba (igual criterio que fogos.pt).
+  return {
+    aerial: aerial || undefined,
+    ground: ground || undefined,
+    personnel: personnel || undefined,
+    aerialUnits: aerial > 0 ? [{ kind: 'aereo', count: aerial }] : undefined,
+    groundUnits: ground > 0 ? [{ kind: 'autobomba', count: ground }] : undefined,
+  };
+}
+
+function anepcToFire(f: {
+  attributes?: AnepcAttrs;
+  geometry?: { x?: number; y?: number };
+}): Fire | null {
+  const a = f.attributes ?? {};
+  const g = f.geometry;
+  const lon = typeof g?.x === 'number' ? g.x : typeof a.Longitude === 'number' ? a.Longitude : NaN;
+  const lat = typeof g?.y === 'number' ? g.y : typeof a.Latitude === 'number' ? a.Latitude : NaN;
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+
+  const { state, ptState } = ptStateFromStatus(a.EstadoOcorrencia ?? '');
+  const concelho = (a.Concelho ?? '').trim();
+  const region = (a.SubRegiao || a.Regiao || 'Portugal').trim();
+  const name = collapseDup(a.Localidade || a.Freguesia || concelho || 'Incêndio');
+  // El feed publica concelho/região pero NO distrito; lo derivamos del concelho
+  // (catálogo CAOP) para la «provincia»; respaldo: sub-região.
+  const subReg = (a.SubRegiao || '').trim();
+  const province = districtForConcelho(concelho) ?? (subReg || '—');
+  const started = epochToIso(a.DataOcorrencia);
+  const updated = epochToIso(a.DataDosDados) ?? started ?? new Date().toISOString();
+  const estado = (a.EstadoOcorrencia ?? '').trim();
+  const id = a.Numero ?? a.ID ?? slugify(name);
+
+  return {
+    slug: `pt-${slugify(concelho || name)}-${id}`,
+    name,
+    municipality: concelho || '—',
+    province,
+    region: `${region} (PT)`,
+    country: 'PT',
+    state,
+    ptState,
+    level: null,
+    type: anepcType(a.CodNatureza),
+    hectares: 0, // el feed de ocorrências no publica superficie (área solo tras extinción)
+    coordinates: [lon, lat],
+    startedAt: started ?? updated,
+    updatedAt: updated,
+    resources: anepcResources(a),
+    timeline: buildTimeline([
+      { at: started, label: 'Início', state: 'activo' },
+      ...(state !== 'activo' && estado ? [{ at: updated, label: estado, state }] : []),
+    ]),
+    sources: ['anepc'],
+  };
+}
+
+/**
+ * Incendios rurales activos de Portugal desde el FeatureServer OFICIAL de la
+ * ANEPC (fuente primaria de PT). El servicio solo contiene ocorrências actuales
+ * (no es un log acumulativo), aun así se excluyen por seguridad los extinguidos y
+ * los muy antiguos (backstop de 45 días). [] ante cualquier fallo.
+ */
+export async function fetchAnepcFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  try {
+    const where = `CodNatureza IN (${ANEPC_FIRE_NATUREZA.join(',')})`;
+    const url =
+      `${ANEPC_QUERY}?where=${encodeURIComponent(where)}` +
+      `&outFields=*&returnGeometry=true&outSR=4326&resultRecordCount=500&f=json`;
+    const res = await fetch(url, {
+      signal: opts.signal ?? AbortSignal.timeout(15_000),
+      headers: { 'User-Agent': INFORCYL_HEADERS['User-Agent'] },
+      // La BD de la ANEPC se actualiza ~cada 10 min; cacheamos para no saturar el
+      // servicio en picos (condición pedida por la AGIF).
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      features?: { attributes?: AnepcAttrs; geometry?: { x?: number; y?: number } }[];
+    };
+    const feats = Array.isArray(json.features) ? json.features : [];
+    const recent = Date.now() - 45 * 86400e3;
+    return feats
+      .map(anepcToFire)
+      .filter((f): f is Fire => f !== null)
+      .filter((f) => f.state !== 'extinguido') // defensivo: fuera «Encerrada»
+      .filter((f) => {
+        const t = Date.parse(f.startedAt);
+        return !Number.isFinite(t) || t >= recent;
+      });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Incendios de Portugal: ANEPC (FeatureServer oficial) como PRIMARIA; si no
+ * responde o viene vacía, respaldo con fogos.pt. Comparten la misma fuente
+ * subyacente (Sistema de Informação Operacional da ANEPC), por eso no se combinan
+ * (evita duplicados) sino que se usa una u otra (patrón de INFORCYL→Opendatasoft).
+ */
+export async function fetchPortugalFires(opts: FetchOptions = {}): Promise<Fire[]> {
+  const anepc = await fetchAnepcFires(opts);
+  if (anepc.length) return anepc;
+  return fetchFogosActive(opts);
 }
 
 // ── España: Castilla y León ──────────────────────────────────────────────────

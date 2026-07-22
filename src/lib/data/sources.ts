@@ -38,6 +38,17 @@ export const SOURCES: Record<SourceId, SourceMeta> = {
     license: 'CC BY 4.0',
     requiresKey: false,
   },
+  anepc: {
+    id: 'anepc',
+    label: 'ANEPC · Proteção Civil (SGIFR)',
+    endpoint:
+      'https://services-eu1.arcgis.com/VlrHb7fn5ewYhX6y/ArcGIS/rest/services/OcorrenciasSite/FeatureServer/0',
+    format: 'ArcGIS FeatureServer (GeoJSON/JSON)',
+    attribution:
+      'ANEPC — Autoridade Nacional de Emergência e Proteção Civil (prociv.gov.pt), vía SGIFR/SIFOR',
+    license: 'Reutilización libre con atribución (SGIFR — geosifor.sgifr.gov.pt)',
+    requiresKey: false,
+  },
   fogos: {
     id: 'fogos',
     label: 'fogos.pt / ANEPC',
@@ -125,5 +136,5 @@ export const DISCLAIMER_112 =
 /** Texto de atribución agregada (pantalla Fuentes). Nombres propios, no se traduce. */
 export const FULL_ATTRIBUTION =
   'European Forest Fire Information System — EFFIS (© European Union, 1995–2026), CC BY 4.0 · ' +
-  'LANCE FIRMS, NASA EOSDIS (dominio público) · fogos.pt / VOST Portugal · ICNF · AEMET · IPMA · ' +
+  'LANCE FIRMS, NASA EOSDIS (dominio público) · ANEPC / Proteção Civil (SGIFR) · fogos.pt / VOST Portugal · ICNF · AEMET · IPMA · ' +
   'Cartografía base © OpenStreetMap (ODbL) / OpenFreeMap';

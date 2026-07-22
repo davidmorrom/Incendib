@@ -133,7 +133,7 @@ El propietario ha autorizado **desarrollo autónomo** (puede estar ausente):
   (`/estadisticas`, F1: serie histórica oficial EGIF)**, `/incendios-hoy`,
   Acerca/Metodología y páginas por provincia (`/p/[provincia]`).
 - ✅ **Datos en vivo en producción** (`live` en Vercel, `mock` en local):
-  - Incidentes: fogos.pt (PT), INFORCYL (CyL), INFOCA (Andalucía), Bombers (Cataluña).
+  - Incidentes: ANEPC/SGIFR (PT, feed oficial; respaldo fogos.pt), INFORCYL (CyL), INFOCA (Andalucía), Bombers (Cataluña).
   - Satélite: FIRMS (focos), EFFIS (perímetros + área quemada, recortado a ES+PT).
   - Superficie: oficial donde la hay (INFORCYL) + estimación EFFIS marcada «~»;
     «sin dato» si no hay ninguna. Meteo local por incendio (Open-Meteo).
