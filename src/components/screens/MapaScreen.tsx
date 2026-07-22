@@ -13,7 +13,7 @@ import { computeKpis, sortByGravity } from '@/lib/fires/derive';
 import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
 import { useNow } from '@/components/time/NowProvider';
 import { useDict } from '@/components/i18n/I18nProvider';
-import type { Fire, Hotspot } from '@/types/fire';
+import type { Fire } from '@/types/fire';
 
 /**
  * Pantalla Mapa (home, 2a móvil / 1d desktop). Un único mapa compartido; el
@@ -22,13 +22,9 @@ import type { Fire, Hotspot } from '@/types/fire';
  */
 export function MapaScreen({
   fires,
-  hotspots,
-  burnedAreas = [],
   focos24h,
 }: {
   fires: Fire[];
-  hotspots: Hotspot[];
-  burnedAreas?: Fire[];
   focos24h: number;
 }) {
   const router = useRouter();
@@ -74,8 +70,6 @@ export function MapaScreen({
       <div className="relative min-h-0 flex-1 bg-bg-map lg:col-start-2">
         <MapCanvasClient
           fires={visible}
-          hotspots={hotspots}
-          burnedAreas={burnedAreas}
           onSelect={select}
           hoveredSlug={hovered}
           onHover={setHovered}

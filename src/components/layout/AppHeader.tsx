@@ -44,7 +44,10 @@ export function AppHeader() {
       <button
         type="button"
         onClick={cycleLocale}
-        aria-label={d.map.langAria}
+        // WCAG 2.5.3 (Label in Name): el nombre accesible DEBE contener el texto
+        // visible ("ES"/"PT"/"EN"). Lo colocamos al inicio (técnica G208) para el
+        // control por voz y para que el lector anuncie el idioma actual.
+        aria-label={`${locale.toUpperCase()} · ${d.map.langAria}`}
         className="grid h-8 flex-none place-items-center rounded-[6px] border border-default px-[9px] font-mono text-[11px] font-semibold text-fg-secondary"
       >
         {locale.toUpperCase()}

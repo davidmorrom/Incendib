@@ -23,25 +23,27 @@
   --text-mute: #5c6470;
   --text-body: #1c222a;
 
-  /* estados de incendio */
+  /* estados de incendio
+   * `-text` = variante legible como texto (AA ≥4.5:1 sobre blanco/base/sunken);
+   * sin sufijo = color de marcador/gráfico (≥3:1). Ver tokens.ts. */
   --state-activo: #c1272d;
   --state-activo-text: #c1272d;
   --state-controlado: #c4761b;
-  --state-controlado-text: #c4761b;
+  --state-controlado-text: #925609;
   --state-estabilizado: #a98f12;
-  --state-estabilizado-text: #a98f12;
+  --state-estabilizado-text: #776608;
   --state-extinguido: #6e7b87;
-  --state-extinguido-text: #6b7480;
+  --state-extinguido-text: #5f6874;
   --state-foco: #d9531e;
-  --state-foco-text: #d9531e;
+  --state-foco-text: #b23f0e;
 
   /* UI */
   --action: #2a5fa8;
   --action-text: #2a5fa8;
   --ok: #2c9a61;
-  --ok-text: #2c9a61;
+  --ok-text: #1f7245;
   --error-text: #c1272d;
-  --warn: #b5822f;
+  --warn: #8a5a12;
 
   /* bordes */
   --border-subtle: rgba(0, 0, 0, 0.08);
@@ -218,9 +220,9 @@ body {
     --text-mute: #5c6470;
     --text-body: #1c222a;
     --state-activo-text: #c1272d;
-    --ok-text: #2c9a61;
+    --ok-text: #1f7245;
     --action-text: #2a5fa8;
-    --warn: #b5822f;
+    --warn: #8a5a12;
     --border-subtle: rgba(0, 0, 0, 0.1);
     --border-default: rgba(0, 0, 0, 0.15);
     --border-strong: rgba(0, 0, 0, 0.2);

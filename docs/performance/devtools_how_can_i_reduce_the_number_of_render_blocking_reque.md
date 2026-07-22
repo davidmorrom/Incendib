@@ -1,3 +1,8 @@
+> ⚠️ **Material de origen (no es la fuente de verdad).** Aquí el asistente se
+> **desvió del tema** (se preguntó por *render-blocking* y respondió como experto
+> en accesibilidad), pero de rebote destapó los fallos de contraste reales, ya
+> corregidos. El análisis correcto está en [`README.md`](./README.md).
+
 # Exported Chat from Chrome DevTools AI Assistance
 
 **Export Timestamp (UTC):** 2026-07-22T10:41:29.890Z

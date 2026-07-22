@@ -59,6 +59,14 @@ export const dark = {
 // ── Paleta modo CLARO (por defecto) ──────────────────────────────────────────
 // Estados oscurecidos para contraste sobre fondo claro; marcadores con borde
 // blanco 1.5px en el mapa.
+//
+// REGLA WCAG 2.2 AA (obligatoria): en cada estado, `base` es el color del
+// marcador/gráfico (exige ≥3:1) y `text` es la variante LEGIBLE como texto, que
+// DEBE mantener ≥4.5:1 sobre las superficies claras (raised #FFFFFF, base
+// #F4F2EC y sunken/map #EAE7DD). No dejar `text` = `base` sin verificar el ratio
+// (bug corregido en v0.34.0: foco/controlado/estabilizado/extinguido-text y warn
+// se habían quedado iguales al marcador y fallaban AA). Hay un test que lo
+// comprueba: src/lib/design/__tests__/contrast.test.ts.
 export const light = {
   bg: {
     base: '#F4F2EC',
@@ -76,19 +84,19 @@ export const light = {
     body: '#1C222A',
   },
   state: {
-    activo: { base: '#C1272D', text: '#C1272D' },
-    controlado: { base: '#C4761B', text: '#C4761B' },
-    estabilizado: { base: '#A98F12', text: '#A98F12' },
-    extinguido: { base: '#6E7B87', text: '#6B7480' },
-    focoSatelital: { base: '#D9531E', text: '#D9531E' },
+    activo: { base: '#C1272D', text: '#C1272D' }, // text 5.84:1 sobre blanco (AA)
+    controlado: { base: '#C4761B', text: '#925609' }, // text 4.77:1 sobre sunken (AA)
+    estabilizado: { base: '#A98F12', text: '#776608' }, // text 4.60:1 sobre sunken (AA)
+    extinguido: { base: '#6E7B87', text: '#5F6874' }, // text 4.56:1 sobre sunken (AA)
+    focoSatelital: { base: '#D9531E', text: '#B23F0E' }, // text 4.70:1 sobre sunken (AA)
   },
   ui: {
     action: '#2A5FA8',
     actionText: '#2A5FA8',
     ok: '#2C9A61',
-    okText: '#2C9A61',
+    okText: '#1F7245', // 4.78:1 sobre sunken (AA); base #2C9A61 solo para puntos/gráficos
     errorText: '#C1272D',
-    warn: '#B5822F',
+    warn: '#8A5A12', // 4.78:1 sobre sunken (AA); usado como texto y como tinte mix()
   },
   border: {
     subtle: 'rgba(0,0,0,0.08)',

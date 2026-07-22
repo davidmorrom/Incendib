@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { LevelBadge } from '@/components/ui/LevelBadge';
 import { formatNumber, timeAgo } from '@/lib/utils/format';
@@ -22,8 +23,18 @@ function subtitle(f: Fire): string {
   return `${f.municipality} · ${f.province}`;
 }
 
-/** Fila de incendio del sheet del mapa (2a). Toca → ficha. */
-export function FireRow({
+/**
+ * Fila de incendio del sheet del mapa (2a). Toca → ficha.
+ *
+ * Memoizada: la home renderiza decenas de filas y `hoveredSlug` cambia con cada
+ * movimiento del puntero sobre mapa/lista. Con `memo` y props estables (`fire`
+ * mismo objeto, `onSelect`/`onHover` con `useCallback`, `highlighted` booleano),
+ * solo re-renderizan las filas cuyo `highlighted` cambia, no todas — recorta el
+ * coste de hit-test/reflow en interacción (v0.34.0). (El tic de reloj de 60 s
+ * aún re-renderiza las filas vía `useNow`; extraer el `timeAgo` a un subnodo
+ * queda como mejora futura.)
+ */
+export const FireRow = memo(function FireRow({
   fire,
   highlighted,
   onSelect,
@@ -90,4 +101,4 @@ export function FireRow({
       </span>
     </button>
   );
-}
+});

@@ -16,7 +16,9 @@ export function LangButton({ className }: { className?: string }) {
     <button
       type="button"
       onClick={cycle}
-      aria-label={d.map.langAria}
+      // WCAG 2.5.3 (Label in Name): el nombre accesible incluye el texto visible
+      // ("ES"/"PT"/"EN") al inicio (técnica G208). Ver AppHeader.
+      aria-label={`${locale.toUpperCase()} · ${d.map.langAria}`}
       className={cn(
         'grid h-7 flex-none place-items-center rounded-[6px] border border-default px-2 font-mono text-[10.5px] font-semibold text-fg-secondary',
         className,

@@ -5,6 +5,44 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.34.0] - 2026-07-22
+
+Rendimiento y accesibilidad de la home a partir del análisis de
+`docs/performance/` (que se reescribe como informe accionable, separando el
+ruido de las extensiones del navegador del coste real del sitio).
+
+### Añadido
+
+- **Endpoint `GET /api/map-layers`** (ISR 5 min): sirve las capas satelitales del
+  mapa (`{ hotspots, burnedAreas }`). El mapa las pide desde cliente al montar.
+- **Test de regresión de contraste** (`src/lib/design/contrast.test.ts`):
+  comprueba que cada token de texto de modo claro cumple WCAG AA (≥4.5:1) sobre
+  blanco/base/sunken. La fórmula reproduce los ratios de Lighthouse.
+
+### Cambiado
+
+- **HTML de la home ~877 KB → 264 KB (−70 %, datos en vivo).** Los ~1100 focos
+  FIRMS y los perímetros EFFIS dejan de serializarse en el HTML como props de la
+  isla cliente (payload RSC inline de ~750 KB, el 87 % del documento) y pasan a
+  cargarse desde `/api/map-layers` al montar el mapa. Solo los consume el mapa
+  (`ssr:false`) y no hacen falta para el primer paint, así que ya no inflan la
+  transferencia ni la deserialización de hidratación en el hilo principal. El KPI
+  «Focos 24 h» se sigue calculando en servidor (solo el número).
+- **`FireRow` memoizada** (`React.memo`): al hacer *hover* solo re-renderizan las
+  filas cuyo resaltado cambia (~2), no las decenas de la lista.
+
+### Corregido
+
+- **Contraste WCAG 2.2 AA (modo claro):** oscurecidos los tokens de **texto**
+  (marcadores `base` intactos, modo oscuro sin tocar): `--state-foco-text`
+  `#d9531e`→`#b23f0e`, `--state-controlado-text` `#c4761b`→`#925609`,
+  `--state-estabilizado-text` `#a98f12`→`#776608`, `--state-extinguido-text`
+  `#6b7480`→`#5f6874`, `--ok-text` `#2c9a61`→`#1f7245`, `--warn`
+  `#b5822f`→`#8a5a12`. Todos ≥4.5:1. Verificado: el audit `color-contrast` pasa.
+- **Nombre accesible del selector de idioma (WCAG 2.5.3, Label in Name):** el
+  `aria-label` incluye ahora el texto visible al inicio («ES · Cambiar idioma»),
+  en `AppHeader` y `LangButton`. Verificado: `label-content-name-mismatch` pasa.
+
 ## [0.33.1] - 2026-07-22
 
 ### Arreglado

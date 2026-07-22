@@ -1,3 +1,9 @@
+> ⚠️ **Material de origen (no es la fuente de verdad).** Traza grabada con las
+> extensiones del navegador del usuario activas (Norton/AdGuard/AdBlock), por lo
+> que sus cifras de `render delay` y de hilo principal están **infladas**. El
+> análisis correcto, verificado y con las acciones aplicadas está en
+> [`README.md`](./README.md).
+
 # Exported Chat from Chrome DevTools AI Assistance
 
 **Export Timestamp (UTC):** 2026-07-22T10:37:16.326Z
