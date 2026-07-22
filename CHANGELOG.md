@@ -5,6 +5,22 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.39.1] - 2026-07-23
+
+### Corregido
+
+- **La hoja de detalle de la ficha (móvil) seguía viéndose pequeña** pese al
+  carrusel de la v0.39.0: «Medios desplegados»/«Evolución» seguían apretados
+  contra el «peek» fijo (496px/72dvh). Ahora el propio tirador (antes
+  decorativo) **expande la hoja** a 92dvh al tocarlo, dejando ver ambas
+  secciones con espacio sin perder el primer vistazo con mapa+contexto.
+  Al expandir, los controles flotantes del mapa (volver, buscador, chip de
+  confirmación satelital) se ocultan — su franja se reduce a un asomo y, con
+  posición absoluta y desplazamientos fijos, se salían de ella y tapaban el
+  tirador (bug real encontrado por Playwright: interceptaba el toque para
+  volver a contraer). La navegación de vuelta no depende de esa franja: la
+  hoja expandida muestra su propio botón «volver», siempre alcanzable.
+
 ## [0.39.0] - 2026-07-23
 
 ### Cambiado

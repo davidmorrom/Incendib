@@ -31,6 +31,41 @@
 
 ## Log
 
+### 2026-07-23 — Agente H (ficha/UI): hoja móvil expandible (v0.39.1)
+
+**Encargo del propietario:** «en móvil se sigue viendo muy pequeño, en pc es
+perfecto» — con captura mostrando «Medios desplegados» ya cortado antes de
+llegar a «Evolución», pese al carrusel de v0.39.0. El escritorio confirmado
+como correcto; el problema seguía siendo específico de móvil.
+
+**Diagnóstico:** el carrusel mejoró cada tarjeta pero no tocó el techo real —
+la hoja seguía acotada a `min(496px,72dvh)`. Fix: el tirador (antes puramente
+decorativo) ahora expande la hoja a **92dvh** al tocarlo (`aria-expanded` +
+`aria-label` bilingüe, target ≥24px WCAG 2.5.8).
+
+**Bug real encontrado por el propio test de Playwright (no manual):** al
+expandir, los controles flotantes del mapa (volver/buscador/chip de
+confirmación satelital — posición absoluta con desplazamientos en px fijos)
+se salían de la franja de mapa ya reducida a un asomo y **tapaban el tirador**,
+interceptando el toque para volver a contraer (`locator.click` colgado
+reintentando 30s contra `subtree intercepts pointer events`). Primer intento
+(reservar 60px fijos de franja) no bastó — la solución robusta fue **ocultar**
+esos controles al expandir (no solo recortarlos) y dar a la hoja **su propio
+botón «volver»**, que no depende en absoluto de las dimensiones de la franja
+de mapa.
+
+**Verificado:** typecheck + lint + 323 tests + build; Playwright headless
+claro/oscuro — capturas del estado contraído y expandido, y el propio ciclo
+expandir→contraer→expandir confirmando que el toggle ya no se cuelga.
+Escritorio sin cambios (el botón es `lg:hidden`).
+
+**Tocado (solo míos, por ruta):** `src/components/screens/FichaScreen.tsx`,
+i18n es/pt/en (`a11y.expandSheet`/`a11y.collapseSheet`), CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.39.1** (último tag v0.39.0; fix). **Siguiente tag
+libre: 0.39.2.**
+
 ### 2026-07-23 — Agente H (ficha/UI): carrusel de medios/evolución + layout de escritorio (v0.39.0)
 
 **Encargo del propietario:** «la ventana de medios desplegados y evolución

@@ -58,6 +58,12 @@ export function FichaScreen({
   const toggleFollow = useFollowStore((s) => s.toggle);
   const following = mounted && followedFires.some((f) => f.slug === fire.slug);
   const [copied, setCopied] = useState(false);
+  // Hoja de detalle (solo móvil; en escritorio siempre a alto completo): la
+  // altura de "peek" (496px/72dvh) deja "Medios desplegados"/"Evolución" muy
+  // apretados. El propio tirador (antes decorativo) ahora expande la hoja a
+  // casi pantalla completa para poder verlos con espacio, sin perder el
+  // primer vistazo con mapa+contexto por defecto.
+  const [expanded, setExpanded] = useState(false);
   // Modo histórico: el incendio ya no está en las fuentes en vivo. Se muestra el
   // último dato conocido, sin señales de «ahora» (meteo, confirmación satelital,
   // avance 24 h) y con banner sobrio.
@@ -116,7 +122,7 @@ export function FichaScreen({
       {/* Mapa enfocado (oculto si no hay coordenadas reales, p. ej. dato del boletín).
           En escritorio pasa a columna derecha (lg:order-2): el panel de detalle
           es el contenido principal y se lee primero, de izquierda a derecha. */}
-      <div className="relative min-h-0 flex-1 bg-bg-map lg:order-2 lg:h-dvh">
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-bg-map lg:order-2 lg:h-dvh">
         {hasLocation ? (
           <FireMiniMapClient fire={fire} />
         ) : (
@@ -142,7 +148,12 @@ export function FichaScreen({
           </div>
         )}
 
-        <div className="absolute left-3 right-3 top-3.5 z-[3] flex items-center gap-2">
+        {/* Ocultos (no solo tapados) con la hoja expandida: si no, al ser
+            posición absoluta con desplazamientos fijos, se salen de esta
+            franja ya reducida y tapan el tirador, interceptando el toque
+            para volver a contraerla. La navegación de vuelta no depende de
+            esta franja: ver el botón propio de la hoja más abajo. */}
+        <div className={cn('absolute left-3 right-3 top-3.5 z-[3] flex items-center gap-2', expanded && 'hidden')}>
           <button
             type="button"
             onClick={back}
@@ -166,7 +177,10 @@ export function FichaScreen({
 
         {!historical && fire.satelliteConfirmed && (
           <div
-            className="if-overlay absolute left-3 top-[62px] z-[3] inline-flex items-center gap-1.5 rounded-[5px] px-[9px] py-[5px]"
+            className={cn(
+              'if-overlay absolute left-3 top-[62px] z-[3] inline-flex items-center gap-1.5 rounded-[5px] px-[9px] py-[5px]',
+              expanded && 'hidden',
+            )}
             style={{ borderColor: mix(V.foco, 40) }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-state-foco" aria-hidden />
@@ -177,16 +191,47 @@ export function FichaScreen({
         )}
       </div>
 
-      {/* Hoja de detalle: en móvil, sheet con tirador que sube sobre el mapa,
-          altura acotada (min(496px,72dvh)). En escritorio (lg:order-1), columna
-          fija a la izquierda de alto completo — ya no hay que elegir entre ver
-          el mapa o el detalle: ambos caben enteros. */}
-      <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card lg:order-1 lg:mt-0 lg:h-dvh lg:rounded-none lg:border-r lg:border-t-0">
-        <div
-          className="mx-auto mt-2 h-1 w-9 flex-none rounded-full lg:hidden"
-          style={{ background: 'var(--border-strong)' }}
-          aria-hidden
-        />
+      {/* Hoja de detalle: en móvil, sheet con tirador que sube sobre el mapa —
+          "peek" (min(496px,72dvh)) por defecto, expandible tocando el tirador
+          para ver "Medios desplegados"/"Evolución" con espacio, sin perder el
+          primer vistazo con mapa. Expandida, el botón de volver del mapa queda
+          oculto (ver arriba) porque su franja se reduce a un asomo — por eso
+          aparece uno propio de la hoja aquí, que no depende de esa franja. En
+          escritorio (lg:order-1), columna fija a la izquierda de alto
+          completo — ahí no hace falta elegir, así que el tirador se oculta. */}
+      <section
+        className={cn(
+          'relative -mt-[14px] flex flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card transition-[height] duration-300 ease-out lg:order-1 lg:mt-0 lg:h-dvh lg:rounded-none lg:border-r lg:border-t-0',
+          expanded ? 'h-[92dvh]' : 'h-[min(496px,72dvh)]',
+        )}
+      >
+        <div className="relative flex h-8 flex-none items-center lg:hidden">
+          {expanded && (
+            <button
+              type="button"
+              onClick={back}
+              aria-label={d.a11y.back}
+              className="absolute left-2 grid h-7 w-7 flex-none place-items-center rounded-btn text-fg-body"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M10 3 L5 8 L10 13" />
+              </svg>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-label={expanded ? d.a11y.collapseSheet : d.a11y.expandSheet}
+            className="flex h-8 flex-1 items-center justify-center"
+          >
+            <span
+              className="h-1 w-9 rounded-full"
+              style={{ background: 'var(--border-strong)' }}
+              aria-hidden
+            />
+          </button>
+        </div>
 
         {/* Procedencia: ficha reconstruida a partir de prensa (no oficial). Marca
             visible y sobria para no falsear el origen del dato. */}

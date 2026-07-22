@@ -260,6 +260,8 @@ const pt: Dictionary = {
     openFire: 'Abrir ficha do incêndio',
     back: 'Voltar',
     dismiss: 'Dispensar aviso',
+    expandSheet: 'Ampliar detalhe',
+    collapseSheet: 'Reduzir detalhe',
   },
   alerts: {
     title: 'Alertas',
