@@ -2,6 +2,7 @@
   "name": "incendib",
   "version": "0.37.0",
   "private": true,
+  "license": "MIT",
   "description": "Visor web sin ánimo de lucro de incendios forestales activos en España y Portugal",
   "type": "module",
   "scripts": {

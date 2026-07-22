@@ -175,4 +175,9 @@ Todas las fuentes son de reutilización libre con atribución:
 
 ## Licencia
 
-© 2026 David Moreno Romero. Todos los derechos reservados.
+Código bajo licencia **[MIT](LICENSE)** © 2026 David Moreno Romero — libre uso,
+modificación y distribución conservando el aviso de copyright, sin garantía.
+
+Los **datos** mostrados pertenecen a sus fuentes y conservan sus propias licencias
+de reutilización con atribución (ver «Fuentes de datos y licencias» más arriba). El
+nombre y la marca «Incendib» no se licencian.
