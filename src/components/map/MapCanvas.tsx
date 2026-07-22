@@ -12,10 +12,13 @@ import {
   type MapLayerMouseEvent,
 } from 'react-map-gl/maplibre';
 import { FireMarker } from './FireMarker';
+import { FireClusterMarker } from './FireClusterMarker';
 import { MapControls } from './MapControls';
 import { MapLegend } from './MapLegend';
 import { IslandInset } from './IslandInset';
+import { useFireClusters, severityState, type Bbox } from '@/lib/map/useFireClusters';
 import { useDict } from '@/components/i18n/I18nProvider';
+import { interpolate } from '@/lib/i18n';
 import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
 import { isIslandFire } from '@/lib/fires/derive';
@@ -95,11 +98,34 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
     date: string;
   } | null>(null);
   const [cursor, setCursor] = useState<'grab' | 'pointer'>('grab');
+  // Viewport (bbox + zoom) para agrupar los marcadores de incendios. Se siembra
+  // con el encuadre inicial y se actualiza al cargar y tras cada movimiento.
+  const [view, setView] = useState<{ bbox: Bbox; zoom: number }>(() => {
+    const [[w, s], [e, n]] = INITIAL_VIEW.bounds;
+    return { bbox: [w, s, e, n], zoom: INITIAL_VIEW.zoom };
+  });
+  const syncView = useCallback(() => {
+    const m = mapRef.current;
+    if (!m) return;
+    const b = m.getBounds();
+    setView({ bbox: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], zoom: m.getZoom() });
+  }, []);
 
   const paint = useMemo(() => maskPaint(resolvedBasemap), [resolvedBasemap]);
   const peninsular = useMemo(() => fires.filter((f) => !isIslandFire(f)), [fires]);
   const islands = useMemo(() => fires.filter(isIslandFire), [fires]);
   const tipFire = tip ? fires.find((f) => f.slug === tip) : null;
+
+  // Agrupación de los marcadores de incendios peninsulares (evita el solape de
+  // pins a coordenadas reales → WCAG 2.5.8). Ver useFireClusters.
+  const { items: fireItems, index: fireIndex } = useFireClusters(peninsular, view.bbox, view.zoom);
+  const expandCluster = useCallback(
+    (id: number, lng: number, lat: number) => {
+      const z = Math.min(fireIndex.getClusterExpansionZoom(id), MAX_ZOOM);
+      mapRef.current?.easeTo({ center: [lng, lat], zoom: z, duration: 500 });
+    },
+    [fireIndex],
+  );
 
   // Perímetros de área quemada (EFFIS): color por estado, según tema. Se pintan
   // primero las áreas quemadas (extinguido) y encima los incendios activos, para
@@ -211,17 +237,22 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
 
   // Hook de pruebas E2E (solo con ?e2e en la URL): expone el mapa para tests
   // visuales automatizados. Sin efecto en uso normal.
-  const handleLoad = useCallback((e: { target: unknown }) => {
-    if (typeof window !== 'undefined' && window.location.search.includes('e2e')) {
-      (window as unknown as { __ibermap?: unknown }).__ibermap = e.target;
-    }
-  }, []);
+  const handleLoad = useCallback(
+    (e: { target: unknown }) => {
+      syncView();
+      if (typeof window !== 'undefined' && window.location.search.includes('e2e')) {
+        (window as unknown as { __ibermap?: unknown }).__ibermap = e.target;
+      }
+    },
+    [syncView],
+  );
 
   return (
     <Map
       ref={mapRef}
       reuseMaps
       onLoad={handleLoad}
+      onMoveEnd={syncView}
       onClick={handleMapClick}
       onMouseEnter={() => setCursor('pointer')}
       onMouseLeave={() => setCursor('grab')}
@@ -364,17 +395,31 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
         </Source>
       )}
 
-      {peninsular.map((f) => (
-        <Marker key={f.slug} longitude={f.coordinates[0]} latitude={f.coordinates[1]} anchor="center">
-          <FireMarker
-            fire={f}
-            outline={theme === 'light'}
-            highlighted={hoveredSlug === f.slug}
-            onSelect={onSelect}
-            onHover={hover}
-          />
-        </Marker>
-      ))}
+      {/* Marcadores de incendios: agrupados a zoom bajo (burbuja de recuento) e
+          individuales (color+forma, accesibles) cuando hay separación ≥44 px.
+          Evita el solape de pins → WCAG 2.5.8; la lista es el equivalente completo. */}
+      {fireItems.map((it) =>
+        it.kind === 'cluster' ? (
+          <Marker key={`cluster-${it.id}`} longitude={it.lng} latitude={it.lat} anchor="center">
+            <FireClusterMarker
+              count={it.count}
+              color={statePalette(theme)[severityState(it.severity)].base}
+              label={interpolate(d.map.firesCount, { n: it.count })}
+              onClick={() => expandCluster(it.id, it.lng, it.lat)}
+            />
+          </Marker>
+        ) : (
+          <Marker key={`fire-${it.fire.slug}`} longitude={it.lng} latitude={it.lat} anchor="center">
+            <FireMarker
+              fire={it.fire}
+              outline={theme === 'light'}
+              highlighted={hoveredSlug === it.fire.slug}
+              onSelect={onSelect}
+              onHover={hover}
+            />
+          </Marker>
+        ),
+      )}
 
       {tipFire && (
         <Popup

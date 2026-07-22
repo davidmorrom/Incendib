@@ -6,6 +6,7 @@ import { formatNumber } from '@/lib/utils/format';
 import { STATE_LABEL_KEY } from '@/lib/fires/style';
 import { mix, V } from '@/lib/design/color';
 import { cn } from '@/lib/utils/cn';
+import { useNeutralizedMarker } from '@/lib/map/useNeutralizedMarker';
 import type { Fire } from '@/types/fire';
 
 /**
@@ -28,6 +29,7 @@ export function FireMarker({
   onHover?: (slug: string | null) => void;
 }) {
   const d = useDict();
+  const ref = useNeutralizedMarker<HTMLButtonElement>();
   const pulsing = fire.state === 'activo' && (fire.level ?? 0) >= 2;
   const stateLabel = d.states[STATE_LABEL_KEY[fire.state]];
   const label =
@@ -37,6 +39,7 @@ export function FireMarker({
 
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={label}
       title={fire.name}
