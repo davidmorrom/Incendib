@@ -31,6 +31,32 @@
 
 ## Log
 
+### 2026-07-22 — Agente H (mapa): focos satelitales ocultos por defecto (v0.36.1)
+
+**Encargo del propietario:** aun con el rediseño en densidad suave (heatmap,
+v0.35.0), los focos siguen viéndose mal / con demasiado ruido visual al abrir
+el mapa. Decisión: el mapa debe abrir **limpio**, solo con incendios
+confirmados; los focos pasan a ser una capa que el usuario activa
+manualmente.
+
+**Hecho (verificado: typecheck + lint + build; navegador real claro/oscuro
+vía chrome-devtools MCP — mapa abre sin focos, sin errores de consola nuevos;
+el toggle «Focos satelitales» en «Capas del mapa» los activa correctamente):**
+cambiado únicamente el valor inicial `hotspotsVisible: true → false` en
+`src/lib/store.ts` (línea ~62). **No toco** el resto del store, el
+renderizado del heatmap (`hotspot-heat`/`hotspot-core` en `MapCanvas.tsx`) ni
+`MapControls.tsx` (el toggle ya existía y sigue igual).
+
+**Tocado (solo míos, por ruta):** `src/lib/store.ts`, CHANGELOG.md,
+package.json, este log.
+
+**Árbol compartido:** en el momento de empezar `git status` estaba limpio y
+solo había el worktree de `main` (sin WIP de otro agente), así que trabajé
+directamente sobre `main` en vez de un worktree aislado.
+
+**Versión:** tomo **v0.36.1** (último tag v0.36.0, patch — cambio de
+comportamiento por defecto, no feature nueva). **Siguiente tag libre: 0.36.2.**
+
 ### 2026-07-22 — Agente A (mapa): focos como densidad suave (v0.35.0)
 
 **Encargo del propietario:** los focos «producen mucho ruido visual, da pereza

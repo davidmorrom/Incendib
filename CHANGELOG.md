@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.36.1] - 2026-07-22
+
+### Cambiado
+
+- **El mapa abre limpio: los focos satelitales (FIRMS) ya no se muestran por
+  defecto.** Aunque el rediseño en densidad suave (heatmap, v0.35.0) redujo el
+  ruido visual, el propietario decidió que siga sin ser la vista de apertura
+  deseada. El mapa arranca ahora mostrando solo **incendios confirmados**; los
+  focos siguen disponibles como capa opcional desde «Capas del mapa», donde el
+  usuario los activa manualmente (`hotspotsVisible` pasa a `false` por defecto
+  en el store; controles y renderizado sin cambios).
+
 ## [0.36.0] - 2026-07-22
 
 ### Añadido
