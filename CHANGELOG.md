@@ -5,7 +5,25 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
-## [0.38.0] - 2026-07-22
+## [0.39.0] - 2026-07-23
+
+### Cambiado
+
+- **Ficha del incendio: rediseño de «Medios desplegados» y «Evolución» +
+  layout propio de escritorio.** Ambas secciones se veían apretadas (lista
+  vertical dentro de una hoja de altura acotada). Ahora:
+  - **Carrusel horizontal** (`ScrollCarousel`, nuevo — scroll-snap nativo,
+    sin dependencia): cada medio y cada hito de la evolución es una tarjeta
+    con espacio propio en vez de una línea apretada. Región accesible
+    (`role="region"` + `tabIndex`): con foco, las flechas del teclado
+    desplazan el contenido de forma nativa. Evolución mantiene el orden más
+    reciente primero (visible sin desplazar).
+  - **Layout de escritorio para `/f/[slug]`** (`lg:`, antes inexistente — la
+    ficha solo tenía diseño móvil, estirado a pantalla completa con un mapa
+    gigante casi vacío): panel de detalle a la izquierda (ancho fijo, alto
+    completo, ya no acotado a 496 px) + mapa a la derecha. Sigue fuera del
+    shell de pestañas (pantalla completa, compartible), sin tocar esa
+    decisión de diseño.
 
 ### Añadido
 

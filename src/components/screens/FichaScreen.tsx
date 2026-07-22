@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
+import { ScrollCarousel } from '@/components/ui/ScrollCarousel';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
@@ -108,9 +109,14 @@ export function FichaScreen({
   };
 
   return (
-    <main id="contenido" className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg">
-      {/* Mapa enfocado (oculto si no hay coordenadas reales, p. ej. dato del boletín) */}
-      <div className="relative min-h-0 flex-1 bg-bg-map">
+    <main
+      id="contenido"
+      className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg lg:grid lg:grid-cols-[440px_1fr] lg:grid-rows-1"
+    >
+      {/* Mapa enfocado (oculto si no hay coordenadas reales, p. ej. dato del boletín).
+          En escritorio pasa a columna derecha (lg:order-2): el panel de detalle
+          es el contenido principal y se lee primero, de izquierda a derecha. */}
+      <div className="relative min-h-0 flex-1 bg-bg-map lg:order-2 lg:h-dvh">
         {hasLocation ? (
           <FireMiniMapClient fire={fire} />
         ) : (
@@ -171,9 +177,16 @@ export function FichaScreen({
         )}
       </div>
 
-      {/* Hoja de detalle */}
-      <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card">
-        <div className="mx-auto mt-2 h-1 w-9 flex-none rounded-full" style={{ background: 'var(--border-strong)' }} aria-hidden />
+      {/* Hoja de detalle: en móvil, sheet con tirador que sube sobre el mapa,
+          altura acotada (min(496px,72dvh)). En escritorio (lg:order-1), columna
+          fija a la izquierda de alto completo — ya no hay que elegir entre ver
+          el mapa o el detalle: ambos caben enteros. */}
+      <section className="relative -mt-[14px] flex h-[min(496px,72dvh)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card lg:order-1 lg:mt-0 lg:h-dvh lg:rounded-none lg:border-r lg:border-t-0">
+        <div
+          className="mx-auto mt-2 h-1 w-9 flex-none rounded-full lg:hidden"
+          style={{ background: 'var(--border-strong)' }}
+          aria-hidden
+        />
 
         {/* Procedencia: ficha reconstruida a partir de prensa (no oficial). Marca
             visible y sobria para no falsear el origen del dato. */}
@@ -426,43 +439,67 @@ export function FichaScreen({
               <div className="mt-4 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
                 {d.fire.evolution}
               </div>
-              <ol className="mt-2">
-                {fire.timeline.map((e, i, arr) => {
+              {/* Carrusel horizontal (más reciente primero, a la izquierda):
+                  cada hito es una tarjeta con espacio propio en vez de una
+                  línea apretada en una lista vertical. */}
+              <ScrollCarousel ariaLabel={d.fire.evolution} className="mt-2 pb-3">
+                {fire.timeline.map((e, i) => {
                   const press = Boolean(e.url);
-                  return (
-                    <li key={`${e.at}-${i}`} className="flex gap-2.5">
-                      <div className="flex flex-none flex-col items-center">
-                        <span
-                          className="mt-1 h-2 w-2 rounded-full"
-                          style={{ background: press ? V.action : e.state ? stateVar(e.state) : V.foco }}
-                          aria-hidden
-                        />
-                        {i < arr.length - 1 && <span className="w-px flex-1" style={{ background: 'var(--border-default)' }} />}
+                  const dot = (
+                    <span
+                      className="inline-block h-2 w-2 flex-none rounded-full"
+                      style={{ background: press ? V.action : e.state ? stateVar(e.state) : V.foco }}
+                      aria-hidden
+                    />
+                  );
+                  const body = (
+                    <>
+                      <div className="flex items-center gap-1.5">
+                        {dot}
+                        <span className="font-mono text-[10px] font-semibold text-fg-secondary">
+                          {dateFmt(e.at)}
+                        </span>
                       </div>
-                      <div className="min-w-0 pb-3">
-                        <div className="font-mono text-[10px] font-semibold text-fg-secondary">{dateFmt(e.at)}</div>
-                        {press ? (
-                          <a href={e.url} target="_blank" rel="noreferrer" className="mt-px block">
-                            <span className="text-[11.5px] leading-snug text-fg-body">{e.label}</span>
-                            <span className="mt-0.5 block font-mono text-[9px] font-semibold text-action-text">
-                              {e.source} · {d.fire.press} ↗
-                            </span>
-                          </a>
-                        ) : (
-                          <div className="mt-px text-[11.5px] text-fg-body">
+                      {press ? (
+                        <>
+                          <span className="mt-1.5 line-clamp-3 block text-[11.5px] leading-snug text-fg-body">
                             {e.label}
-                            {e.detected && (
-                              <span className="ml-1 font-mono text-[9px] font-normal text-fg-mute">
-                                · {d.fire.tracked}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </li>
+                          </span>
+                          <span className="mt-1 block font-mono text-[9px] font-semibold text-action-text">
+                            {e.source} · {d.fire.press} ↗
+                          </span>
+                        </>
+                      ) : (
+                        <div className="mt-1.5 line-clamp-3 text-[11.5px] leading-snug text-fg-body">
+                          {e.label}
+                          {e.detected && (
+                            <span className="ml-1 font-mono text-[9px] font-normal text-fg-mute">
+                              · {d.fire.tracked}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                  const cardClass =
+                    'w-[172px] flex-none snap-start rounded-btn border border-subtle bg-bg-card px-3 py-2.5';
+                  return press ? (
+                    <a
+                      key={`${e.at}-${i}`}
+                      href={e.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cardClass}
+                    >
+                      {body}
+                    </a>
+                  ) : (
+                    <div key={`${e.at}-${i}`} className={cardClass}>
+                      {body}
+                    </div>
                   );
                 })}
-              </ol>
+              </ScrollCarousel>
             </>
           ) : null}
 

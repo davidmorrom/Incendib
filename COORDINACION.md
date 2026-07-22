@@ -31,6 +31,63 @@
 
 ## Log
 
+### 2026-07-23 — Agente H (ficha/UI): carrusel de medios/evolución + layout de escritorio (v0.39.0)
+
+**Encargo del propietario:** «la ventana de medios desplegados y evolución
+dentro de cada incendio se ve pequeña tanto en pc como en móvil». Explorado
+con el propietario (`AskUserQuestion`) antes de implementar: eligió la opción
+más completa — carrusel para ambas secciones **+** layout propio de
+escritorio para `/f/[slug]`.
+
+**Diagnóstico:** en móvil, la hoja de detalle está acotada a
+`min(496px,72dvh)`; tras el grid de stats + banners, «Medios desplegados»
+apenas asomaba 2 líneas antes de los botones de acción. En escritorio era
+peor por un motivo distinto: `/f/[slug]` vive fuera del shell de pestañas
+(`src/app/f/layout.tsx`, decisión deliberada y documentada — pantalla
+completa, compartible) pero **nunca tuvo layout de escritorio** (confirmado:
+`docs/HANDOFF.md` no especifica un `Nd` para la pantalla 1c, a diferencia de
+Mapa 2a/1d y Noticias 3a/6a) — era la vista móvil estirada a ancho completo,
+con un mapa gigante casi vacío y la hoja apretada abajo.
+
+**Hecho (typecheck + lint + 323 tests + build; verificado con Playwright
+headless en móvil/escritorio × claro/oscuro, y navegación por teclado real —
+`ArrowRight` sobre la región enfocada desplaza `scrollLeft` de forma nativa):**
+- `src/components/ui/ScrollCarousel.tsx` (nuevo): contenedor `overflow-x-auto
+  snap-x snap-mandatory` con `role="region"` + `tabIndex` — sin JS ni
+  dependencia nueva; las flechas de teclado desplazan de forma nativa del
+  navegador al estar la región enfocada.
+- `ResourcesPanel.tsx`: los grupos (aéreos/terrestres) pasan de fila fija a
+  tarjetas dentro de `ScrollCarousel`.
+- `FichaScreen.tsx`: «Evolución» pasa de `<ol>` vertical a tarjetas
+  horizontales (más reciente primero, a la izquierda — visible sin
+  desplazar); tarjetas de prensa siguen como enlace (`<a>`) con
+  `line-clamp-3`. Layout `lg:grid lg:grid-cols-[440px_1fr]`: panel de detalle
+  a la izquierda (`lg:order-1`, alto completo, ya no acotado a 496 px, tirador
+  oculto) + mapa a la derecha (`lg:order-2`) — mismo orden de DOM, solo
+  reordenado visualmente vía `order` (no rompe el flujo móvil). Sigue **fuera
+  del shell de pestañas** (no se añadió `DesktopTopNav`): no se tocó esa
+  decisión, solo se dio estructura de dos columnas al contenido existente.
+- `globals.css`: utilidad `.no-scrollbar` (oculta la barra nativa, conserva el
+  scroll real).
+
+**Gotcha de sesión (anotado para quien siga):** un `npm run dev` mío quedó
+vivo en el puerto 3000 tras varios `taskkill` fallidos (no liberó el
+`OwningProcess` a la primera) y corrompió `.next` durante `npm run build`
+(`Cannot find module for page: /_document`, luego `/acerca` — el gotcha ya
+documentado más abajo por Agente C: build concurrente con `next start`/`dev`
+deja `.next` a medias). Diagnosticado con
+`Get-NetTCPConnection -LocalPort 3000`, resuelto con
+`Stop-Process -Id <pid> -Force` **por PID exacto** (nunca `taskkill /IM
+node.exe` a lo bruto: mata también servidores/MCP de otras sesiones).
+
+**Tocado (solo míos, por ruta):** `src/components/ui/ScrollCarousel.tsx`
+(nuevo), `src/components/fires/ResourcesPanel.tsx`,
+`src/components/screens/FichaScreen.tsx`, `src/app/globals.css`, CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.39.0** (último tag v0.38.0; cambio de UI, no dato).
+**Siguiente tag libre: 0.39.1.**
+
 ### 2026-07-22 — Agente H (mapa/datos): superficie por focos también en el listado (v0.38.0)
 
 **Encargo del propietario:** que el `hotspotHectares` de la v0.37.0 (hasta

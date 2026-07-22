@@ -1,6 +1,7 @@
 'use client';
 
 import { useDict } from '@/components/i18n/I18nProvider';
+import { ScrollCarousel } from '@/components/ui/ScrollCarousel';
 import { formatNumber } from '@/lib/utils/format';
 import { interpolate } from '@/lib/i18n';
 import type { AerialKind, GroundKind, Resources } from '@/types/fire';
@@ -130,7 +131,7 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-w-0 flex-1">
+    <div className="w-[196px] flex-none snap-start rounded-btn border border-subtle bg-bg-card px-3 py-2.5">
       <div className="flex items-baseline justify-between border-b border-subtle pb-1">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-fg-mute">
           {title}
@@ -165,7 +166,7 @@ export function ResourcesPanel({ resources }: { resources?: Resources }) {
       </div>
 
       {(aerial.length > 0 || ground.length > 0) && (
-        <div className="flex gap-4">
+        <ScrollCarousel ariaLabel={d.resources.heading}>
           {aerial.length > 0 && (
             <Group title={d.resources.aerial} total={sum(aerial)}>
               {aerial.map((u) => (
@@ -190,7 +191,7 @@ export function ResourcesPanel({ resources }: { resources?: Resources }) {
               ))}
             </Group>
           )}
-        </div>
+        </ScrollCarousel>
       )}
 
       {foreign.length > 0 && (

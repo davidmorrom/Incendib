@@ -130,6 +130,17 @@ body {
   :root[data-theme='dark'] .if-overlay {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
   }
+
+  /* Carrusel horizontal (medios desplegados, evolución de la ficha): oculta la
+   * barra de scroll nativa mientras conserva el scroll real (rueda, gesto,
+   * teclado) — el desplazamiento lo indica el asomo de la siguiente tarjeta. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Tooltip del mapa: quitamos el chrome por defecto del Popup de MapLibre y
