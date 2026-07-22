@@ -1053,8 +1053,16 @@ function ringCentroid(ring: [number, number][]): [number, number] {
   return [x / ring.length, y / ring.length];
 }
 
-/** Radio de enganche incendio↔área quemada: distancia al BORDE del perímetro. */
-const ATTACH_RADIUS_KM = 12;
+/**
+ * Tolerancia (km) por FUERA del anillo para considerar que un incendio "posee" un
+ * área quemada EFFIS. Un marcador DENTRO del polígono siempre cuenta; si está
+ * fuera, solo si su borde queda a ≤ este margen (el punto oficial de ignición cae
+ * a veces justo fuera del área mapeada por el desfase del marcador y la resolución
+ * de MODIS ~250 m; caso real: La Mierla/Guadalajara, marcador a 0,37 km del borde).
+ * Un margen amplio (p. ej. 12 km) haría que un incendio pequeño y cercano heredase
+ * la superficie ENORME de la cicatriz de otro fuego: dato falso, no aproximación.
+ */
+const ATTACH_MARGIN_KM = 3;
 
 /**
  * Un área quemada solo puede pertenecer al incendio si no es una cicatriz vieja:
@@ -1065,15 +1073,16 @@ const ATTACH_RADIUS_KM = 12;
 const SCAR_MAX_AGE_MS = 7 * 86400e3;
 
 /**
- * Distancia (km) de un punto al perímetro: 0 si cae dentro del anillo; si no,
- * mínima a sus vértices (aproxima la distancia al borde; los anillos EFFIS son
- * densos, con vértices cada ~250 m). El centroide NO sirve de referencia: en un
- * gran incendio (decenas de miles de ha) queda a >20 km del punto de ignición
- * donde la fuente oficial pone el marcador (caso real: La Mierla/Guadalajara,
- * 35 000 ha, marcador a 0,4 km del borde y a 21 km del centroide).
+ * Distancia (km) de un punto al BORDE del anillo (mínima a sus vértices; los
+ * anillos EFFIS son densos, ~250 m entre vértices). Devuelve un valor real también
+ * para puntos interiores (no se cortocircuita a 0), para poder discriminar entre
+ * varios marcadores dentro del mismo polígono por geografía y no por el orden de
+ * las fuentes. La pertenencia "dentro" se comprueba aparte con `inRing`. El
+ * centroide NO sirve de referencia: en un gran incendio (decenas de miles de ha)
+ * queda a >20 km del punto de ignición donde la fuente pone el marcador (La
+ * Mierla/Guadalajara: marcador a 0,4 km del borde y a 21 km del centroide).
  */
 function distanceToRingKm(pt: [number, number], ring: [number, number][]): number {
-  if (inRing(pt[0], pt[1], ring)) return 0;
   let best = Infinity;
   for (const v of ring) {
     const km = haversineKm(pt, v);
@@ -1083,19 +1092,34 @@ function distanceToRingKm(pt: [number, number], ring: [number, number][]): numbe
 }
 
 /**
- * Adjunta a cada incendio el área quemada EFFIS más cercana (borde a
+ * Adjunta a los incendios el área quemada EFFIS correspondiente (borde a
  * ≤ ATTACH_RADIUS_KM y detección no anterior en >7 días al inicio del incendio):
  * le da forma (perímetro) en mapa/ficha y, **solo si la fuente oficial no publica
  * superficie**, rellena las hectáreas como ESTIMACIÓN (marcada `hectaresApprox`,
  * se muestra con «~»). La cifra oficial (p. ej. INFORCYL) siempre tiene prioridad;
  * EFFIS/MODIS (250 m) subestima y va con retraso, por eso nunca la sobrescribe.
  * Las áreas quemadas se muestran además como capa propia del mapa (getBurnedAreas).
+ *
+ * Admisibilidad ESTRECHA: un incendio solo "posee" un área quemada si su marcador
+ * cae DENTRO del anillo o a ≤ ATTACH_MARGIN_KM de su borde. Así un incendio lejano
+ * (p. ej. a 6-12 km) no hereda ni la forma ni la superficie enorme de la cicatriz
+ * de otro fuego (dato falso).
+ *
+ * Asignación **1:1**: cada área quemada (un incendio físico) se adjudica a UN solo
+ * incidente y cada incidente recibe a lo sumo una. Así un polígono grande no se
+ * duplica en dos marcadores distintos (caso real: La Mierla, 35 268 ha, se
+ * adjuntaba a la vez a Guadalajara/INFOCA y a Retortillo de Soria/INFORCYL, a
+ * 46 km, doblando la superficie). Emparejamiento codicioso: primero los pares con
+ * el marcador DENTRO del anillo y, dentro de cada grupo, por distancia al borde
+ * ascendente (geografía, nunca el orden de las fuentes).
  */
 export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   if (!perimeters.length) return fires;
-  // Pre-cálculo por perímetro: bbox expandida por el radio (descarte barato) y
-  // fecha de detección, para no medir 4000 vértices contra cada incendio.
-  const margin = ATTACH_RADIUS_KM / 80; // grados; ~80 km/° de longitud en Iberia
+  // Pre-cálculo por perímetro: bbox expandida por el margen (descarte barato) y
+  // fecha de detección, para no medir miles de vértices contra cada incendio. Un
+  // marcador interior siempre cae dentro de la bbox, así que el margen solo cubre
+  // la tolerancia por fuera.
+  const marginDeg = ATTACH_MARGIN_KM / 80; // grados; ~80 km/° de longitud en Iberia
   const candidates = perimeters
     .filter((p) => p.perimeter && p.perimeter.length >= 4)
     .map((p) => {
@@ -1112,33 +1136,53 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
       return {
         p,
         detectedMs: Date.parse(p.startedAt),
-        bbox: [minLon - margin, minLat - margin, maxLon + margin, maxLat + margin] as const,
+        bbox: [minLon - marginDeg, minLat - marginDeg, maxLon + marginDeg, maxLat + marginDeg] as const,
       };
     });
-  return fires.map((f) => {
-    if (f.perimeter) return f;
+
+  // Pares (incendio, área quemada) admisibles: marcador dentro del anillo o a
+  // ≤ ATTACH_MARGIN_KM del borde, y área no anterior en >7 días al inicio.
+  const links: { fi: number; ci: number; inside: boolean; km: number }[] = [];
+  fires.forEach((f, fi) => {
+    if (f.perimeter) return; // ya tiene forma propia; no consume un área EFFIS
     const startMs = Date.parse(f.startedAt);
     const [lon, lat] = f.coordinates;
-    let best: Fire | undefined;
-    let bestKm = ATTACH_RADIUS_KM;
-    for (const c of candidates) {
+    candidates.forEach((c, ci) => {
       // Cicatriz detectada mucho antes del inicio del incendio → otro fuego.
       if (
         Number.isFinite(c.detectedMs) &&
         Number.isFinite(startMs) &&
         c.detectedMs < startMs - SCAR_MAX_AGE_MS
       ) {
-        continue;
+        return;
       }
-      if (lon < c.bbox[0] || lon > c.bbox[2] || lat < c.bbox[1] || lat > c.bbox[3]) continue;
-      const km = distanceToRingKm(f.coordinates, c.p.perimeter!);
-      if (km < bestKm) {
-        bestKm = km;
-        best = c.p;
-      }
-    }
+      if (lon < c.bbox[0] || lon > c.bbox[2] || lat < c.bbox[1] || lat > c.bbox[3]) return;
+      const ring = c.p.perimeter!;
+      const inside = inRing(lon, lat, ring);
+      const km = distanceToRingKm(f.coordinates, ring);
+      if (inside || km <= ATTACH_MARGIN_KM) links.push({ fi, ci, inside, km });
+    });
+  });
+
+  // Emparejamiento codicioso 1:1: los marcadores DENTRO del anillo primero y,
+  // dentro de cada grupo, por distancia al borde ascendente.
+  links.sort((a, b) => (a.inside === b.inside ? a.km - b.km : a.inside ? -1 : 1));
+  const assigned = new Map<number, Fire>(); // fireIndex → área adjudicada
+  const usedFires = new Set<number>();
+  const usedPerims = new Set<number>();
+  for (const { fi, ci } of links) {
+    if (usedFires.has(fi) || usedPerims.has(ci)) continue;
+    usedFires.add(fi);
+    usedPerims.add(ci);
+    assigned.set(fi, candidates[ci]!.p);
+  }
+
+  return fires.map((f, fi) => {
+    const best = assigned.get(fi);
     if (!best?.perimeter) return f;
-    const out: Fire = { ...f, perimeter: best.perimeter };
+    // Guarda el slug del área adjuntada para no duplicarla luego como entrada
+    // independiente de área quemada (p. ej. en `/p/[provincia]`).
+    const out: Fire = { ...f, perimeter: best.perimeter, perimeterSourceSlug: best.slug };
     // Rellena superficie estimada solo si no hay cifra oficial.
     if (!f.hectares && best.hectares > 0) {
       out.hectares = best.hectares;

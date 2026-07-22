@@ -65,11 +65,19 @@ export async function getProvincePool(pslug: string): Promise<PooledFire[]> {
   ]);
   const git = gitArchiveFires();
   const inProv = (f: Fire) => provinceSlug(f.province) === pslug;
+  // Áreas EFFIS ya absorbidas como perímetro de un incidente en vivo: no se
+  // vuelven a listar como entrada independiente de área quemada (evita duplicar
+  // el mismo incendio físico en la página de provincia).
+  const absorbed = new Set(
+    live.map((f) => f.perimeterSourceSlug).filter((s): s is string => Boolean(s)),
+  );
   const pooled: PooledFire[] = [
     ...live.filter(inProv).map((fire) => ({ fire, origin: 'live' as const })),
     ...archived.filter(inProv).map((fire) => ({ fire, origin: 'archive' as const, asOf: fire.updatedAt })),
     ...git.filter(inProv).map((fire) => ({ fire, origin: 'archive' as const, asOf: fire.updatedAt })),
-    ...burned.filter(inProv).map((fire) => ({ fire, origin: 'archive' as const, asOf: fire.updatedAt })),
+    ...burned
+      .filter((f) => inProv(f) && !absorbed.has(f.slug))
+      .map((fire) => ({ fire, origin: 'archive' as const, asOf: fire.updatedAt })),
   ];
   return dedupe(pooled);
 }

@@ -180,6 +180,14 @@ export interface Fire {
    */
   perimeter?: [number, number][];
   /**
+   * Slug del área quemada EFFIS que se adjuntó como `perimeter` (p. ej.
+   * `effis-1234`). Sirve para no listar esa misma área otra vez como entrada
+   * independiente (capa `getBurnedAreas`) en las páginas que fusionan ambas
+   * (p. ej. `/p/[provincia]`). Solo se rellena cuando el perímetro proviene de
+   * un área EFFIS adjuntada, no cuando la fuente ya trae su propio perímetro.
+   */
+  perimeterSourceSlug?: string;
+  /**
    * Corregido a mano desde el panel privado (override): al menos un campo se editó
    * respecto al dato de la fuente. La UI lo señala («corregido a mano») por
    * transparencia. `overriddenFields` lista qué campos se tocaron.

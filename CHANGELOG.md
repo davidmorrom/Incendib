@@ -5,6 +5,33 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.34.1] - 2026-07-22
+
+### Arreglado
+
+- **Incendios «duplicados» por compartir el área quemada de EFFIS.**
+  `attachPerimeters` adjudicaba un mismo polígono de EFFIS a VARIOS marcadores de
+  incidente a la vez, duplicando superficie y forma en el mapa. Casos reales
+  (verificados en producción): el megaincendio de La Mierla (35 268 ha) aparecía a
+  la vez en Guadalajara (INFOCA) y en Retortillo de Soria (INFORCYL) —a 46 km, de
+  fuentes distintas y siendo dos incendios físicos distintos—; y un incendio de
+  Segovia (3 121 ha) en Brieva y Cantimpalos. En conjunto, ~38 000 ha se contaban
+  por duplicado. El arreglo (validado con una revisión adversarial):
+  - **Adjudicación 1:1**: cada área quemada se adjudica a un solo incidente y cada
+    incidente recibe a lo sumo una (emparejamiento codicioso: primero los
+    marcadores DENTRO del anillo y, dentro de cada grupo, por distancia al borde
+    ascendente —geografía, no el orden de las fuentes).
+  - **Pertenencia estrecha**: un incidente solo hereda un área si su marcador cae
+    DENTRO del anillo o a ≤ 3 km de su borde (antes bastaban 12 km, lo que permitía
+    que un incendio pequeño heredase la superficie enorme de la cicatriz de otro
+    fuego cercano: dato falso, no aproximación).
+  - El incidente que ya no hereda el área queda con superficie «sin dato» hasta que
+    su fuente publique cifra oficial o EFFIS mapee su propia área; el polígono sigue
+    viéndose en la capa de área quemada del mapa (`getBurnedAreas`).
+- **Duplicado en `/p/[provincia]`**: el mismo incendio ya no aparece dos veces
+  (como incidente en vivo con perímetro y como área quemada EFFIS independiente);
+  el área ya absorbida por un incidente se excluye del listado (`perimeterSourceSlug`).
+
 ## [0.34.0] - 2026-07-22
 
 Rendimiento y accesibilidad de la home a partir del análisis de

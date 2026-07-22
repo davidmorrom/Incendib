@@ -31,6 +31,48 @@
 
 ## Log
 
+### 2026-07-22 — Agente A (datos): dedup de área quemada EFFIS 1:1 (v0.34.1)
+
+**Encargo del propietario:** «el incendio de Guadalajara y el de Retortillo de
+Soria parecen el mismo».
+
+**Diagnóstico (verificado en prod):** son DOS incendios físicos distintos (46 km,
+fuentes distintas: INFOCA vs INFORCYL; Retortillo es nivel 2 con 80 medios y está
+a 6,5 km FUERA del polígono). El bug: mi `attachPerimeters` (v0.33.1, distancia al
+borde) adjuntaba el MISMO polígono EFFIS a varios marcadores. Alcance real: 2
+grupos —La Mierla (35 268 ha)→{Guadalajara, Retortillo}; Segovia (3 121 ha)→
+{Brieva, Cantimpalos}— con ~38 000 ha contadas por duplicado.
+
+**Arreglo (typecheck + lint + 306 tests + build; validado con workflow de revisión
+adversarial que confirmó 4 hallazgos, 2 major aplicados):** en `attachPerimeters`:
+1. **Adjudicación 1:1 codiciosa** (DENTRO del anillo primero, luego borde asc —
+   geografía, no orden de fuentes): cada área a un solo incidente y cada incidente
+   a lo sumo una.
+2. **Pertenencia estrecha** (`ATTACH_MARGIN_KM=3`): un incidente solo hereda un
+   área si su marcador cae dentro o a ≤3 km del borde (antes 12 km → un incendio
+   pequeño heredaba la superficie enorme de la cicatriz de otro: dato falso).
+3. `distanceToRingKm` ya NO cortocircuita a 0 los puntos interiores (desempate
+   geográfico real). Simulado sobre datos reales: sobreviven todas las adjunciones
+   legítimas (Barraco 0,91 / Brieva 0,24 / Guadalajara 0,37 km) y caen solo los 2
+   duplicados (Retortillo 6,5 / Cantimpalos 9,4 → «sin dato» honesto).
+4. Además, `/p/[provincia]` ya no duplica el incendio (incidente en vivo + área
+   EFFIS): la absorbida se excluye vía `perimeterSourceSlug`.
+
+Diferido (pre-existente, documentado): áreas EFFIS MultiPolygon solo consideran la
+primera parte (marcador en un lóbulo secundario → «sin dato»); requiere perímetro
+multi-anillo + render.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`
+(`attachPerimeters`, `distanceToRingKm`, constantes), `src/lib/data/adapters/attach.test.ts`
+(+3 tests), `src/types/fire.ts` (+`perimeterSourceSlug`, aditivo),
+`src/lib/fires/history-pool.ts` (exclusión en `getProvincePool`), CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.34.1**. ⚠️ El commit `d26ae75` (perf/WCAG de la home,
+**v0.34.0**, de otro agente) estaba commiteado en local sin pushear; va en mi push
+(main va rápido) y **queda sin tag v0.34.0** (a expensas de su autor). Siguiente
+tag libre: 0.34.2.
+
 ### 2026-07-22 — Agente A (datos): superficie de grandes incendios arreglada (v0.33.1)
 
 **Encargo del propietario:** el megaincendio de Guadalajara (>33 000 ha según
