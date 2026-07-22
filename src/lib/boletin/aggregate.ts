@@ -16,10 +16,13 @@ import { fetchFirmsHotspots } from '@/lib/data/adapters';
 import { sortByGravity } from '@/lib/fires/derive';
 import { boletinId, isoWeekPeriod, lastClosedWeek } from './week';
 
-function computeKpi(fires: Fire[], firmsWeek: number): BoletinKpi {
+export function computeKpi(fires: Fire[], firmsWeek: number): BoletinKpi {
   const tracked = fires.filter((f) => f.state !== 'extinguido');
   const hectares = tracked.reduce((s, f) => s + (f.hectares || 0), 0);
-  const perimeters = fires.filter((f) => f.perimeter && f.perimeter.length > 0).length;
+  // Excluye las extensiones aproximadas por FIRMS (`perimeterApprox`): esta
+  // cifra debe reflejar perímetros REALES (nativos o EFFIS), no siluetas
+  // derivadas de focos térmicos — mismo motivo que no entran en `hectares`.
+  const perimeters = fires.filter((f) => f.perimeter && f.perimeter.length > 0 && !f.perimeterApprox).length;
 
   let maxLevel: BoletinKpi['maxLevel'] = null;
   let maxLevelWhere: string | undefined;

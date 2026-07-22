@@ -5,9 +5,40 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
-## [0.36.2] - 2026-07-22
+## [0.37.0] - 2026-07-22
+
+### Añadido
+
+- **Extensión aproximada de incendios confirmados sin perímetro propio.**
+  Cuando un incidente ya confirmado por una fuente oficial sigue activo pero
+  EFFIS aún no ha mapeado su cicatriz, si hay ≥3 focos FIRMS cerca (≤3 km) se
+  dibuja su casco convexo + margen como una extensión aproximada — nunca un
+  incidente nuevo, solo rellena la forma de uno que ya existía. Se pinta con
+  línea discontinua y relleno tenue (`src/lib/map/perimeter.ts`), siempre
+  distinguible de un perímetro real, y la ficha muestra un aviso explícito
+  («extensión aproximada por detección satelital... no es un perímetro
+  oficial»). Deliberadamente **nunca** toca `hectares`/`hectaresApprox` del
+  incidente ni ningún KPI/ranking/boletín — lección directa del incidente de
+  `deriveSatelliteFires` (revertido en v0.33.0), donde un dato derivado de
+  FIRMS acabó tratado como confirmado en todas partes.
+- **Superficie estimada por focos, solo en la ficha del incendio.** Cuando no
+  hay cifra oficial ni EFFIS, la ficha calcula el área del casco (vía
+  `@turf/turf`) y la muestra como «~N ha · estimación muy aproximada (focos)»
+  — deliberadamente más cauta que la nota «estimación satélite» de EFFIS (un
+  casco de unos pocos focos térmicos sobrestima el área real; una
+  clasificación de imagen EFFIS es una base bastante más sólida). Se calcula
+  bajo demanda en `app/f/[slug]/page.tsx`, nunca se escribe en `Fire.hectares`:
+  no entra en el KPI «HA AFECTADAS», rankings ni boletín.
 
 ### Corregido
+
+- **`dedupeMutualAidFires` podía perder un perímetro real.** El desempate al
+  fusionar el mismo incidente reportado por dos CCAA (v0.36.2) se basaba solo
+  en qué gemelo declaraba más hectáreas — pero el gemelo con menos hectáreas
+  podía ser el que ya tenía un perímetro EFFIS adjudicado. Ahora se prioriza
+  conservar el que tiene forma propia; las hectáreas solo desempatan si
+  ninguno de los dos tiene perímetro. Hallado en auditoría adversarial
+  dedicada al feature de arriba.
 
 - **Incendio de La Mierla (Guadalajara) contado dos veces.** Detectado por
   captura del propietario: el mapa mostraba un cúmulo «2» sobre esa zona que

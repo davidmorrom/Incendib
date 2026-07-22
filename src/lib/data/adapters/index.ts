@@ -32,6 +32,7 @@ import { utmToLonLat } from '@/lib/geo/utm';
 import { districtForConcelho } from '@/lib/geo/pt-concelhos';
 import { findProvince } from '@/lib/geo/provinces';
 import { slugify as slugifyShared } from '@/lib/utils/slug';
+import { convex, buffer, points as turfPoints, area as turfArea } from '@turf/turf';
 
 /**
  * Construye el timeline de evolución de un incendio a partir de los eventos
@@ -1206,8 +1207,10 @@ const MUTUAL_AID_DUP_KM = 1;
  * Mierla»/«Guadalajara»). Sin fusionar, el incidente se cuenta dos veces en los
  * KPI («activos», total) y el mapa lo muestra como un cúmulo de 2 que nunca se
  * separa (dos marcadores a la misma coordenada están siempre a <44 px, a
- * cualquier zoom). Se fusiona en el más informativo (mayor superficie: ya
- * incorpora la adjudicación de `attachPerimeters`) y se anotan ambas fuentes.
+ * cualquier zoom). Se fusiona en el más informativo (con preferencia por el
+ * que ya tiene forma propia — la adjudicación geográfica de `attachPerimeters`
+ * es una señal más fuerte que un número de hectáreas mayor en el otro gemelo —
+ * y se anotan ambas fuentes.
  */
 export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
   const pairs: { i: number; j: number; km: number }[] = [];
@@ -1233,7 +1236,16 @@ export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
     if (used.has(i) || used.has(j)) continue;
     used.add(i);
     used.add(j);
-    const [survivor, absorbed] = fires[i]!.hectares >= fires[j]!.hectares ? [i, j] : [j, i];
+    // Preferimos conservar el gemelo que YA tiene perímetro propio: perderlo
+    // solo porque el otro reporta más hectáreas dejaría un incidente con forma
+    // real sin ella (y el paso siguiente, `deriveApproxPerimeters`, le
+    // dibujaría una extensión aproximada como si nunca hubiera tenido una
+    // oficial). Solo si ninguno tiene forma, desempatamos por hectáreas.
+    const aHasPerimeter = !!fires[i]!.perimeter;
+    const bHasPerimeter = !!fires[j]!.perimeter;
+    const survivorIsI =
+      aHasPerimeter !== bHasPerimeter ? aHasPerimeter : fires[i]!.hectares >= fires[j]!.hectares;
+    const [survivor, absorbed] = survivorIsI ? [i, j] : [j, i];
     absorbedBy.set(absorbed, survivor);
   }
   if (!absorbedBy.size) return fires;
@@ -1251,6 +1263,79 @@ export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
       return { ...f, sources: Array.from(new Set([...f.sources, ...extra])) };
     })
     .filter((_, idx) => !absorbedBy.has(idx));
+}
+
+/** Radio (km) para agrupar focos FIRMS alrededor de un incidente confirmado sin
+ * perímetro propio. Menor que el de `confirmWithHotspots` (6 km): aquí no basta
+ * con corroborar actividad, hace falta que los focos describan la extensión
+ * inmediata del incidente, no todo lo que arde en la comarca. */
+const APPROX_PERIMETER_RADIUS_KM = 3;
+/** Con <3 focos no hay envolvente fiable (un casco convexo de 1-2 puntos no es
+ * una forma): mejor sin dato que una silueta inventada. */
+const APPROX_PERIMETER_MIN_HOTSPOTS = 3;
+/** Margen (km) sobre el casco convexo: un foco VIIRS marca el CENTRO de un
+ * píxel (~375 m), no el borde real del incendio. */
+const APPROX_PERIMETER_BUFFER_KM = 0.35;
+
+/**
+ * Incidentes CONFIRMADOS por una fuente oficial que siguen activos pero sin
+ * ninguna forma propia (ni nativa ni EFFIS adjuntado — EFFIS tarda días en
+ * mapear una cicatriz) pueden dibujarse con una EXTENSIÓN aproximada: el casco
+ * convexo de los focos FIRMS que caen a su alrededor, con un pequeño margen.
+ *
+ * Deliberadamente conservador y limitado a un trazo en el mapa:
+ * - Exige ≥3 focos cercanos; si no, el incidente queda como hoy (sin forma).
+ * - NUNCA toca `hectares`/`hectaresApprox`: es geometría, no una cifra, y no
+ *   debe alimentar KPI, ranking, boletín ni push (la lección del incidente de
+ *   `deriveSatelliteFires`, revertido en v0.33.0, fue precisamente que un dato
+ *   derivado de FIRMS se colaba como si fuera confirmado en todas partes).
+ * - Se marca `perimeterApprox: true` para que la UI lo distinga siempre del
+ *   perímetro real (estilo propio + aviso de detección satelital).
+ *
+ * Cota geométrica (por construcción, nunca puede desbocarse): todo foco usado
+ * está a ≤`APPROX_PERIMETER_RADIUS_KM` del incidente (un disco es convexo, así
+ * que el casco de un subconjunto siempre cae dentro), luego el polígono final
+ * queda contenido en un disco de radio `RADIUS_KM + BUFFER_KM` (~3,35 km) →
+ * diámetro máximo ~6,7 km. Nunca puede "escaparse" a otro municipio como le
+ * pasaba a `deriveSatelliteFires`.
+ *
+ * Límite conocido (no resuelto, mitigado por el estilo): no exige que los
+ * focos formen UN cúmulo contiguo — dos focos de calor genuinamente separados
+ * dentro del radio (p. ej. el frente real + una quema agrícola cercana sin
+ * relación) se fusionarían en un único casco. El trazo discontinuo + tenue +
+ * el aviso de «no es un perímetro oficial» acotan el riesgo de lectura, pero
+ * no lo eliminan.
+ */
+export function deriveApproxPerimeters(fires: Fire[], hotspots: Hotspot[]): Fire[] {
+  if (!hotspots.length) return fires;
+  return fires.map((f) => {
+    if (f.state !== 'activo' || f.perimeter) return f;
+    const nearby = hotspots.filter(
+      (h) => haversineKm(f.coordinates, h.coordinates) <= APPROX_PERIMETER_RADIUS_KM,
+    );
+    if (nearby.length < APPROX_PERIMETER_MIN_HOTSPOTS) return f;
+    const hull = convex(turfPoints(nearby.map((h) => h.coordinates)));
+    if (!hull) return f; // focos colineales o coincidentes: sin envolvente válida
+    const padded = buffer(hull, APPROX_PERIMETER_BUFFER_KM, { units: 'kilometers' })?.geometry;
+    if (!padded || padded.type !== 'Polygon') return f;
+    const ring = padded.coordinates[0] as [number, number][];
+    if (ring.length < 4) return f;
+    return { ...f, perimeter: ring, perimeterApprox: true };
+  });
+}
+
+/**
+ * Superficie (ha) de un anillo de perímetro [lon,lat] cerrado. Uso EXCLUSIVO
+ * de la ficha individual del incendio, para incidentes con `perimeterApprox`
+ * y sin cifra oficial: se calcula bajo demanda solo al pintar esa ficha, NUNCA
+ * se escribe en `Fire.hectares` ni se agrega a KPI/ranking/boletín — el hull
+ * de unos pocos focos térmicos sobrestima el área real (rellena todo lo que
+ * queda entre los puntos exteriores) y es una base bastante más floja que la
+ * clasificación de imagen de EFFIS, así que no debe mezclarse con esa cifra.
+ */
+export function estimatePerimeterHectares(ring: [number, number][]): number {
+  const m2 = turfArea({ type: 'Polygon', coordinates: [ring] });
+  return Math.round((m2 / 10_000) * 10) / 10;
 }
 
 // ── Capa de calidad: confirmación por focos FIRMS ────────────────────────────

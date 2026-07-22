@@ -21,6 +21,7 @@ import {
   attachPerimeters,
   confirmWithHotspots,
   dedupeMutualAidFires,
+  deriveApproxPerimeters,
 } from './adapters';
 import {
   getOverridesCached,
@@ -75,8 +76,11 @@ export async function getFires(): Promise<Fire[]> {
     // mismo fuego). Se fusiona tras adjudicar los perímetros, para preferir el
     // que ya quedó con la superficie oficial/estimada.
     const merged = dedupeMutualAidFires(withPerimeters);
+    // Incidentes activos y confirmados que siguen sin forma propia: extensión
+    // aproximada a partir de los focos FIRMS cercanos (nunca toca hectáreas).
+    const withApprox = deriveApproxPerimeters(merged, hotspots);
     // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
-    fires = confirmWithHotspots(merged, hotspots);
+    fires = confirmWithHotspots(withApprox, hotspots);
   } else {
     fires = MOCK_FIRES;
   }

@@ -94,6 +94,9 @@ const es = {
     viewProvince: 'Ver incendios de {province}',
     reconstructed: 'Reconstruido a partir de prensa — no es un parte oficial.',
     reconstructedSource: 'prensa',
+    perimeterApprox:
+      'Extensión aproximada por detección satelital (VIIRS/FIRMS) — no es un perímetro oficial.',
+    approxHotspot: 'estimación muy aproximada (focos)',
   },
   resources: {
     heading: 'Medios desplegados',
@@ -130,6 +133,7 @@ const es = {
     extinguido: 'Extinguido',
     foco: 'Foco satelital (sin confirmar)',
     perimeter: 'Perímetro de área quemada',
+    perimeterApprox: 'Extensión aproximada (satélite)',
   },
   sources: {
     title: 'Fuentes y licencias',

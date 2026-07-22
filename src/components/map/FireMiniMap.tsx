@@ -11,6 +11,8 @@ import {
   perimeterCasingPaint,
   perimeterFillPaint,
   perimeterLinePaint,
+  perimeterApproxFillPaint,
+  perimeterApproxLinePaint,
 } from '@/lib/map/perimeter';
 import { statePalette } from '@/lib/design/tokens';
 import type { FeatureCollection, Polygon } from 'geojson';
@@ -49,13 +51,24 @@ export function FireMiniMap({ fire }: { fire: Fire }) {
       <div className="pointer-events-none absolute bottom-1 left-2 z-[1] font-mono text-[8px] leading-none text-fg-mute">
         © OpenStreetMap · OpenFreeMap
       </div>
-      {perimeter && (
-        <Source id="fp" type="geojson" data={perimeter}>
-          <Layer id="fp-fill" type="fill" paint={perimeterFillPaint(perimeterOpts)} />
-          <Layer id="fp-casing" type="line" layout={PERIMETER_LINE_LAYOUT} paint={perimeterCasingPaint(perimeterOpts)} />
-          <Layer id="fp-line" type="line" layout={PERIMETER_LINE_LAYOUT} paint={perimeterLinePaint(perimeterOpts)} />
-        </Source>
-      )}
+      {perimeter &&
+        (fire.perimeterApprox ? (
+          <Source id="fp" type="geojson" data={perimeter}>
+            <Layer id="fp-approx-fill" type="fill" paint={perimeterApproxFillPaint()} />
+            <Layer
+              id="fp-approx-line"
+              type="line"
+              layout={PERIMETER_LINE_LAYOUT}
+              paint={perimeterApproxLinePaint()}
+            />
+          </Source>
+        ) : (
+          <Source id="fp" type="geojson" data={perimeter}>
+            <Layer id="fp-fill" type="fill" paint={perimeterFillPaint(perimeterOpts)} />
+            <Layer id="fp-casing" type="line" layout={PERIMETER_LINE_LAYOUT} paint={perimeterCasingPaint(perimeterOpts)} />
+            <Layer id="fp-line" type="line" layout={PERIMETER_LINE_LAYOUT} paint={perimeterLinePaint(perimeterOpts)} />
+          </Source>
+        ))}
       <Marker longitude={fire.coordinates[0]} latitude={fire.coordinates[1]} anchor="center">
         <StateGlyph state={fire.state} size={20} outline={theme === 'light'} />
       </Marker>

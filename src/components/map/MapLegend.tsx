@@ -43,6 +43,16 @@ export function MapLegend() {
             />
             <span className="text-[11px] text-fg-body">{d.legend.perimeter}</span>
           </div>
+          {/* Extensión aproximada por focos FIRMS: mismo trazo, mucho más tenue
+              (nunca al nivel de un perímetro real). */}
+          <div className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="h-[12px] w-[13px] flex-none rounded-[2px]"
+              style={{ backgroundColor: mix(V.foco, 8), border: `1px solid ${mix(V.foco, 40)}` }}
+            />
+            <span className="text-[11px] text-fg-body">{d.legend.perimeterApprox}</span>
+          </div>
         </div>
       )}
 

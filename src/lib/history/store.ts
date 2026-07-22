@@ -99,6 +99,7 @@ function slimForArchive(f: Fire): Fire {
     timeline: f.timeline?.slice(-20),
     fwi: f.fwi,
     perimeter: f.perimeter,
+    perimeterApprox: f.perimeterApprox,
     // omitidos a propósito: weather, satelliteConfirmed, hotspotKm, delta24h (señales de «ahora»)
   };
 }

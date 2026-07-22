@@ -95,6 +95,9 @@ const pt: Dictionary = {
     viewProvince: 'Ver incêndios de {province}',
     reconstructed: 'Reconstruído a partir de imprensa — não é um comunicado oficial.',
     reconstructedSource: 'imprensa',
+    perimeterApprox:
+      'Extensão aproximada por deteção satelital (VIIRS/FIRMS) — não é um perímetro oficial.',
+    approxHotspot: 'estimativa muito aproximada (focos)',
   },
   resources: {
     heading: 'Meios mobilizados',
@@ -131,6 +134,7 @@ const pt: Dictionary = {
     extinguido: 'Extinto',
     foco: 'Foco de satélite (por confirmar)',
     perimeter: 'Perímetro de área ardida',
+    perimeterApprox: 'Extensão aproximada (satélite)',
   },
   sources: {
     title: 'Fontes e licenças',

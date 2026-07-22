@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getFires, getWeather, getNews } from '@/lib/data';
+import { estimatePerimeterHectares } from '@/lib/data/adapters';
 import { resolveFire } from '@/lib/fires/resolve';
 import { allHighlightSlugs } from '@/lib/boletin/store';
 import { listArchivedGitSlugs } from '@/lib/history/archive-git';
@@ -87,6 +88,12 @@ export default async function FichaPage({ params }: Params) {
   const pool = await getPlacePool(fire);
   const related = findEpisodeLinks({ fire, origin }, pool) ?? undefined;
 
+  // Superficie SOLO para esta ficha (nunca en `Fire.hectares`/KPI/ranking/
+  // boletín): el hull de focos sobrestima el área real y es una base más
+  // floja que EFFIS, así que se calcula aparte y aquí, bajo demanda.
+  const hotspotHectares =
+    fire.perimeterApprox && fire.perimeter ? estimatePerimeterHectares(fire.perimeter) : undefined;
+
   return (
     <FichaScreen
       fire={{ ...fire, weather, timeline: timeline.length ? timeline : fire.timeline }}
@@ -95,6 +102,7 @@ export default async function FichaPage({ params }: Params) {
       boletinId={boletinId}
       hasLocation={hasLocation}
       related={related}
+      hotspotHectares={hotspotHectares}
     />
   );
 }

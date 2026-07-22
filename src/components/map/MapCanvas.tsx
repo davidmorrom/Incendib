@@ -40,9 +40,13 @@ import {
 } from '@/lib/map/config';
 import {
   PERIMETER_LINE_LAYOUT,
+  PERIMETER_REAL_FILTER,
+  PERIMETER_APPROX_FILTER,
   perimeterCasingPaint,
   perimeterFillPaint,
   perimeterLinePaint,
+  perimeterApproxFillPaint,
+  perimeterApproxLinePaint,
 } from '@/lib/map/perimeter';
 import { SOURCES } from '@/lib/data/sources';
 import type { Fire, Hotspot } from '@/types/fire';
@@ -149,6 +153,7 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
             name: f.name,
             ha: f.hectares,
             date: f.startedAt,
+            approx: f.perimeterApprox === true,
           },
           geometry: { type: 'Polygon', coordinates: [f.perimeter!] },
         })),
@@ -309,21 +314,44 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       {/* Perímetros (EFFIS + frente activo): relleno traslúcido + casing neutro
           (legible sobre cualquier base) + línea del color del estado. El orden
           fill→casing→line deja el borde nítido encima. Los focos y marcadores
-          van después → siempre por encima de los polígonos. */}
+          van después → siempre por encima de los polígonos.
+          Las extensiones aproximadas (focos FIRMS, sin perímetro oficial) se
+          excluyen de estas tres capas y se pintan aparte, con línea
+          discontinua — línea "estimado", no un perímetro real. */}
       {perimetersVisible && hasPerimeters && (
         <Source id="perimeters" type="geojson" data={perimeters}>
-          <Layer id="perimeter-fill" type="fill" paint={perimeterFillPaint(perimeterOpts)} />
+          <Layer
+            id="perimeter-fill"
+            type="fill"
+            filter={PERIMETER_REAL_FILTER}
+            paint={perimeterFillPaint(perimeterOpts)}
+          />
           <Layer
             id="perimeter-casing"
             type="line"
+            filter={PERIMETER_REAL_FILTER}
             layout={PERIMETER_LINE_LAYOUT}
             paint={perimeterCasingPaint(perimeterOpts)}
           />
           <Layer
             id="perimeter-line"
             type="line"
+            filter={PERIMETER_REAL_FILTER}
             layout={PERIMETER_LINE_LAYOUT}
             paint={perimeterLinePaint(perimeterOpts)}
+          />
+          <Layer
+            id="perimeter-approx-fill"
+            type="fill"
+            filter={PERIMETER_APPROX_FILTER}
+            paint={perimeterApproxFillPaint()}
+          />
+          <Layer
+            id="perimeter-approx-line"
+            type="line"
+            filter={PERIMETER_APPROX_FILTER}
+            layout={PERIMETER_LINE_LAYOUT}
+            paint={perimeterApproxLinePaint()}
           />
         </Source>
       )}

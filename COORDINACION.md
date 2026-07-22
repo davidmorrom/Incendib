@@ -31,6 +31,78 @@
 
 ## Log
 
+### 2026-07-22 — Agente H (mapa/datos): extensión aproximada por focos FIRMS (v0.37.0)
+
+**Encargo del propietario:** con los focos que ya tenemos, ¿no podemos marcar
+el perímetro aproximado de un incendio confirmado cuando coincide con ellos?
+Indicando que es aproximado, sin dibujar los puntos de foco debajo (aclarado
+por el propietario tras pregunta directa). Después, en la misma sesión: ¿y
+calcularle hectáreas aproximadas cuando no hay fuente oficial? Aclarado
+también: **solo en la ficha del incendio**, nunca en KPI/ranking/boletín.
+
+**Diseño (validado con el propietario antes de implementar, dos rondas de
+`AskUserQuestion` dada la historia sensible del área — ver v0.33.0 más abajo):**
+1. `deriveApproxPerimeters` (`src/lib/data/adapters/index.ts`): incidentes
+   `activo` YA confirmados por fuente oficial, sin perímetro propio, con ≥3
+   focos FIRMS a ≤3 km → casco convexo (`@turf/turf`) + margen 0,35 km →
+   `perimeter` + `perimeterApprox: true`. Cota geométrica por construcción:
+   nunca puede superar ~6,7 km de diámetro (ver comentario en el código).
+   **Nunca toca `hectares`/`hectaresApprox`.**
+2. `estimatePerimeterHectares`: superficie del casco, calculada BAJO DEMANDA
+   solo en `app/f/[slug]/page.tsx` y pasada como prop `hotspotHectares` a
+   `FichaScreen` — nunca se escribe en `Fire.hectares`, así que es estructuralmente
+   imposible que llegue a KPI/ranking/boletín (no viaja por `getFires()`).
+   Nota más cauta que la de EFFIS: «estimación muy aproximada (focos)».
+3. Render: capas dedicadas `perimeter-approx-fill`/`perimeter-approx-line` con
+   línea DISCONTINUA (`src/lib/map/perimeter.ts`) — MapLibre no admite
+   `line-dasharray` data-driven, así que van separadas de las 3 capas de
+   perímetro real (que ahora se filtran para excluir `approx`). Ficha: banner
+   de aviso + minimapa con el mismo estilo discontinuo.
+4. Excluido del KPI «Perímetros» del boletín (`aggregate.ts`) y persistido en
+   el archivo histórico (`history/store.ts`) para que una ficha archivada
+   conserve el aviso.
+
+**Verificado:** typecheck + lint + 323 tests + build; visual con Playwright
+headless (claro/oscuro) contra datos LIVE reales — dos incidentes reales
+(Agrelos-PT, Burgohondo-CyL) recibieron extensión aproximada; el mapa muestra
+el casco discontinuo con margen amplio de holgura (siguiente incidente sin
+forma más cercano, fuera del casco, a varios km); la ficha de Burgohondo
+muestra «~1 827 ha · estimación muy aproximada (focos)» mientras
+`GET /api/fires` sigue devolviendo `hectares: 0` para ese mismo incidente
+(confirma que no se filtra al feed agregado).
+
+**Auditoría adversarial dedicada** (agente independiente, instrucción
+explícita de releer el código sin fiarse de mis comentarios): un hallazgo real
+corregido (`dedupeMutualAidFires` podía perder un perímetro real al fusionar
+duplicados de dos CCAA — ver entrada de abajo, v0.36.2, y el fix en esta misma
+versión) + un límite conocido documentado sin resolver (el casco no exige que
+los focos sean un cúmulo contiguo; mitigado por el estilo discontinuo + aviso,
+no eliminado). Todo lo demás (facets, ranking, informe, push/alertas, OG
+images, JSON-LD, archivo histórico) revisado y limpio.
+
+**Gotcha de build:** `@turf/convex` depende de `concaveman` → `rbush`/
+`tinyqueue` (CJS puro). Empaquetarlo con el webpack de `next build` rompía
+`new RBush()` («X is not a constructor») al prerenderizar `/api/fires`. Fix:
+`serverExternalPackages: ['@turf/turf']` en `next.config.mjs` (dejar que Node
+lo resuelva con `require()` nativo). `@turf/turf` estaba en `devDependencies`
+desde el commit inicial del proyecto, sin usar en ningún sitio — lo pasé a
+`dependencies` (corre en servidor, en producción).
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`
+(`dedupeMutualAidFires` fix, `deriveApproxPerimeters`,
+`estimatePerimeterHectares`), `src/lib/data/index.ts`, `src/types/fire.ts`
+(+`perimeterApprox`), `src/lib/map/perimeter.ts` (capas approx), `MapCanvas.tsx`,
+`FireMiniMap.tsx`, `MapLegend.tsx`, `FichaScreen.tsx` (banner + superficie),
+`app/f/[slug]/page.tsx`, i18n es/pt/en (`fire.perimeterApprox`,
+`fire.approxHotspot`, `legend.perimeterApprox`), `boletin/aggregate.ts`
+(exclusión del KPI), `history/store.ts` (persistir `perimeterApprox`),
+`next.config.mjs`, `package.json`/`package-lock.json` (turf a dependencies),
+tests nuevos (`approx-perimeter.test.ts`, `kpi.test.ts`,
+`dedupe-mutual-aid.test.ts` +1 caso), CHANGELOG, este log.
+
+**Versión:** tomo **v0.37.0** (último tag v0.36.2; feature, no solo fix).
+**Siguiente tag libre: 0.37.1.**
+
 ### 2026-07-22 — Agente H (datos): dedup de incendios reportados por dos CCAA (v0.36.2)
 
 **Encargo del propietario:** captura de pantalla mostrando un cúmulo «2» sobre

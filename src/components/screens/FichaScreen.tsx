@@ -34,6 +34,7 @@ export function FichaScreen({
   boletinId,
   hasLocation = true,
   related,
+  hotspotHectares,
 }: {
   fire: Fire;
   /** Procedencia del dato: en vivo, archivo o destacado del boletín. */
@@ -46,6 +47,13 @@ export function FichaScreen({
   hasLocation?: boolean;
   /** Episodios del mismo paraje (reactivaciones), si los hay. */
   related?: EpisodeLinks;
+  /**
+   * Superficie estimada SOLO para esta ficha, a partir del casco de focos de
+   * `fire.perimeterApprox` (ver `estimatePerimeterHectares`). Nunca viene de
+   * `Fire.hectares`: no cuenta en KPI/ranking/boletín, solo se enseña aquí,
+   * con una nota más cautelosa que la de una estimación EFFIS.
+   */
+  hotspotHectares?: number;
 }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
@@ -184,6 +192,21 @@ export function FichaScreen({
           >
             <p className="text-[11px] font-semibold leading-snug text-state-controlado-text">
               ⚠ {d.fire.reconstructed}
+            </p>
+          </div>
+        )}
+
+        {/* Extensión aproximada por focos FIRMS (sin perímetro oficial/EFFIS
+            todavía): aviso visible, mismo tono que el resto de señales
+            satelitales (`satelliteConfirmed`), para no leerse como un
+            perímetro real. */}
+        {fire.perimeterApprox && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.foco, 45), background: mix(V.foco, 8) }}
+          >
+            <p className="text-[11px] font-semibold leading-snug text-state-foco-text">
+              ⚠ {d.fire.perimeterApprox}
             </p>
           </div>
         )}
@@ -343,6 +366,15 @@ export function FichaScreen({
                         : d.fire.noProgress}
                   </div>
                 )}
+              </>
+            ) : hotspotHectares ? (
+              <>
+                <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
+                  ~{formatNumber(hotspotHectares)} <span className="text-[11px] text-fg-secondary">ha</span>
+                </div>
+                <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
+                  {d.fire.approxHotspot}
+                </div>
               </>
             ) : (
               <div className="mt-1 whitespace-nowrap font-mono text-[13px] font-semibold text-fg-secondary">

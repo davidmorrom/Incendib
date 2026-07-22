@@ -1,4 +1,4 @@
-import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl';
+import type { FillLayerSpecification, FilterSpecification, LineLayerSpecification } from 'maplibre-gl';
 
 /**
  * Estilo compartido de los perímetros (área quemada EFFIS + frente activo),
@@ -14,6 +14,9 @@ import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl
  * color + grosor, nunca solo color.
  *
  * El color de cada feature llega en la propiedad `color`; el tipo en `kind`.
+ * Estas tres capas son solo para perímetros REALES: las extensiones
+ * aproximadas (`approx`, ver `deriveApproxPerimeters`) se excluyen con un
+ * `filter` en el `Layer` y usan su propio estilo, ver más abajo.
  */
 export interface PerimeterOpts {
   /** Base de imagen de satélite: sube el contraste (relleno y línea). */
@@ -82,5 +85,32 @@ export function perimeterLinePaint({ imagery }: PerimeterOpts): LineLayerSpecifi
       imagery ? 0.98 : 0.95,
       imagery ? 0.9 : 0.82,
     ],
+  };
+}
+
+/**
+ * Filtro para separar las extensiones aproximadas (focos FIRMS) del resto:
+ * las tres capas de arriba (perímetro real) deben EXCLUIRLAS; las dos de abajo
+ * (línea discontinua) son SOLO para ellas. `line-dasharray` de MapLibre no
+ * admite expresión por feature (data-driven), así que necesitan capas propias
+ * en vez de una rama más del `case` de las capas reales.
+ */
+export const PERIMETER_REAL_FILTER: FilterSpecification = ['!=', ['get', 'approx'], true];
+export const PERIMETER_APPROX_FILTER: FilterSpecification = ['==', ['get', 'approx'], true];
+
+/** Relleno muy tenue: siempre menos presente que cualquier área real. */
+export function perimeterApproxFillPaint(): FillLayerSpecification['paint'] {
+  return { 'fill-color': ['get', 'color'], 'fill-opacity': 0.1 };
+}
+
+/** Línea DISCONTINUA — convención cartográfica de "estimado, no confirmado".
+ * Más fina y menos opaca que un perímetro real, para no leerse con la misma
+ * certeza pese al guión. */
+export function perimeterApproxLinePaint(): LineLayerSpecification['paint'] {
+  return {
+    'line-color': ['get', 'color'],
+    'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.3, 9, 1.7, 12, 2.2, 14, 2.7],
+    'line-opacity': 0.8,
+    'line-dasharray': [2, 1.6],
   };
 }

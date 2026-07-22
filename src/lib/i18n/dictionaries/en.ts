@@ -95,6 +95,9 @@ const en: Dictionary = {
     viewProvince: 'View fires in {province}',
     reconstructed: 'Reconstructed from press reports — not an official report.',
     reconstructedSource: 'press',
+    perimeterApprox:
+      'Approximate extent from satellite detection (VIIRS/FIRMS) — not an official perimeter.',
+    approxHotspot: 'very rough estimate (hotspots)',
   },
   resources: {
     heading: 'Deployed resources',
@@ -131,6 +134,7 @@ const en: Dictionary = {
     extinguido: 'Extinguished',
     foco: 'Satellite hotspot (unconfirmed)',
     perimeter: 'Burned-area perimeter',
+    perimeterApprox: 'Approximate extent (satellite)',
   },
   sources: {
     title: 'Sources and licences',

@@ -56,6 +56,11 @@ const nextConfig = {
   // maplibre-gl / react-map-gl ship modern ESM (la lógica v8 vive en
   // @vis.gl/react-maplibre); transpilarlos evita errores de ESM sin procesar.
   transpilePackages: ['maplibre-gl', 'react-map-gl', '@vis.gl/react-maplibre'],
+  // @turf/convex depende de concaveman → rbush/tinyqueue (CJS puro, con su
+  // propio workaround de interop para webpack). Empaquetarlo con webpack rompe
+  // el `new RBush()` interno ("X is not a constructor"); externalizarlo deja
+  // que Node lo resuelva con require() nativo, sin tocar el resto del bundle.
+  serverExternalPackages: ['@turf/turf'],
   async redirects() {
     return [
       {

@@ -188,6 +188,14 @@ export interface Fire {
    */
   perimeterSourceSlug?: string;
   /**
+   * `perimeter` es una EXTENSIÓN aproximada derivada de focos FIRMS cercanos
+   * (casco convexo + margen), no un perímetro oficial ni EFFIS: se rellena solo
+   * cuando el incidente está confirmado por una fuente oficial pero aún no tiene
+   * forma propia. La UI debe comunicarlo siempre (detección satelital ≠
+   * confirmado) y NUNCA debe usarse para derivar `hectares`/KPI/ranking/boletín.
+   */
+  perimeterApprox?: boolean;
+  /**
    * Corregido a mano desde el panel privado (override): al menos un campo se editó
    * respecto al dato de la fuente. La UI lo señala («corregido a mano») por
    * transparencia. `overriddenFields` lista qué campos se tocaron.
