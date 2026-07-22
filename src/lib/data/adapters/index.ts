@@ -225,7 +225,7 @@ function titleCase(s: string): string {
 }
 
 /** Distancia aproximada en km (haversine) entre dos puntos [lon,lat]. */
-function haversineKm(a: [number, number], b: [number, number]): number {
+export function haversineKm(a: [number, number], b: [number, number]): number {
   const R = 6371;
   const dLat = ((b[1] - a[1]) * Math.PI) / 180;
   const dLon = ((b[0] - a[0]) * Math.PI) / 180;
@@ -1190,6 +1190,67 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
     }
     return out;
   });
+}
+
+/** Distancia (km) bajo la cual dos incidentes de FUENTES distintas se tratan como
+ * el mismo incendio físico. Caso real detectado: La Mierla/Guadalajara, a ~0,12 km
+ * de diferencia entre el parte de INFORCYL (CyL en apoyo mutuo) y el de INFOCA
+ * (Andalucía en apoyo mutuo) — el mismo fuego, dos sistemas de emergencia. Margen
+ * amplio: en producción, el siguiente par de fuentes distintas más próximo está
+ * a >45 km, así que este umbral no roza incidentes realmente independientes. */
+const MUTUAL_AID_DUP_KM = 1;
+
+/**
+ * Dos CCAA pueden desplegar apoyo mutuo al MISMO incendio y cada una lo reporta
+ * en su propio sistema con su propio id (INFORCYL e INFOCA listando ambos «La
+ * Mierla»/«Guadalajara»). Sin fusionar, el incidente se cuenta dos veces en los
+ * KPI («activos», total) y el mapa lo muestra como un cúmulo de 2 que nunca se
+ * separa (dos marcadores a la misma coordenada están siempre a <44 px, a
+ * cualquier zoom). Se fusiona en el más informativo (mayor superficie: ya
+ * incorpora la adjudicación de `attachPerimeters`) y se anotan ambas fuentes.
+ */
+export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
+  const pairs: { i: number; j: number; km: number }[] = [];
+  for (let i = 0; i < fires.length; i++) {
+    for (let j = i + 1; j < fires.length; j++) {
+      const a = fires[i]!;
+      const b = fires[j]!;
+      if (a.country !== b.country) continue;
+      if (a.state === 'extinguido' || b.state === 'extinguido') continue;
+      if (a.sources.some((s) => b.sources.includes(s))) continue; // misma fuente: no aplica
+      const km = haversineKm(a.coordinates, b.coordinates);
+      if (km <= MUTUAL_AID_DUP_KM) pairs.push({ i, j, km });
+    }
+  }
+  if (!pairs.length) return fires;
+
+  // Emparejamiento codicioso 1:1 por distancia ascendente (mismo patrón que
+  // attachPerimeters): cada incendio se fusiona como mucho una vez.
+  pairs.sort((x, y) => x.km - y.km);
+  const used = new Set<number>();
+  const absorbedBy = new Map<number, number>(); // índice absorbido → índice superviviente
+  for (const { i, j } of pairs) {
+    if (used.has(i) || used.has(j)) continue;
+    used.add(i);
+    used.add(j);
+    const [survivor, absorbed] = fires[i]!.hectares >= fires[j]!.hectares ? [i, j] : [j, i];
+    absorbedBy.set(absorbed, survivor);
+  }
+  if (!absorbedBy.size) return fires;
+
+  const extraSources = new Map<number, Fire['sources']>();
+  for (const [absorbedIdx, survivorIdx] of absorbedBy) {
+    const list = extraSources.get(survivorIdx) ?? [];
+    extraSources.set(survivorIdx, [...list, ...fires[absorbedIdx]!.sources]);
+  }
+
+  return fires
+    .map((f, idx) => {
+      const extra = extraSources.get(idx);
+      if (!extra) return f;
+      return { ...f, sources: Array.from(new Set([...f.sources, ...extra])) };
+    })
+    .filter((_, idx) => !absorbedBy.has(idx));
 }
 
 // ── Capa de calidad: confirmación por focos FIRMS ────────────────────────────

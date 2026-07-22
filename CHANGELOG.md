@@ -5,6 +5,29 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.36.2] - 2026-07-22
+
+### Corregido
+
+- **Incendio de La Mierla (Guadalajara) contado dos veces.** Detectado por
+  captura del propietario: el mapa mostraba un cúmulo «2» sobre esa zona que
+  nunca se separaba en marcadores individuales al acercar. Causa: **INFORCYL
+  (apoyo desde Castilla y León) e INFOCA (apoyo desde Andalucía) reportan el
+  mismo incendio real cada uno en su propio sistema**, a ~120 m de diferencia
+  entre sí — el código ya documentaba que INFOCA lista despliegues fuera de
+  Andalucía, pero no que INFORCYL hace lo mismo para el mismo fuego. Esto
+  inflaba el KPI «Activos» en 1 y el cúmulo del mapa quedaba permanentemente
+  atascado (dos marcadores en la misma coordenada están siempre a <44 px, a
+  cualquier zoom, así que `getClusterExpansionZoom` nunca lo resuelve).
+- Nueva `dedupeMutualAidFires` (`src/lib/data/adapters/index.ts`): funde
+  incidentes de **fuentes distintas** a ≤1 km (umbral con amplio margen: el
+  siguiente par de fuentes distintas más próximo en producción está a >45 km),
+  descartando el par si alguno ya está extinguido o si comparten fuente.
+  Se conserva el más informativo (mayor superficie, ya adjudicada por
+  `attachPerimeters`) y se anotan ambas fuentes (`sources`) para no ocultar que
+  hay dos partes oficiales del mismo fuego. Aplicada en `getFires` tras la
+  adjudicación de perímetros EFFIS. +5 tests.
+
 ## [0.36.1] - 2026-07-22
 
 ### Cambiado

@@ -31,6 +31,49 @@
 
 ## Log
 
+### 2026-07-22 — Agente H (datos): dedup de incendios reportados por dos CCAA (v0.36.2)
+
+**Encargo del propietario:** captura de pantalla mostrando un cúmulo «2» sobre
+La Mierla (Guadalajara) que nunca se separaba en marcadores individuales al
+acercar zoom.
+
+**Diagnóstico (verificado contra datos live):** NO es un bug del clustering
+(v0.36.0/`useFireClusters.ts`) — es un incendio contado **dos veces**.
+`cyl-mierla-la-42-106-26` (INFORCYL, apoyo desde CyL) y `and-guadalajara-1088`
+(INFOCA, apoyo desde Andalucía; **el mismo** que ya se documentó en el fix de
+v0.33.1/v0.34.1 sobre el perímetro EFFIS «La Mierla») son el mismo incendio
+real, a **~120 m** de diferencia. El código ya sabía que INFOCA lista
+despliegues fuera de Andalucía (comentario en `infocaToFire`), pero no que
+INFORCYL hace lo mismo para este mismo fuego. Al estar a la misma coordenada,
+el cúmulo de supercluster nunca se resuelve (2 puntos a <44 px lo son a
+cualquier zoom) — y de paso el KPI «Activos» contaba el fuego dos veces.
+
+**Escaneadas todas las combinaciones de fuentes distintas del feed live (82
+incendios)**: la única pareja de fuentes distintas por debajo de 15 km está a
+0,123 km (este caso); la siguiente más próxima está a 45,9 km. Umbral de fusión
+elegido: **≤1 km** (amplio margen a ambos lados, no roza incidentes reales
+distintos).
+
+**Hecho (typecheck + lint + 311 tests + build; verificado con Playwright
+headless contra el dev server: el marcador de La Mierla pasa de cúmulo «2»
+atascado a marcador individual; `and-guadalajara-1088` conserva superficie
+35 268 ha y perímetro, con `sources: ["infoca","jcyl"]`):**
+`dedupeMutualAidFires` (nueva, `src/lib/data/adapters/index.ts`, cerca de
+`attachPerimeters`): funde incidentes de fuentes distintas a ≤1 km (descarta si
+alguno está extinguido o si comparten fuente), quedándose con el más
+informativo (mayor superficie) y anotando ambas fuentes. Aplicada en
+`getFires` (`src/lib/data/index.ts`) **después** de `attachPerimeters` (para
+que el desempate por superficie ya tenga en cuenta la adjudicación EFFIS).
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`
+(`haversineKm` ahora exportado + `dedupeMutualAidFires`),
+`src/lib/data/index.ts` (`getFires`, comentario de `dedupeFires` corregido),
+`src/lib/data/adapters/dedupe-mutual-aid.test.ts` (nuevo, +5 tests),
+CHANGELOG.md, package.json, este log.
+
+**Versión:** tomo **v0.36.2** (último tag v0.36.1, fix). **Siguiente tag
+libre: 0.36.3.**
+
 ### 2026-07-22 — Agente H (mapa): focos satelitales ocultos por defecto (v0.36.1)
 
 **Encargo del propietario:** aun con el rediseño en densidad suave (heatmap,

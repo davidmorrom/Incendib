@@ -20,6 +20,7 @@ import {
   fetchEffisPerimeters,
   attachPerimeters,
   confirmWithHotspots,
+  dedupeMutualAidFires,
 } from './adapters';
 import {
   getOverridesCached,
@@ -68,7 +69,12 @@ export async function getFires(): Promise<Fire[]> {
       fetchFirmsHotspots({ days: 2 }),
       fetchEffisPerimeters(),
     ]);
-    const merged = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    const withPerimeters = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    // Una misma CCAA vecina puede reportar un incendio ajeno donde despliega
+    // apoyo mutuo (visto en La Mierla/Guadalajara: INFORCYL e INFOCA listan el
+    // mismo fuego). Se fusiona tras adjudicar los perímetros, para preferir el
+    // que ya quedó con la superficie oficial/estimada.
+    const merged = dedupeMutualAidFires(withPerimeters);
     // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
     fires = confirmWithHotspots(merged, hotspots);
   } else {
@@ -94,7 +100,9 @@ async function safeOverrides(): Promise<OverrideState> {
   }
 }
 
-/** Dedup por slug (las fuentes PT/ES no se solapan, pero por seguridad). */
+/** Dedup por slug (mismo id repetido dentro de una misma fuente). El solape
+ * ENTRE fuentes distintas (apoyo mutuo entre CCAA) lo resuelve
+ * `dedupeMutualAidFires`, por proximidad geográfica. */
 function dedupeFires(fires: Fire[]): Fire[] {
   const seen = new Set<string>();
   const out: Fire[] = [];
