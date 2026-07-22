@@ -32,6 +32,8 @@ Todo lo anterior se ha corregido y **verificado** (ver
 | Payload RSC de focos/perímetros en HTML | ~750 KB  | **0 KB** (movido a `/api/map-layers`) |
 | Lighthouse a11y · `color-contrast`    | ❌ falla   | ✅ pasa    |
 | Lighthouse a11y · `label-content-name-mismatch` | ❌ falla | ✅ pasa |
+| Lighthouse a11y · `target-size` (marcadores) | ❌ falla (solape) | ✅ pasa (clustering) |
+| **Puntuación Accessibility (móvil)** | 96 | **100** |
 | Re-render de la lista al hacer *hover* | 142 filas | ~2 filas (memo) |
 
 ---
@@ -182,11 +184,24 @@ un cambio no-op disfrazado de mejora.
   los `base` como marcadores). 14 aserciones; blinda contra regresiones. La
   fórmula reproduce exactamente los ratios de Lighthouse (autotest incluido).
 
+- **`target-size` de los marcadores (WCAG 2.5.8):** los pins de incendios a
+  coordenadas geográficas reales se solapaban a zoom bajo (espacio pulsable
+  seguro < 24 px). Se **agrupan** ahora con `supercluster`: burbuja de recuento a
+  zoom bajo (borde = mayor gravedad del grupo), marcadores individuales al
+  ampliar. Además `useNeutralizedMarker` retira el envoltorio genérico
+  `role="button"` + `aria-label="Map marker"` + `tabindex` que MapLibre añade a
+  cada marcador (botón anidado redundante que también rompía
+  `label-content-name-mismatch`). Ficheros: `src/lib/map/useFireClusters.ts`,
+  `src/components/map/FireClusterMarker.tsx`, `src/lib/map/useNeutralizedMarker.ts`,
+  `src/components/map/MapCanvas.tsx`. **Verificado: Accessibility 100, sin fallos
+  de a11y.** La lista de incendios sigue siendo el equivalente accesible completo.
+
 ### Verificación
 
-`npm run typecheck` ✅ · `npm run lint` ✅ · `npm test` ✅ (303 tests) ·
+`npm run typecheck` ✅ · `npm run lint` ✅ · `npm test` ✅ (306 tests) ·
 `npm run build` ✅. Medición runtime con el MCP de Chrome DevTools contra
-`next start` (modo live, 1128 focos).
+`next start` (modo live, ~1128 focos): **Lighthouse Accessibility 100** (móvil),
+sin auditorías de accesibilidad fallando.
 
 ---
 
@@ -194,7 +209,6 @@ un cambio no-op disfrazado de mejora.
 
 | Ítem | Motivo de aplazarlo |
 | ---- | ------------------- |
-| **`target-size` de los marcadores del mapa** (WCAG 2.5.8) | Con datos en vivo, los incendios agrupados geográficamente (p. ej. cluster Ávila/Soria/Guadalajara) solapan sus botones de 28 px y el audit falla (dato-dependiente, **no** regresión de este trabajo). Existe equivalente accesible (la lista de incendios con targets correctos). Resolverlo bien pide clustering de marcadores con solución a11y equivalente → coordinar con diseño hifi. |
 | **Una sola lista por viewport** (no montar sheet móvil + lista desktop a la vez) | Ahorra ~1000 nodos de DOM, pero gatear por `matchMedia` arriesga desajuste de hidratación / flash (CLS hoy = 0). Requiere cuidado; medir CLS antes/después. |
 | **Virtualizar/acotar filas** (sheet e `/informe`) | Hoy hay decenas de incendios; escala mal en picos de verano (cientos). Windowing ligero manteniendo accesibilidad y foco de teclado. |
 | **Desacoplar el reloj de 60 s de `FireRow`** | `FireRow` consume `useNow()` para `timeAgo`, así que el tic re-renderiza las filas pese al `memo`. Extraer el `timeAgo` a un subnodo lo evitaría; ganancia marginal (1×/min) frente al *hover*. |

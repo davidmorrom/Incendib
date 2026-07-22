@@ -5,6 +5,30 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.36.0] - 2026-07-22
+
+### Añadido
+
+- **Agrupación (clustering) de los marcadores de incendios en el mapa.** A
+  coordenadas geográficas reales, los pins de incendios próximos se solapaban; a
+  zoom bajo se muestran ahora como una burbuja de recuento (borde = mayor
+  gravedad del grupo) y, al ampliar (o pulsar la burbuja), como los marcadores
+  individuales color+forma. Vía `supercluster`, determinista por viewport
+  (`src/lib/map/useFireClusters.ts`, `FireClusterMarker`). La lista de incendios
+  sigue siendo el equivalente accesible completo.
+
+### Corregido
+
+- **Accesibilidad `target-size` (WCAG 2.5.8):** el clustering elimina el solape de
+  marcadores que dejaba el «espacio pulsable seguro» por debajo de 24 px.
+- **Envoltorio a11y redundante de los marcadores.** MapLibre marca el `<div>`
+  contenedor de cada marcador con `role="button"` + `aria-label="Map marker"` +
+  `tabindex` genéricos (botón anidado sobre nuestro `<button>` real, que además
+  disparaba `label-content-name-mismatch` con el texto de las burbujas).
+  `useNeutralizedMarker` los retira (MutationObserver), dejando el botón interno
+  como único control. Verificado: **Accessibility 100** en Lighthouse, sin fallos
+  de accesibilidad.
+
 ## [0.35.0] - 2026-07-22
 
 ### Cambiado
