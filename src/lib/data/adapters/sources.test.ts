@@ -195,6 +195,28 @@ describe('fetchInfocaFires (Andalucía)', () => {
     mockJson({ features: [{ attributes: { TERMINO_MUNICIPAL: 'X', ESTADO: 'ACTIVO' } }] });
     expect(await fetchInfocaFires()).toEqual([]);
   });
+
+  it('deriva la región de la provincia en despliegues fuera de Andalucía (La Mierla)', async () => {
+    mockJson({
+      features: [
+        {
+          attributes: {
+            OID_ENTERO: 1088,
+            TERMINO_MUNICIPAL: 'GUADALAJARA',
+            PROVINCIA: 'GUADALAJARA',
+            ESTADO: 'ACTIVO',
+            FECHA: Date.now() - 86400e3,
+          },
+          geometry: { x: -3.236, y: 40.941 },
+        },
+      ],
+    });
+    const fires = await fetchInfocaFires();
+    expect(fires).toHaveLength(1);
+    expect(fires[0]!.province).toBe('Guadalajara');
+    expect(fires[0]!.region).toBe('Castilla-La Mancha'); // no «Andalucía»
+    expect(fires[0]!.sources).toEqual(['infoca']);
+  });
 });
 
 describe('fetchCatalunyaFires (Bombers)', () => {

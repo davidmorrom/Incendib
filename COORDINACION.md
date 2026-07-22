@@ -31,6 +31,37 @@
 
 ## Log
 
+### 2026-07-22 — Agente A (datos): superficie de grandes incendios arreglada (v0.33.1)
+
+**Encargo del propietario:** el megaincendio de Guadalajara (>33 000 ha según
+prensa) salía «sin dato» de superficie.
+
+**Diagnóstico (verificado contra prod y las APIs):** el incidente SÍ existe en
+`getFires` (`and-guadalajara-1088`, vía INFOCA, que lista su despliegue de apoyo
+fuera de Andalucía) y EFFIS SÍ tiene la cicatriz («Mierla, La», **35 268 ha**,
+firedate 16-jul, a 13 min del inicio oficial). No casaban porque
+`attachPerimeters` medía distancia al **centroide** (≤12 km) y en un polígono de
+35 000 ha el centroide queda a **21,4 km** del marcador de ignición (que está a
+**0,37 km del borde**).
+
+**Hecho e integrado en `main`** (typecheck + lint + **289 tests** + build):
+- ⚠️ `src/lib/data/adapters/index.ts` (compartido): `attachPerimeters` mide ahora
+  **distancia al borde** (0 si el punto cae dentro; ray-casting reutilizado de
+  `point-in-region.ts`, ahora exporta `inRing`), con descarte por bbox. Nuevo
+  **gate temporal**: cicatriz detectada >7 días antes del inicio del incendio =
+  otro fuego → no presta forma ni hectáreas (protege reactivaciones El Barraco).
+- `infocaToFire`: la región se deriva de la provincia (`findProvince`) — el de
+  Guadalajara salía con región «Andalucía»; ahora «Castilla-La Mancha».
+- Tests: attach (borde-vs-centroide con el caso real, cicatriz vieja) + INFOCA
+  fuera de Andalucía.
+
+**Nota (sin tocar):** el OTRO incendio de Guadalajara (Selas/Corduente, ~878 ha
+EFFIS, 118 focos <48 h) sigue sin incidente porque INFOCAM está desconectado; la
+vía documentada es re-alta con `gateByHotspots` (PENDIENTE §1). No lo hago aquí
+para no mezclar carriles.
+
+**Versión:** tomo **v0.33.1** (último tag v0.33.0). **Siguiente tag libre: 0.33.2.**
+
 ### 2026-07-22 — Agente G (revisión): REVERTIDA la capa de incendios derivados por satélite (v0.33.0)
 
 **Encargo del propietario:** analizar la feature «incendios derivados por

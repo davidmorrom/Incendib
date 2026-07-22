@@ -27,9 +27,11 @@ import type {
   Country,
   TimelineEntry,
 } from '@/types/fire';
-import { inEsPt } from '@/lib/geo/point-in-region';
+import { inEsPt, inRing } from '@/lib/geo/point-in-region';
 import { utmToLonLat } from '@/lib/geo/utm';
 import { districtForConcelho } from '@/lib/geo/pt-concelhos';
+import { findProvince } from '@/lib/geo/provinces';
+import { slugify as slugifyShared } from '@/lib/utils/slug';
 
 /**
  * Construye el timeline de evolución de un incendio a partir de los eventos
@@ -868,13 +870,18 @@ function infocaToFire(f: {
   const startedMs = date ? Date.parse(`${date}T${hora}:00+02:00`) : NaN;
   const startedAt = Number.isNaN(startedMs) ? new Date().toISOString() : new Date(startedMs).toISOString();
   const id = a.OID_ENTERO ?? a.ESRI_OID ?? slugify(muni);
+  const province = titleCase(a.PROVINCIA ?? '') || '—';
+  // INFOCA también lista incidentes fuera de Andalucía en los que despliega apoyo
+  // (caso real: La Mierla, Guadalajara): la región (CCAA) se deriva de la
+  // provincia con el catálogo; solo si no se reconoce se asume Andalucía.
+  const region = findProvince(slugifyShared(province))?.region ?? 'Andalucía';
 
   return {
     slug: `and-${slugify(muni)}-${id}`,
     name: muni,
     municipality: muni,
-    province: titleCase(a.PROVINCIA ?? '') || '—',
-    region: 'Andalucía',
+    province,
+    region,
     country: 'ES',
     state: esStateFromSituacion(a.ESTADO),
     level: null,
@@ -1046,9 +1053,39 @@ function ringCentroid(ring: [number, number][]): [number, number] {
   return [x / ring.length, y / ring.length];
 }
 
+/** Radio de enganche incendio↔área quemada: distancia al BORDE del perímetro. */
+const ATTACH_RADIUS_KM = 12;
+
 /**
- * Adjunta a cada incendio el área quemada EFFIS más cercana (≤ 12 km): le da
- * forma (perímetro) en mapa/ficha y, **solo si la fuente oficial no publica
+ * Un área quemada solo puede pertenecer al incendio si no es una cicatriz vieja:
+ * si EFFIS la detectó (FIREDATE→startedAt) mucho antes de que el incendio
+ * empezara, es de OTRO fuego anterior en el mismo paraje (p. ej. reactivaciones
+ * tipo El Barraco) y no debe prestarle ni forma ni hectáreas.
+ */
+const SCAR_MAX_AGE_MS = 7 * 86400e3;
+
+/**
+ * Distancia (km) de un punto al perímetro: 0 si cae dentro del anillo; si no,
+ * mínima a sus vértices (aproxima la distancia al borde; los anillos EFFIS son
+ * densos, con vértices cada ~250 m). El centroide NO sirve de referencia: en un
+ * gran incendio (decenas de miles de ha) queda a >20 km del punto de ignición
+ * donde la fuente oficial pone el marcador (caso real: La Mierla/Guadalajara,
+ * 35 000 ha, marcador a 0,4 km del borde y a 21 km del centroide).
+ */
+function distanceToRingKm(pt: [number, number], ring: [number, number][]): number {
+  if (inRing(pt[0], pt[1], ring)) return 0;
+  let best = Infinity;
+  for (const v of ring) {
+    const km = haversineKm(pt, v);
+    if (km < best) best = km;
+  }
+  return best;
+}
+
+/**
+ * Adjunta a cada incendio el área quemada EFFIS más cercana (borde a
+ * ≤ ATTACH_RADIUS_KM y detección no anterior en >7 días al inicio del incendio):
+ * le da forma (perímetro) en mapa/ficha y, **solo si la fuente oficial no publica
  * superficie**, rellena las hectáreas como ESTIMACIÓN (marcada `hectaresApprox`,
  * se muestra con «~»). La cifra oficial (p. ej. INFORCYL) siempre tiene prioridad;
  * EFFIS/MODIS (250 m) subestima y va con retraso, por eso nunca la sobrescribe.
@@ -1056,15 +1093,48 @@ function ringCentroid(ring: [number, number][]): [number, number] {
  */
 export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
   if (!perimeters.length) return fires;
+  // Pre-cálculo por perímetro: bbox expandida por el radio (descarte barato) y
+  // fecha de detección, para no medir 4000 vértices contra cada incendio.
+  const margin = ATTACH_RADIUS_KM / 80; // grados; ~80 km/° de longitud en Iberia
+  const candidates = perimeters
+    .filter((p) => p.perimeter && p.perimeter.length >= 4)
+    .map((p) => {
+      let minLon = Infinity;
+      let minLat = Infinity;
+      let maxLon = -Infinity;
+      let maxLat = -Infinity;
+      for (const [x, y] of p.perimeter!) {
+        if (x < minLon) minLon = x;
+        if (x > maxLon) maxLon = x;
+        if (y < minLat) minLat = y;
+        if (y > maxLat) maxLat = y;
+      }
+      return {
+        p,
+        detectedMs: Date.parse(p.startedAt),
+        bbox: [minLon - margin, minLat - margin, maxLon + margin, maxLat + margin] as const,
+      };
+    });
   return fires.map((f) => {
     if (f.perimeter) return f;
+    const startMs = Date.parse(f.startedAt);
+    const [lon, lat] = f.coordinates;
     let best: Fire | undefined;
-    let bestKm = 12;
-    for (const p of perimeters) {
-      const km = haversineKm(f.coordinates, p.coordinates);
+    let bestKm = ATTACH_RADIUS_KM;
+    for (const c of candidates) {
+      // Cicatriz detectada mucho antes del inicio del incendio → otro fuego.
+      if (
+        Number.isFinite(c.detectedMs) &&
+        Number.isFinite(startMs) &&
+        c.detectedMs < startMs - SCAR_MAX_AGE_MS
+      ) {
+        continue;
+      }
+      if (lon < c.bbox[0] || lon > c.bbox[2] || lat < c.bbox[1] || lat > c.bbox[3]) continue;
+      const km = distanceToRingKm(f.coordinates, c.p.perimeter!);
       if (km < bestKm) {
         bestKm = km;
-        best = p;
+        best = c.p;
       }
     }
     if (!best?.perimeter) return f;

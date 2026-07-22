@@ -77,4 +77,49 @@ describe('attachPerimeters', () => {
     const f = fire({ slug: 'a', hectares: 0 });
     expect(attachPerimeters([f], [])).toEqual([f]);
   });
+
+  it('engancha un GRAN incendio por el borde aunque el centroide quede a >12 km (caso La Mierla)', () => {
+    // Polígono alargado ~40 km hacia el noreste: centroide a ~20 km del marcador.
+    const ring: [number, number][] = [
+      [-3.25, 40.93],
+      [-2.91, 40.93],
+      [-2.91, 41.24],
+      [-3.25, 41.24],
+      [-3.25, 40.93],
+    ];
+    const big = fire({
+      slug: 'effis-big',
+      state: 'extinguido',
+      hectares: 35268,
+      coordinates: [-3.08, 41.09], // centroide
+      sources: ['effis'],
+      perimeter: ring,
+      startedAt: '2026-07-16T12:08:00Z',
+    });
+    // Marcador oficial en el punto de ignición, justo fuera del anillo (~0.4 km).
+    const official = fire({
+      slug: 'and-guadalajara',
+      coordinates: [-3.2555, 40.94],
+      hectares: 0,
+      startedAt: '2026-07-16T11:55:00Z',
+    });
+    const [out] = attachPerimeters([official], [big]);
+    expect(out?.perimeter).toEqual(ring);
+    expect(out?.hectares).toBe(35268);
+    expect(out?.hectaresApprox).toBe(true);
+  });
+
+  it('NO hereda una cicatriz detectada mucho antes del inicio (reactivación)', () => {
+    const scar = { ...area([-4.505, 40.405], 140), startedAt: '2026-06-15T00:00:00Z' };
+    const nuevo = fire({
+      slug: 'nuevo',
+      coordinates: [-4.5, 40.4],
+      hectares: 0,
+      startedAt: '2026-07-10T00:00:00Z', // 25 días después de la cicatriz
+    });
+    const [out] = attachPerimeters([nuevo], [scar]);
+    expect(out?.perimeter).toBeUndefined();
+    expect(out?.hectares).toBe(0);
+    expect(out?.hectaresApprox).toBeFalsy();
+  });
 });

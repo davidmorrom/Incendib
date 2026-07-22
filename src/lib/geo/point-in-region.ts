@@ -33,8 +33,9 @@ const POLYS: Poly[] = FEATURES.map((f) => {
   return { ring, bbox: [minLon, minLat, maxLon, maxLat] };
 });
 
-/** Ray-casting estándar (par/impar) sobre un anillo [lon,lat]. */
-function inRing(lon: number, lat: number, ring: Ring): boolean {
+/** Ray-casting estándar (par/impar) sobre un anillo [lon,lat]. Exportado para
+ * reutilizarlo con otros anillos (p. ej. perímetros EFFIS en los adaptadores). */
+export function inRing(lon: number, lat: number, ring: Ring): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const pi = ring[i]!;

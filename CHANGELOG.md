@@ -5,6 +5,25 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.33.1] - 2026-07-22
+
+### Arreglado
+
+- **Superficie de grandes incendios (caso La Mierla/Guadalajara, ~35 000 ha):**
+  `attachPerimeters` casaba incendio↔área quemada EFFIS por distancia al
+  **centroide** (≤12 km), y en un gran incendio el centroide de la cicatriz queda
+  a >20 km del punto de ignición donde la fuente oficial pone el marcador — el
+  incendio de Guadalajara (35 268 ha en EFFIS) se mostraba «sin dato». Ahora se
+  mide la distancia al **borde** del perímetro (0 si el marcador cae dentro),
+  con descarte barato por bbox. Además se añade **coherencia temporal**: una
+  cicatriz detectada por EFFIS >7 días antes del inicio oficial del incendio es
+  de otro fuego anterior (reactivaciones tipo El Barraco) y ya no presta ni forma
+  ni hectáreas.
+- **Región incorrecta en despliegues de INFOCA fuera de Andalucía:** la capa de
+  INFOCA también lista incidentes en los que Andalucía despliega apoyo (el de
+  Guadalajara aparecía con región «Andalucía»). La CCAA se deriva ahora de la
+  provincia con el catálogo (`Guadalajara` → «Castilla-La Mancha»).
+
 ## [0.33.0] - 2026-07-22
 
 ### Eliminado
