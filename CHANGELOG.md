@@ -5,6 +5,25 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.40.0] - 2026-07-23
+
+### Añadido
+
+- **Castilla-La Mancha (INFOCAM) en vivo, con doble filtro de honestidad.**
+  Hasta ahora los incendios de CLM (p. ej. Almorox, Toledo) no aparecían: es la
+  única CCAA sin API fiable de incidentes activos. Su feed oficial (INFOCAM /
+  `V_Incendio`) es un **log acumulativo** que nunca cierra incidentes —el mismo
+  punto de Almorox figura tres veces (campañas de 2024, 2025 y 2026), todas
+  «Activo» y sin fecha de fin—, así que volcarlo tal cual daría por activos
+  incendios extinguidos hace años (verificado contra prensa: 0/11 reales). Ahora
+  se integra tras **dos filtros**: (1) solo incidentes con inicio en los últimos
+  7 días (`isInfocamRecentActive`), que descarta los «zombis» de campañas
+  pasadas; y (2) un **gate por focos FIRMS** (`gateByHotspots`), que deja pasar
+  solo los corroborados por una detección satelital cercana (≤5 km, <48 h) —lo
+  que separa el incendio real y en curso del «reciente pero ya apagado». El resto
+  de fuentes NO se filtran por satélite (ya marcan estado y recencia). Se añade
+  su fila en «Fuentes y licencias».
+
 ## [0.39.1] - 2026-07-23
 
 ### Corregido

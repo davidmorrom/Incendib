@@ -17,9 +17,11 @@ import {
   fetchJcylFires,
   fetchInfocaFires,
   fetchCatalunyaFires,
+  fetchInfocamFires,
   fetchEffisPerimeters,
   attachPerimeters,
   confirmWithHotspots,
+  gateByHotspots,
   dedupeMutualAidFires,
   deriveApproxPerimeters,
 } from './adapters';
@@ -47,30 +49,42 @@ export function getDataMode(): DataMode {
  * Incendios agregados y normalizados.
  *
  * En live combina las fuentes con datos reales usables: ANEPC (Portugal, feed
- * oficial; respaldo fogos.pt), Castilla y León (INFORCYL), Andalucía (INFOCA) y
- * Cataluña (Bombers). El resto de España no tiene API de incendios activos en
- * tiempo real, así que ahí solo hay focos satelitales (getHotspots). Los
- * perímetros de EFFIS se adjuntan al
- * incendio oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío =
- * buena noticia).
+ * oficial; respaldo fogos.pt), Castilla y León (INFORCYL), Andalucía (INFOCA),
+ * Cataluña (Bombers) y Castilla-La Mancha (INFOCAM, con gate por satélite; ver
+ * abajo). El resto de España no tiene API de incendios activos en tiempo real,
+ * así que ahí solo hay focos satelitales (getHotspots). Los perímetros de EFFIS
+ * se adjuntan al incendio oficial más cercano. Nunca lanza: si todo falla,
+ * devuelve [] (vacío = buena noticia).
  *
- * NOTA: Castilla-La Mancha (INFOCAM) NO se integra: su capa es un log acumulativo
- * que nunca cierra incidentes (Estado siempre "Activo", Fecha_Fin nula), así que
- * daría por activos incendios ya extinguidos (verificado contra prensa: 0/11
- * reales). Ver `fetchInfocamFires` — solo re-activar con validación por FIRMS.
+ * INFOCAM (Castilla-La Mancha) es un log acumulativo poco fiable: nunca cierra
+ * incidentes (Estado siempre "Activo", Fecha_Fin nula), así que daría por activos
+ * incendios ya extinguidos (verificado contra prensa: 0/11 reales). Por eso NO se
+ * vuelca tal cual: `fetchInfocamFires` deja solo los de la última semana
+ * (`isInfocamRecentActive`) y aquí, además, `gateByHotspots` deja pasar solo los
+ * confirmados por un foco FIRMS cercano. El resto de fuentes NO se filtran por
+ * satélite (ya marcan estado y filtran por recencia; ahí un fallo de detección de
+ * FIRMS sería un falso negativo).
  */
 export async function getFires(): Promise<Fire[]> {
   let fires: Fire[];
   if (getDataMode() === 'live') {
-    const [pt, cyl, and, cat, hotspots, perimeters] = await Promise.all([
+    const [pt, cyl, and, cat, clm, hotspots, perimeters] = await Promise.all([
       fetchPortugalFires(),
       fetchJcylFires(),
       fetchInfocaFires(),
       fetchCatalunyaFires(),
+      fetchInfocamFires(),
       fetchFirmsHotspots({ days: 2 }),
       fetchEffisPerimeters(),
     ]);
-    const withPerimeters = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
+    // INFOCAM es un log acumulativo poco fiable (ver docstring): solo dejamos
+    // pasar los incidentes confirmados por un foco FIRMS cercano. Al resto de
+    // fuentes NO se les aplica el gate.
+    const clmGated = gateByHotspots(clm, hotspots);
+    const withPerimeters = attachPerimeters(
+      dedupeFires([...pt, ...cyl, ...and, ...cat, ...clmGated]),
+      perimeters,
+    );
     // Una misma CCAA vecina puede reportar un incendio ajeno donde despliega
     // apoyo mutuo (visto en La Mierla/Guadalajara: INFORCYL e INFOCA listan el
     // mismo fuego). Se fusiona tras adjudicar los perímetros, para preferir el
@@ -204,6 +218,7 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
   const cyl = bySrc('jcyl');
   const and = bySrc('infoca');
   const cat = bySrc('catalunya');
+  const clm = bySrc('infocam');
   // EFFIS: nº de áreas quemadas recientes recuperadas (independiente de si se
   // adjuntan a un incidente), para reflejar fielmente si la fuente responde.
   const perims = burned.length;
@@ -254,6 +269,14 @@ export async function getSourceStatus(): Promise<SourceStatus[]> {
       status: 'ok',
       note: plural(cat.length, 'incidente'),
       lastUpdate: latestIso(cat.map((f) => f.updatedAt), now),
+    },
+    {
+      id: 'infocam',
+      label: 'INFOCAM · Castilla-La Mancha',
+      description: 'confirmados por satélite',
+      status: 'ok',
+      note: plural(clm.length, 'incidente'),
+      lastUpdate: latestIso(clm.map((f) => f.updatedAt), now),
     },
     {
       id: 'effis',

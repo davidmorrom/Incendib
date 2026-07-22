@@ -1489,21 +1489,25 @@ export async function fetchCatalunyaFires(opts: FetchOptions = {}): Promise<Fire
 }
 
 // ── Castilla-La Mancha: INFOCAM (ArcGIS FeatureServer público de la JCCM) ──────
-// ⚠️ NO SE USA en getFires (a propósito). La capa V_Incendio (org
-// LVA9E9zjh6QfM7Mo) es un LOG ACUMULATIVO: nunca cierra incidentes (`Estado`
-// queda "Activo" para siempre, `Fecha_Fin` casi siempre nula) y no publica
-// "última actualización". Verificado contra prensa (2026-07-12): de los 11 que
-// mostraba como activos, 0 lo estaban (todos extintos/controlados; alguno ni
-// existía). Por eso se desconecta: mejor sin CLM que con activos falsos.
-// Para re-activar con honestidad: cruzar cada incendio con focos FIRMS recientes
-// (<48 h, <~4 km) y mostrar solo los confirmados por satélite. Se conserva el
-// adaptador (endpoint + parseo) para ese futuro. Trae punto, municipio y fechas;
-// sin nivel, sin medios, sin superficie.
+// La capa V_Incendio (org LVA9E9zjh6QfM7Mo) es un LOG ACUMULATIVO: nunca cierra
+// incidentes (`Estado` queda "Activo" para siempre, `Fecha_Fin` casi siempre
+// nula) y no publica "última actualización". Verificado contra prensa
+// (2026-07-12): de los 11 que mostraba como activos, 0 lo estaban. Por eso NO se
+// vuelca tal cual — se integra con DOBLE FILTRO de honestidad (aplicado en
+// `getFires`):
+//   1. `isInfocamRecentActive`: solo `Fecha_Inicio` de los últimos 7 días — la
+//      única señal de "activo ahora" que da el feed. Caza los "zombis" que
+//      quedan "Activo" meses o años (el mismo punto de Almorox, p. ej., aparece
+//      3 veces: campañas de 2024, 2025 y 2026, todas "Activo" sin `Fecha_Fin`).
+//   2. `gateByHotspots`: de esos, solo los con un foco FIRMS cercano (<48 h,
+//      ≤5 km) — descarta el "reciente pero ya sin fuego real".
+// Trae punto, municipio y fechas; sin nivel, sin medios, sin superficie (la
+// extensión aproximada la aporta `deriveApproxPerimeters` con los focos FIRMS).
 
 const INFOCAM_QUERY =
   'https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services/V_Incendio/FeatureServer/0/query';
 
-interface InfocamAttrs {
+export interface InfocamAttrs {
   OBJECTID?: number;
   Incendios?: string; // nombre del incendio
   Estado?: string; // Activo / Extinguido (no fiable)
@@ -1548,6 +1552,24 @@ function infocamToFire(f: {
   };
 }
 
+/**
+ * ¿Es este registro de INFOCAM un incidente activo y reciente? El feed es un log
+ * acumulativo (ver cabecera de sección): nunca marca `Fecha_Fin` ni "última
+ * actualización", así que la única señal fiable de "activo ahora" es una
+ * `Fecha_Inicio` de los últimos `windowDays` días. Puro (recibe `now`) para
+ * poder testarlo de forma determinista. NO confirma actividad real: eso lo hace
+ * después el gate por focos FIRMS (`gateByHotspots`) sobre lo que aquí pasa.
+ */
+export function isInfocamRecentActive(a: InfocamAttrs, now: number, windowDays = 7): boolean {
+  if (typeof a.Fecha_Inicio !== 'number') return false; // sin fecha → descartar
+  if (a.Fecha_Inicio < now - windowDays * 86400e3) return false; // solo la última semana
+  if (a.Fecha_Fin != null) return false; // cerrado (si algún día lo marcan)
+  if ((a.Estado ?? '').toLowerCase().includes('exting')) return false;
+  // El dataset trae incendios fronterizos de otras CCAA: quedarnos solo con CLM.
+  if (a.CCAA && !/mancha/i.test(a.CCAA)) return false;
+  return true;
+}
+
 /** Incendios de Castilla-La Mancha (INFOCAM): abiertos y recientes. [] si falla. */
 export async function fetchInfocamFires(opts: FetchOptions = {}): Promise<Fire[]> {
   try {
@@ -1566,22 +1588,11 @@ export async function fetchInfocamFires(opts: FetchOptions = {}): Promise<Fire[]
       features?: { attributes?: InfocamAttrs; geometry?: { x?: number; y?: number } }[];
     };
     const feats = Array.isArray(json.features) ? json.features : [];
-    // Ventana de 7 días: INFOCAM casi nunca cierra los incendios (Fecha_Fin queda
-    // nula ~siempre) y no publica "última actualización", así que la única señal
-    // fiable de "activo ahora" es una Fecha_Inicio reciente. 30 días arrastraba
-    // decenas de incendios ya apagados; 7 días ≈ incidentes de esta semana.
-    const recent = Date.now() - 7 * 86400e3;
+    // "Activo y reciente" (ventana de 7 días) vive en `isInfocamRecentActive`
+    // (pura y testada); el gate por focos FIRMS se aplica aparte, en `getFires`.
+    const now = Date.now();
     return feats
-      .filter((ft) => {
-        const a = ft.attributes ?? {};
-        if (typeof a.Fecha_Inicio !== 'number') return false; // sin fecha → descartar
-        if (a.Fecha_Inicio < recent) return false; // solo campaña de la última semana
-        if (a.Fecha_Fin != null) return false; // cerrado (si algún día lo marcan)
-        if ((a.Estado ?? '').toLowerCase().includes('exting')) return false;
-        // Solo CLM (el dataset trae incendios fronterizos de otras CCAA).
-        if (a.CCAA && !/mancha/i.test(a.CCAA)) return false;
-        return true;
-      })
+      .filter((ft) => isInfocamRecentActive(ft.attributes ?? {}, now))
       .map(infocamToFire)
       .filter((x): x is Fire => x !== null);
   } catch {

@@ -31,6 +31,45 @@
 
 ## Log
 
+### 2026-07-23 — Agente I (datos): Castilla-La Mancha (INFOCAM) con gate FIRMS (v0.40.0)
+
+**Encargo del propietario:** «el incendio de Almorox, Toledo, no aparece. ¿Por
+qué?» → tras diagnóstico, decidió integrar INFOCAM con el filtro por satélite.
+
+**Diagnóstico (verificado en vivo contra el FeatureServer de INFOCAM):** Almorox
+está en Toledo (Castilla-La Mancha), la única CCAA sin fuente fiable de activos.
+INFOCAM existía como adaptador pero estaba **desconectado a propósito** (log
+acumulativo). Confirmado consultando el feed: el **mismo punto** de Almorox
+(−4,391, 40,233) figura **3 veces** —inicios 2024-10-02, 2025-10-08 y
+**2026-07-22** (el real)— todas «Activo» y sin `Fecha_Fin`. Volcarlo tal cual
+resucitaría dos incendios muertos junto al real.
+
+**Hecho (typecheck + lint + 332 tests; build verificado en worktree aislado — ver
+nota a H):**
+- `src/lib/data/adapters/index.ts`: extraído el filtro de recencia a
+  `isInfocamRecentActive` (puro, testado con los 3 timestamps reales de Almorox);
+  reconectada la sección INFOCAM (cabecera reescrita: ya no dice «NO SE USA»).
+- `src/lib/data/index.ts`: `getFires` añade `fetchInfocamFires()` al fan-out y
+  aplica `gateByHotspots(clm, hotspots)` (solo confirmados por foco FIRMS ≤5 km,
+  <48 h) antes del dedup. Al resto de fuentes NO se les aplica el gate.
+  `getSourceStatus` añade la fila INFOCAM (i18n `sourceNames.infocam` ya existía).
+- `src/lib/data/adapters/infocam.test.ts` (nuevo): 9 casos (zombis 2024/2025
+  descartados, real 2026 pasa, ventana de 7 días, Fecha_Fin/Estado/CCAA, y gate).
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`,
+`src/lib/data/index.ts`, `src/lib/data/adapters/infocam.test.ts`, CHANGELOG,
+package.json, este log.
+
+⚠️ **AVISO A AGENTE H:** al integrar, `src/components/screens/FichaScreen.tsx`
+tenía tu **WIP sin commitear que NO compila** (`Cannot find name 'expanded'` en
+la línea ~150: usas `expanded` antes de su declaración, refactor a medias). **No
+lo he tocado.** Por eso verifiqué mi build en un **worktree aislado** de mi
+commit (sin tu WIP). El `next build` de `main` seguirá roto hasta que cierres ese
+fichero — commítealo cuando esté sano.
+
+**Versión:** tomo **v0.40.0** (último tag v0.39.1; feature: fuente de datos
+nueva). **Siguiente tag libre: 0.40.1.**
+
 ### 2026-07-23 — Agente H (ficha/UI): hoja móvil expandible (v0.39.1)
 
 **Encargo del propietario:** «en móvil se sigue viendo muy pequeño, en pc es
