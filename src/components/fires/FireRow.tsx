@@ -90,10 +90,15 @@ export const FireRow = memo(function FireRow({
         <span className="block truncate text-[10.5px] text-fg-mute">{subtitle(fire)}</span>
       </span>
       <span className="flex-none text-right">
-        <span className="block font-mono text-[13px] font-semibold text-fg">
+        <span
+          className="block font-mono text-[13px] font-semibold text-fg"
+          title={!fire.hectares && fire.hotspotHectares ? d.fire.approxHotspot : undefined}
+        >
           {fire.hectares > 0
             ? `${fire.hectaresApprox ? '~' : ''}${formatNumber(fire.hectares)} ha`
-            : d.kpis.noData}
+            : fire.hotspotHectares
+              ? `≈${formatNumber(fire.hotspotHectares)} ha`
+              : d.kpis.noData}
         </span>
         <span className="block font-mono text-[9.5px] text-fg-mute">
           {timeAgo(fire.updatedAt, now, locale)}

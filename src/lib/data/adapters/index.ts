@@ -1285,10 +1285,12 @@ const APPROX_PERIMETER_BUFFER_KM = 0.35;
  *
  * Deliberadamente conservador y limitado a un trazo en el mapa:
  * - Exige ≥3 focos cercanos; si no, el incidente queda como hoy (sin forma).
- * - NUNCA toca `hectares`/`hectaresApprox`: es geometría, no una cifra, y no
- *   debe alimentar KPI, ranking, boletín ni push (la lección del incidente de
- *   `deriveSatelliteFires`, revertido en v0.33.0, fue precisamente que un dato
- *   derivado de FIRMS se colaba como si fuera confirmado en todas partes).
+ * - NUNCA toca `hectares`/`hectaresApprox`: `hotspotHectares` es un campo
+ *   APARTE (superficie del casco, para mostrarla junto al incidente cuando no
+ *   hay cifra oficial ni EFFIS) que no debe alimentar KPI, ranking, boletín ni
+ *   push (la lección del incidente de `deriveSatelliteFires`, revertido en
+ *   v0.33.0, fue precisamente que un dato derivado de FIRMS se colaba como si
+ *   fuera confirmado en todas partes).
  * - Se marca `perimeterApprox: true` para que la UI lo distinga siempre del
  *   perímetro real (estilo propio + aviso de detección satelital).
  *
@@ -1320,18 +1322,22 @@ export function deriveApproxPerimeters(fires: Fire[], hotspots: Hotspot[]): Fire
     if (!padded || padded.type !== 'Polygon') return f;
     const ring = padded.coordinates[0] as [number, number][];
     if (ring.length < 4) return f;
-    return { ...f, perimeter: ring, perimeterApprox: true };
+    return {
+      ...f,
+      perimeter: ring,
+      perimeterApprox: true,
+      hotspotHectares: estimatePerimeterHectares(ring),
+    };
   });
 }
 
 /**
- * Superficie (ha) de un anillo de perímetro [lon,lat] cerrado. Uso EXCLUSIVO
- * de la ficha individual del incendio, para incidentes con `perimeterApprox`
- * y sin cifra oficial: se calcula bajo demanda solo al pintar esa ficha, NUNCA
- * se escribe en `Fire.hectares` ni se agrega a KPI/ranking/boletín — el hull
- * de unos pocos focos térmicos sobrestima el área real (rellena todo lo que
- * queda entre los puntos exteriores) y es una base bastante más floja que la
- * clasificación de imagen de EFFIS, así que no debe mezclarse con esa cifra.
+ * Superficie (ha) de un anillo de perímetro [lon,lat] cerrado. Alimenta
+ * `hotspotHectares` (ver el campo en `types/fire.ts`): NUNCA se escribe en
+ * `Fire.hectares` ni se agrega a KPI/ranking/boletín — el hull de unos pocos
+ * focos térmicos sobrestima el área real (rellena todo lo que queda entre los
+ * puntos exteriores) y es una base bastante más floja que la clasificación de
+ * imagen de EFFIS, así que no debe mezclarse con esa cifra.
  */
 export function estimatePerimeterHectares(ring: [number, number][]): number {
   const m2 = turfArea({ type: 'Polygon', coordinates: [ring] });

@@ -31,6 +31,48 @@
 
 ## Log
 
+### 2026-07-22 — Agente H (mapa/datos): superficie por focos también en el listado (v0.38.0)
+
+**Encargo del propietario:** que el `hotspotHectares` de la v0.37.0 (hasta
+ahora solo calculado en la ficha) se vea también en el listado principal de
+incendios del mapa al abrir el visor.
+
+**Hecho:** movido `hotspotHectares` a campo propio en `Fire`
+(`src/types/fire.ts`), calculado una vez en `deriveApproxPerimeters`
+(`src/lib/data/adapters/index.ts`) junto al casco, **siempre SEPARADO de
+`hectares`** (nunca se suma, nunca se lee genéricamente: solo lo consumen
+`FireRow` y `FichaScreen`, que lo referencian por nombre). `FireRow.tsx`
+muestra «≈N ha» en vez de «sin dato» cuando no hay cifra oficial, con prefijo
+«≈» (no «~» de EFFIS) + `title` con la nota completa, para no leerse con la
+misma confianza que una estimación EFFIS. `history/store.ts` persiste el
+campo en el archivo. Simplificado `app/f/[slug]/page.tsx` (ya no calcula la
+cifra aparte: la lee directo de `fire.hotspotHectares`).
+
+**Verificado:** typecheck + lint + 323 tests + build; `GET /api/fires` en
+vivo confirma `hectares: 0` sin cambios en el KPI «HA AFECTADAS» del home
+mientras la fila de Burgohondo pasa de «sin dato» a «≈1 827 ha».
+
+**Nota de coordinación importante:** a mitad de esta tarea, el propietario
+reescribió `origin/main` para purgar PII (ver entrada de Agente S justo
+debajo — **léela**, describe el motivo completo). Mis 2 commits locales
+(dedup mutuo v0.36.2 + extensión aproximada v0.37.0) quedaron sobre el
+historial VIEJO; verifiqué que su contenido era idéntico al de los commits
+reescritos ya en `origin/main` (`f6625bd`/`f3fa8dd`, mismo mensaje, mismo
+árbol salvo la redacción de PII) y en vez de rebasar+forzar hice
+`git reset --hard origin/main` (con mi trabajo en curso protegido en
+`git stash` primero) para no arriesgar reintroducir nada. Confirmado con el
+propietario antes de tocar el remoto.
+
+**Tocado (solo míos, por ruta):** `src/types/fire.ts` (+`hotspotHectares`),
+`src/lib/data/adapters/index.ts` (`deriveApproxPerimeters` lo rellena),
+`src/components/fires/FireRow.tsx`, `src/components/screens/FichaScreen.tsx`,
+`src/app/f/[slug]/page.tsx` (simplificado), `src/lib/history/store.ts`,
+`src/lib/data/adapters/approx-perimeter.test.ts`, CHANGELOG, package.json,
+este log.
+
+**Versión:** tomo **v0.38.0** (último tag v0.37.0; feature). **Siguiente tag
+libre: 0.38.1.**
+
 ### 2026-07-22 — Agente S (seguridad): purga de PII de terceros + preparación para difusión pública
 
 **Encargo del propietario:** auditar la seguridad del repo público antes de

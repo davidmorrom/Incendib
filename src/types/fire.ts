@@ -196,6 +196,17 @@ export interface Fire {
    */
   perimeterApprox?: boolean;
   /**
+   * Superficie (ha) del casco de `perimeterApprox`, SOLO para mostrarla junto
+   * al incidente (lista principal del mapa, ficha) cuando no hay cifra
+   * oficial ni EFFIS. Deliberadamente SEPARADO de `hectares`: un casco de unos
+   * pocos focos térmicos sobrestima el área real y es una base más floja que
+   * una clasificación de imagen EFFIS, así que NUNCA debe sumarse en
+   * `hectares`/KPI («HA AFECTADAS»)/ranking/boletín — solo se lee este campo
+   * por su nombre, en las vistas que lo muestran explícitamente marcado como
+   * tal.
+   */
+  hotspotHectares?: number;
+  /**
    * Corregido a mano desde el panel privado (override): al menos un campo se editó
    * respecto al dato de la fuente. La UI lo señala («corregido a mano») por
    * transparencia. `overriddenFields` lista qué campos se tocaron.

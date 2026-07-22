@@ -48,12 +48,16 @@ describe('deriveApproxPerimeters', () => {
     expect(out?.perimeterApprox).toBe(true);
     expect(out?.hectares).toBe(0);
     expect(out?.hectaresApprox).toBeUndefined();
+    // hotspotHectares SÍ se rellena (campo aparte, para mostrar en lista/ficha
+    // cuando no hay cifra oficial), pero nunca en `hectares`.
+    expect(out?.hotspotHectares).toBeGreaterThan(0);
   });
 
   it('NO dibuja nada con menos de 3 focos cercanos (sin dato mejor que forma inventada)', () => {
     const [out] = deriveApproxPerimeters([fire({})], cluster.slice(0, 2));
     expect(out?.perimeter).toBeUndefined();
     expect(out?.perimeterApprox).toBeUndefined();
+    expect(out?.hotspotHectares).toBeUndefined();
   });
 
   it('NO dibuja nada si los focos están lejos (>3 km)', () => {

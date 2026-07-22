@@ -34,7 +34,6 @@ export function FichaScreen({
   boletinId,
   hasLocation = true,
   related,
-  hotspotHectares,
 }: {
   fire: Fire;
   /** Procedencia del dato: en vivo, archivo o destacado del boletín. */
@@ -47,13 +46,6 @@ export function FichaScreen({
   hasLocation?: boolean;
   /** Episodios del mismo paraje (reactivaciones), si los hay. */
   related?: EpisodeLinks;
-  /**
-   * Superficie estimada SOLO para esta ficha, a partir del casco de focos de
-   * `fire.perimeterApprox` (ver `estimatePerimeterHectares`). Nunca viene de
-   * `Fire.hectares`: no cuenta en KPI/ranking/boletín, solo se enseña aquí,
-   * con una nota más cautelosa que la de una estimación EFFIS.
-   */
-  hotspotHectares?: number;
 }) {
   const d = useDict();
   const locale = useUIStore((s) => s.locale);
@@ -367,10 +359,11 @@ export function FichaScreen({
                   </div>
                 )}
               </>
-            ) : hotspotHectares ? (
+            ) : fire.hotspotHectares ? (
               <>
                 <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
-                  ~{formatNumber(hotspotHectares)} <span className="text-[11px] text-fg-secondary">ha</span>
+                  ~{formatNumber(fire.hotspotHectares)}{' '}
+                  <span className="text-[11px] text-fg-secondary">ha</span>
                 </div>
                 <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
                   {d.fire.approxHotspot}

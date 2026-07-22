@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.38.0] - 2026-07-22
+
+### Añadido
+
+- **Superficie estimada por focos, también en el listado principal del mapa.**
+  El campo `hotspotHectares` (v0.37.0) pasa de calcularse bajo demanda solo en
+  la ficha a formar parte del incidente ya en `getFires()` — pero como campo
+  APARTE de `hectares`, nunca mezclado con él: sigue sin entrar en el KPI «HA
+  AFECTADAS», rankings ni boletín (nada distinto lee `hectares` por su nombre,
+  así que ningún agregado existente puede recogerlo). La fila del incidente en
+  la lista del mapa (`FireRow`) muestra ahora «≈N ha» en vez de «sin dato»
+  cuando no hay cifra oficial ni EFFIS — con el prefijo «≈» (no «~») para no
+  leerse con la misma confianza que una estimación EFFIS, y un `title` con la
+  nota completa al pasar el cursor.
+
 ## [0.37.0] - 2026-07-22
 
 ### Añadido
