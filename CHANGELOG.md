@@ -5,6 +5,23 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.40.1] - 2026-07-23
+
+### Cambiado
+
+- **La ficha seguía viéndose pequeña en móvil pese al «tap para expandir» de
+  la v0.39.1** — el tirador seguía pareciendo un adorno (un puntito gris), sin
+  ninguna pista de que fuera interactivo, así que nadie lo descubría y la
+  vista por defecto seguía siendo la misma hoja apretada de siempre. Cambio de
+  enfoque, más directo: el mapa pasa a una **franja fija y modesta (200px)**
+  en vez de repartirse el alto con la hoja, y la hoja pasa a ocupar **todo el
+  resto de la pantalla por defecto** (sin techo ni gesto que descubrir). Se
+  retira el estado expandir/contraer — ya no hace falta: «Medios
+  desplegados»/«Evolución» se ven enteros sin tocar nada. El mapa sigue dando
+  contexto de ubicación (con sus controles — volver, buscador, chip de
+  confirmación satelital — siempre visibles, ya no dependen de una franja que
+  se encogía). Escritorio sin cambios (columna de mapa de alto completo).
+
 ## [0.40.0] - 2026-07-23
 
 ### Añadido

@@ -260,8 +260,6 @@ const en: Dictionary = {
     openFire: 'Open fire details',
     back: 'Back',
     dismiss: 'Dismiss notice',
-    expandSheet: 'Expand details',
-    collapseSheet: 'Collapse details',
   },
   alerts: {
     title: 'Alerts',

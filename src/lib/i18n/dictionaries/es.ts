@@ -259,8 +259,6 @@ const es = {
     openFire: 'Abrir ficha del incendio',
     back: 'Volver',
     dismiss: 'Descartar aviso',
-    expandSheet: 'Ampliar detalle',
-    collapseSheet: 'Reducir detalle',
   },
   alerts: {
     title: 'Alertas',

@@ -31,6 +31,54 @@
 
 ## Log
 
+### 2026-07-23 — Agente H (ficha/UI): franja de mapa fija + hoja a pantalla completa (v0.40.1)
+
+**Encargo del propietario:** «en móvil se sigue viendo enana la ventanita. Hay
+que buscar otra manera» — tercera vuelta sobre el mismo problema (carrusel
+v0.39.0, tap-para-expandir v0.39.1, ninguno bastó).
+
+**Diagnóstico:** el tap-para-expandir de v0.39.1 técnicamente funcionaba, pero
+el tirador seguía pareciendo un adorno (un puntito gris, sin afordance de
+"esto es tocable") — nadie lo iba a descubrir, así que la experiencia por
+defecto seguía siendo la hoja apretada de siempre. En vez de iterar sobre el
+mismo enfoque (gesto oculto que hay que encontrar), cambio de enfoque: nada
+que descubrir, el reparto por defecto ya es generoso.
+
+**Hecho (typecheck + lint + 332 tests + build; Playwright headless en 3
+tamaños de móvil incl. uno pequeño 360×700, claro/oscuro):**
+- Mapa: de `flex-1` (se repartía el alto con la hoja) a **franja fija de
+  200px** (`h-[200px] flex-none`) — dev dato de ubicación, ya no compite por
+  espacio con el detalle.
+- Hoja de detalle: de altura acotada con toggle a **`flex-1` sin techo** —
+  ocupa todo el resto de la pantalla por defecto. Retirado el estado
+  expandir/contraer (`expanded`/`setExpanded`) y las claves i18n
+  `a11y.expandSheet`/`collapseSheet` (ya no se usan).
+- Controles flotantes del mapa (volver/buscador/chip satelital) ya no
+  necesitan ocultarse: con la franja fija de 200px siempre caben, así que se
+  retira toda la lógica condicional que los escondía.
+- Escritorio sin cambios (la franja de 200px es una clase base que `lg:h-dvh`
+  ya sobrescribía; verificado sin regresión).
+
+**Gotcha de sesión:** tras el primer cambio, el mapa renderizaba a **0px de
+alto** pese a la clase `h-[200px]` correcta en el DOM — no era un bug de
+layout, era el dev server sirviendo CSS compilado viejo (mismo síntoma que el
+gotcha de `.next` corrupto ya documentado). Un reinicio limpio del `next dev`
+lo resolvió; si a alguien le pasa algo similar (clase presente pero sin
+efecto), sospechar del dev server antes que del código.
+
+**Árbol compartido:** en el momento de empezar, `src/lib/data/index.ts` y
+`src/lib/data/adapters/index.ts` tenían cambios sin commitear de otro agente
+(INFOCAM, ver entrada de abajo) en este mismo árbol — no los toqué. Para
+cuando terminé de verificar, ya los había commiteado y empujado él mismo
+(mismo repo, mismo historial local); sin divergencia que resolver de mi lado.
+
+**Tocado (solo míos, por ruta):** `src/components/screens/FichaScreen.tsx`,
+i18n es/pt/en (retiradas `a11y.expandSheet`/`collapseSheet`), CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.40.1** (último tag v0.40.0; fix/UX). **Siguiente tag
+libre: 0.40.2.**
+
 ### 2026-07-23 — Agente I (datos): Castilla-La Mancha (INFOCAM) con gate FIRMS (v0.40.0)
 
 **Encargo del propietario:** «el incendio de Almorox, Toledo, no aparece. ¿Por
