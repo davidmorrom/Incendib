@@ -368,8 +368,8 @@ export async function fetchFogosActive(opts: FetchOptions = {}): Promise<Fire[]>
 }
 
 // ── Portugal: ANEPC / SGIFR (FeatureServer oficial de ocorrências) ────────────
-// Fuente OFICIAL facilitada a Incendib por la AGIF (AGIF) y el ICNF
-// (ICNF): el FeatureServer público de la ANEPC que alimenta el SIFOR /
+// Fuente OFICIAL facilitada a Incendib por la AGIF y el ICNF: el FeatureServer
+// público de la ANEPC que alimenta el SIFOR /
 // GeoSIFOR (sgifr.gov.pt/fogos-incendios-rurais-ativos y geosifor.sgifr.gov.pt).
 // Es la MISMA fuente subyacente que fogos.pt (Sistema de Informação Operacional
 // da ANEPC), pero desde el endpoint autoritativo y sin registro: por eso pasa a

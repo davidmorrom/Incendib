@@ -228,7 +228,7 @@ ruido de las extensiones del navegador del coste real del sitio).
 ### Añadido
 
 - **Portugal: fuente OFICIAL de la ANEPC (FeatureServer del SGIFR) como fuente
-  primaria**, facilitada por la AGIF (AGIF) y el ICNF (ICNF) en
+  primaria**, facilitada por la AGIF y el ICNF en
   respuesta a la solicitud de Incendib. Es la misma fuente subyacente que fogos.pt
   (Sistema de Informação Operacional da ANEPC), pero desde el endpoint autoritativo
   y sin registro. Nuevo adaptador `fetchAnepcFires` (filtra incendios reales por

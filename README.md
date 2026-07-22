@@ -11,7 +11,7 @@ serio y usable — pensada como panel de sala de emergencias, no como landing.
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![MapLibre](https://img.shields.io/badge/MapLibre-GL-295DAA?logo=maplibre&logoColor=white)](https://maplibre.org)
-![Version](https://img.shields.io/badge/version-0.17.x-E5484D)
+![Version](https://img.shields.io/badge/version-0.37.x-E5484D)
 
 </div>
 
@@ -160,9 +160,14 @@ Todas las fuentes son de reutilización libre con atribución:
 - [x] **v0.16** — **Web Push** (alertas por zona) e **histórico** de campaña.
 - [x] **v0.17** — **Boletín semanal** (F1: edición publicada; F2: automatización;
   F3: imagen OG) y **SEO** (`sitemap.xml` + `robots.txt`).
-- [ ] **Próximo** — **Territorios** (páginas por CCAA/provincia), **Estadísticas**
-  (analítica histórica) y mejoras de mapa (selección de provincia, capas base).
-  Ver la investigación en [`docs/research/`](docs/research/00-INDICE.md).
+- [x] **v0.30** — **Estadísticas** (`/estadisticas`, serie histórica oficial
+  EGIF/MITECO) y **páginas por provincia** (`/p/[provincia]`).
+- [x] **v0.35–v0.37** — **Fuente oficial de Portugal** (ANEPC/SGIFR), **clustering
+  de marcadores**, selector de mapa base y **extensión aproximada por focos** en la
+  ficha (siempre marcada como aproximada, nunca en KPI ni boletín).
+- [ ] **Próximo** — más regiones autonómicas en vivo, selección de provincia en el
+  mapa y estadísticas F2/F3. Ver la investigación en
+  [`docs/research/`](docs/research/00-INDICE.md).
 
 > Pendientes bloqueados por falta de fuente o decisión (documentados en
 > `docs/notas-sesion-*.md`): más regiones autonómicas en vivo, evacuación en

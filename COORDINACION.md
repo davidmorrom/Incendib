@@ -31,6 +31,32 @@
 
 ## Log
 
+### 2026-07-22 — Agente S (seguridad): purga de PII de terceros + preparación para difusión pública
+
+**Encargo del propietario:** auditar la seguridad del repo público antes de
+difundir el enlace en redes. Resultado (workflow multiagente + verificación
+adversarial): **secretos de servidor LIMPIOS** en árbol e historial; único
+bloqueante = **datos personales de terceros y correspondencia privada**
+publicados (funcionarios de ICNF/AGIF/ANEPC).
+
+**Hecho (clon aislado + reescritura de historial con `git filter-repo` +
+`push --force`, autorizado por el propietario):**
+- `git rm` de `docs/incendib-actualizacion-2026-07-17.json`, `-22.json` y
+  `docs/contactos-institucionales.csv` (patrón CRM que ya estaba en `.gitignore`
+  para la variante `-15`); patrones ampliados en `.gitignore`.
+- Correo personal `…@prociv.pt` → buzón institucional (`geral@prociv.pt`) y
+  nombres de funcionarios → su organismo (AGIF/ICNF/ANEPC) en `DATA-SOURCES.md`,
+  `CHANGELOG.md`, este fichero y el comentario de `adapters/index.ts`.
+- Esos ficheros/cadenas purgados de **todo el historial**; borradas las 5 ramas
+  remotas ya fusionadas. Añadido `LICENSE`; README actualizado (badge/hoja de ruta).
+
+⚠️ **PARA EL RESTO DE AGENTES:** el historial de `origin/main` se ha **REESCRITO**
+(hashes nuevos). Vuestro checkout local está desincronizado: haced `git fetch
+origin` y **rebasad vuestro WIP sobre el nuevo `origin/main`**. **No forcéis push
+con el historial viejo** o reintroduciríais los datos personales. Si vuestro
+`adapters/index.ts` sin commitear aún nombra a personas en el comentario de la
+fuente ANEPC, sustituidlo por el organismo antes de commitear.
+
 ### 2026-07-22 — Agente H (mapa/datos): extensión aproximada por focos FIRMS (v0.37.0)
 
 **Encargo del propietario:** con los focos que ya tenemos, ¿no podemos marcar
@@ -316,7 +342,7 @@ escribió el cron). Es residual y no se re-crea; se puede purgar desde el panel/
 ### 2026-07-22 — Agente A (datos): Portugal vía ANEPC oficial — INTEGRADO (v0.32.0)
 
 **Tarea (propietario):** integrar el FeatureServer OFICIAL de la ANEPC (facilitado
-por AGIF/ICNF; ver `docs/incendib-actualizacion-2026-07-{17,22}.json`) como fuente
+por AGIF/ICNF) como fuente
 primaria de Portugal, en sustitución/complemento de fogos.pt.
 
 **Hecho e integrado en `main`** (typecheck + lint + **293 tests** + build OK;
@@ -346,7 +372,7 @@ sin taguear —feature de focos-satélite de otro agente, `b2bc140`—, así que
 queda sin tag**). **Siguiente tag libre: 0.32.1.**
 
 **Pendiente (acción del PROPIETARIO, no código):** enviar los borradores de respuesta
-a AGIF/ICNF y escribir a ANEPC (`geral@prociv.pt`, ANEPC) para la
+a AGIF/ICNF y escribir a la ANEPC (`geral@prociv.pt`) para la
 evolución del perímetro de grandes incendios.
 
 ### 2026-07-17 — Agente E (estadísticas): página `/estadisticas` F1 — INTEGRADO (v0.30.0)

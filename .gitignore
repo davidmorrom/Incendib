@@ -62,7 +62,9 @@ capturas-post02/capas.png
 capturas-post02/filtros.png
 capturas-post02/hero.png
 capturas-post02/perimetro.png
-docs/incendib-actualizacion-2026-07-15.json
+# registros internos de contacto / CRM (datos personales de terceros — fuera del repo)
+docs/incendib-actualizacion-*.json
+docs/contactos-institucionales.csv
 docs/incendib-crm-contactos.csv
 docs/incendib-crm-contactos.json
 docs/incendib-crm-importar.csv
