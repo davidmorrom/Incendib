@@ -5,6 +5,34 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.33.0] - 2026-07-22
+
+### Eliminado
+
+- **Incendios derivados por satélite (revertido `b2bc140`).** Se retira
+  `deriveSatelliteFires` y toda su integración: los focos FIRMS huérfanos en zonas
+  sin fuente oficial dejan de promoverse a incidentes provisionales `activo` en el
+  mapa, la lista, la ficha, los conteos, las alertas y el boletín. Motivo: el
+  marcador del mapa era idéntico al de un incendio confirmado (incumplía «marcador
+  = color + forma» y «detección satelital ≠ incendio confirmado»); el KPI de
+  portada, el boletín y el push los contaban/anunciaban como confirmados; y la
+  heurística podía fabricar un incidente grande a partir de un solo foco, heredando
+  el área acumulada de una cicatriz EFFIS ya extinguida (hasta 45 días). En una
+  herramienta de seguridad prima «sin dato» sobre «dato falso». La cobertura de
+  zonas sin parte oficial podrá volver como una capa de «detección satelital»
+  propia, visualmente inconfundible y nunca contada como confirmada.
+- Eliminado el archivo permanente `src/content/archive/sat-effis-561620.json`, un
+  incidente derivado que había quedado registrado en git.
+
+### Corregido
+
+- **Boletín semanal w29:** se retiran de la edición publicada las 14 detecciones
+  satelitales provisionales que se colaban como incendios activos (la región
+  «Detección satelital» figuraba como la nº 1 por superficie, 22 491 ha). KPIs
+  recalculados (activos 57→43, superficie 23 375→884 ha, perímetros 10→9),
+  eliminado el destacado `sat-effis-561620` y añadida una nota de corrección a la
+  edición.
+
 ## [0.32.0] - 2026-07-22
 
 ### Añadido

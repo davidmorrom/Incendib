@@ -31,6 +31,45 @@
 
 ## Log
 
+### 2026-07-22 — Agente G (revisión): REVERTIDA la capa de incendios derivados por satélite (v0.33.0)
+
+**Encargo del propietario:** analizar la feature «incendios derivados por
+satélite» (`b2bc140`) porque se mezclaba con los incendios reales y confundía;
+decidido **revertir por completo**.
+
+**Análisis (workflow multiagente):** el flag `satelliteOnly` solo lo consumían 3
+hojas de UI; todo lo demás trataba los derivados como confirmados. El marcador del
+mapa era idéntico a un incendio confirmado; el KPI de portada, el ranking, las
+facetas, el boletín y el **push** los contaban/anunciaban como reales (el push
+incluso silenciaba el aviso honesto de foco a <5 km); y la heurística podía
+fabricar un incidente grande desde un solo foco, heredando el área acumulada de una
+cicatriz EFFIS ya extinguida.
+
+**Hecho (verificado: typecheck + lint + tests + build; commit por rutas explícitas,
+rebase antes de push):**
+- `git revert b2bc140` + limpieza de artefactos: borrado
+  `src/content/archive/sat-effis-561620.json` y **des-horneado el boletín w29**
+  (retirada la región «Detección satelital» 22 491 ha nº1, KPIs 57→43 / 23 375→884
+  ha / 10→9, destacado `sat-effis-561620` fuera + nota de corrección).
+- ⚠️ **Agente A (datos):** toqué `src/lib/data/index.ts` — resolví el conflicto del
+  **docstring** de `getFires` conservando tu texto de ANEPC y quitando las frases de
+  `deriveSatelliteFires`. **Tu `fetchPortugalFires` y la composición de `getFires`
+  quedan intactos.** También revertí en `adapters/index.ts` **solo** el bloque
+  `deriveSatelliteFires` (~línea 945+); tu adaptador ANEPC no se toca.
+- ⚠️ **Agente B (boletín):** modifiqué `src/content/boletines/2026-w29.json` (edición
+  publicada) por corrección de honestidad, autorizada por el propietario. No toqué
+  `aggregate.ts` ni el esquema.
+- Revertidos también: `types/fire.ts` (`satelliteOnly`), i18n `{es,pt,en}`
+  (`satelliteOnly`/`satelliteOnlyNote`), `FireRow`/`MapCanvas`/`FichaScreen` (bloques
+  `satelliteOnly`), `mock.ts`, y eliminado `derive-satellite.test.ts`.
+  **`satelliteConfirmed` (feature distinta, focos FIRMS que confirman un incendio
+  oficial) queda INTACTO.**
+
+**Nota:** en producción puede quedar un `hist:fire:sat-effis-561620` en Redis (lo
+escribió el cron). Es residual y no se re-crea; se puede purgar desde el panel/CLI.
+
+**Versión:** tomo **v0.33.0** (último tag v0.32.0). **Siguiente tag libre: 0.33.1.**
+
 ### 2026-07-22 — Agente A (datos): Portugal vía ANEPC oficial — INTEGRADO (v0.32.0)
 
 **Tarea (propietario):** integrar el FeatureServer OFICIAL de la ANEPC (facilitado

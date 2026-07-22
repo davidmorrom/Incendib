@@ -67,22 +67,13 @@ export function FireRow({
             )}
           </span>
           <LevelBadge level={fire.level} country={fire.country} />
-          {fire.satelliteConfirmed && !fire.satelliteOnly && (
+          {fire.satelliteConfirmed && (
             <span
               className="h-1.5 w-1.5 flex-none rounded-full bg-state-foco"
               style={{ boxShadow: '0 0 4px var(--state-foco)' }}
               title={interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
               aria-label={interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
             />
-          )}
-          {fire.satelliteOnly && (
-            <span
-              className="flex-none rounded-[3px] border border-state-foco px-1 font-mono text-[8.5px] font-medium uppercase text-state-foco-text"
-              title={d.fire.satelliteOnlyNote}
-              aria-label={d.fire.satelliteOnly}
-            >
-              {d.fire.satelliteOnly}
-            </span>
           )}
         </span>
         <span className="block truncate text-[10.5px] text-fg-mute">{subtitle(fire)}</span>

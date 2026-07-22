@@ -158,16 +158,14 @@ export function FichaScreen({
           </div>
         </div>
 
-        {!historical && (fire.satelliteConfirmed || fire.satelliteOnly) && (
+        {!historical && fire.satelliteConfirmed && (
           <div
             className="if-overlay absolute left-3 top-[62px] z-[3] inline-flex items-center gap-1.5 rounded-[5px] px-[9px] py-[5px]"
             style={{ borderColor: mix(V.foco, 40) }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-state-foco" aria-hidden />
             <span className="font-mono text-[9.5px] font-medium text-state-foco-text">
-              {fire.satelliteOnly
-                ? d.fire.satelliteOnly
-                : interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
+              {interpolate(d.fire.satelliteConfirmed, { km: fire.hotspotKm ?? 0 })}
             </span>
           </div>
         )}
@@ -186,19 +184,6 @@ export function FichaScreen({
           >
             <p className="text-[11px] font-semibold leading-snug text-state-controlado-text">
               ⚠ {d.fire.reconstructed}
-            </p>
-          </div>
-        )}
-
-        {/* Procedencia: incidente derivado solo de satélite (zona sin fuente oficial).
-            Se comunica siempre: es una detección, no un parte confirmado. */}
-        {fire.satelliteOnly && (
-          <div
-            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
-            style={{ borderColor: mix(V.foco, 50), background: mix(V.foco, 10) }}
-          >
-            <p className="text-[11px] font-semibold leading-snug text-state-foco-text">
-              ⚠ {d.fire.satelliteOnlyNote}
             </p>
           </div>
         )}

@@ -20,7 +20,6 @@ import {
   fetchEffisPerimeters,
   attachPerimeters,
   confirmWithHotspots,
-  deriveSatelliteFires,
 } from './adapters';
 import {
   getOverridesCached,
@@ -47,19 +46,16 @@ export function getDataMode(): DataMode {
  *
  * En live combina las fuentes con datos reales usables: ANEPC (Portugal, feed
  * oficial; respaldo fogos.pt), Castilla y León (INFORCYL), Andalucía (INFOCA) y
- * Cataluña (Bombers). El resto
- * de España no tiene API de incendios activos en tiempo real; ahí, en vez de dejar
- * solo focos satelitales sueltos, `deriveSatelliteFires` agrupa los focos FIRMS
- * activos en incidentes provisionales (marcados `satelliteOnly`) y los enriquece
- * con el área quemada EFFIS cercana. Los perímetros de EFFIS se adjuntan al
+ * Cataluña (Bombers). El resto de España no tiene API de incendios activos en
+ * tiempo real, así que ahí solo hay focos satelitales (getHotspots). Los
+ * perímetros de EFFIS se adjuntan al
  * incendio oficial más cercano. Nunca lanza: si todo falla, devuelve [] (vacío =
  * buena noticia).
  *
- * NOTA: Castilla-La Mancha (INFOCAM) NO se integra como fuente operativa: su capa
- * es un log acumulativo que nunca cierra incidentes (Estado siempre "Activo",
- * Fecha_Fin nula), así que daría por activos incendios ya extinguidos (verificado
- * contra prensa: 0/11 reales). Sus incendios activos afloran ahora vía satélite
- * (`deriveSatelliteFires`, respaldo por focos FIRMS), no vía INFOCAM.
+ * NOTA: Castilla-La Mancha (INFOCAM) NO se integra: su capa es un log acumulativo
+ * que nunca cierra incidentes (Estado siempre "Activo", Fecha_Fin nula), así que
+ * daría por activos incendios ya extinguidos (verificado contra prensa: 0/11
+ * reales). Ver `fetchInfocamFires` — solo re-activar con validación por FIRMS.
  */
 export async function getFires(): Promise<Fire[]> {
   let fires: Fire[];
@@ -74,12 +70,7 @@ export async function getFires(): Promise<Fire[]> {
     ]);
     const merged = attachPerimeters(dedupeFires([...pt, ...cyl, ...and, ...cat]), perimeters);
     // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
-    const confirmed = confirmWithHotspots(merged, hotspots);
-    // Zonas sin fuente oficial (Madrid, Castilla-La Mancha, Extremadura…): promueve
-    // los focos FIRMS activos a incidentes provisionales (marcados `satelliteOnly`),
-    // enriquecidos con el área quemada EFFIS cercana. Antes solo se veían los focos.
-    const derived = deriveSatelliteFires(merged, hotspots, perimeters);
-    fires = [...confirmed, ...derived];
+    fires = confirmWithHotspots(merged, hotspots);
   } else {
     fires = MOCK_FIRES;
   }

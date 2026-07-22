@@ -8,9 +8,9 @@
   "status": "cerrado",
   "kpi": {
     "firmsWeek": 326,
-    "activeFires": 57,
-    "hectares": 23375,
-    "perimeters": 10,
+    "activeFires": 43,
+    "hectares": 884,
+    "perimeters": 9,
     "maxLevel": 1,
     "maxLevelWhere": "Soto De Cerrato · Castilla y León"
   },
@@ -23,12 +23,6 @@
     "maxLevelWhere": "Caboalles De Arriba · Castilla y León"
   },
   "ranking": [
-    {
-      "region": "Detección satelital",
-      "country": "ES",
-      "fires": 14,
-      "hectares": 22491
-    },
     {
       "region": "Cataluña",
       "country": "ES",
@@ -84,19 +78,6 @@
       "coordinates": [
         -4.417960875383184,
         41.93657082684141
-      ]
-    },
-    {
-      "slug": "sat-effis-561620",
-      "name": "Mierla, La",
-      "region": "Detección satelital",
-      "country": "ES",
-      "hectares": 22491,
-      "level": null,
-      "state": "activo",
-      "coordinates": [
-        -3.2078325031994543,
-        40.984105078216494
       ]
     },
     {
@@ -160,5 +141,5 @@
     "firms",
     "effis"
   ],
-  "note": "Las cifras reflejan la situación consolidada a fecha de cierre y una ventana móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el acotado exacto a la semana natural llegará cuando exista histórico persistido."
+  "note": "Las cifras reflejan la situación consolidada a fecha de cierre y una ventana móvil de detección satelital de 5 días (límite de la API de NASA FIRMS); el acotado exacto a la semana natural llegará cuando exista histórico persistido. Edición corregida el 2026-07-22: se retiró la capa de incidentes derivados por satélite, que contabilizaba 14 detecciones provisionales (22 491 ha, en su mayoría una cicatriz EFFIS ya extinguida) como incendios activos confirmados; las cifras reflejan ahora solo fuentes oficiales y detección satelital cruda."
 }
