@@ -4,7 +4,7 @@ import { DesktopTopNav } from '@/components/layout/DesktopTopNav';
 import { NetworkStatus } from '@/components/layout/NetworkStatus';
 import { SiteBanner } from '@/components/layout/SiteBanner';
 import { SkipLink } from '@/components/layout/SkipLink';
-import { getBannerCached } from '@/lib/overrides/store';
+import { getBannersCached } from '@/lib/overrides/store';
 
 /**
  * Shell de la app: marco de altura de viewport con área de contenido scrollable
@@ -13,7 +13,7 @@ import { getBannerCached } from '@/lib/overrides/store';
  * completa, sin barra inferior).
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const banner = await getBannerCached();
+  const banners = await getBannersCached();
   return (
     <I18nProvider>
       <div className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg print:block print:h-auto print:overflow-visible">
@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="print:hidden">
           <NetworkStatus />
         </div>
-        <SiteBanner banner={banner} />
+        <SiteBanner banners={banners} />
         <DesktopTopNav className="hidden lg:flex print:!hidden" />
         <main
           id="contenido"

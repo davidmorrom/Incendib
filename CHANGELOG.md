@@ -5,6 +5,30 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.42.0] - 2026-07-23
+
+### Añadido
+
+- **Banners de sitio múltiples (pila de avisos).** El banner global editorial que
+  publica el panel privado deja de ser único: el visor lee una **lista**
+  (`override:banners`) y **apila** los avisos activos ordenados por gravedad
+  (crítico → aviso → info), cada uno como una banda propia. Sirve para mostrar a
+  la vez, por ejemplo, un aviso **crítico** y otro **informativo**. Cada banda es
+  **descartable por separado** (recordada en `localStorage` por `id`+`updatedAt`,
+  de modo que un banner nuevo o editado reaparece sin afectar al descarte de los
+  demás). El contenedor mantiene `role="status"`/`aria-live`; **nunca** sustituye
+  ni oculta el disclaimer 112. Inerte por defecto: sin banners activos no
+  renderiza nada.
+
+### Compatibilidad
+
+- **Migración transparente del banner heredado.** `getBanners()` lee
+  `override:banners`; si aún no existe (el panel todavía no ha migrado), cae al
+  banner único `override:banner` sintetizándole un `id`. Así el visor puede
+  desplegarse **antes** que el panel sin que el sitio público se quede sin aviso.
+  La caché sigue invalidándose por el mismo tag (`BANNER_TAG`) desde
+  `POST /api/admin/revalidate`. Ver `Incendib-Panel/docs/INTEGRACION-INCENDIB.md`.
+
 ## [0.41.0] - 2026-07-23
 
 ### Añadido

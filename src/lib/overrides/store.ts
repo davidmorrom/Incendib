@@ -12,6 +12,8 @@ import { unstable_cache } from 'next/cache';
 import type { Locale } from '@/lib/i18n';
 
 export interface SiteBanner {
+  /** Identificador estable (para descartar cada banner por separado). */
+  id: string;
   active: boolean;
   level: 'info' | 'warn' | 'critical';
   /** Texto por idioma; cae a `es` si falta el del idioma activo. */
@@ -21,9 +23,15 @@ export interface SiteBanner {
   updatedAt: number;
 }
 
+/** Multi-banner (formato actual del panel): lista de {@link SiteBanner}. */
+const BANNERS_KEY = 'override:banners';
+/** Banner único heredado (single-banner); solo se lee como respaldo si no hay lista. */
 const BANNER_KEY = 'override:banner';
 /** Etiqueta de caché; el panel la invalida vía `POST /api/admin/revalidate`. */
 export const BANNER_TAG = 'override:banner';
+
+/** Prioridad de gravedad para apilar (mayor = arriba). */
+const LEVEL_PRIORITY: Record<SiteBanner['level'], number> = { critical: 3, warn: 2, info: 1 };
 
 let client: Redis | null | undefined;
 function redis(): Redis | null {
@@ -34,7 +42,12 @@ function redis(): Redis | null {
   return client;
 }
 
-/** Banner global vigente, o `null` si no hay (o no hay Redis). Nunca lanza. */
+/** Garantiza `id` en un banner (los heredados single-banner no lo tenían). */
+function withId(banner: SiteBanner, fallbackId: string): SiteBanner {
+  return banner.id ? banner : { ...banner, id: fallbackId };
+}
+
+/** Banner global único heredado, o `null`. Nunca lanza. Se conserva como respaldo de migración. */
 export async function getBanner(): Promise<SiteBanner | null> {
   const r = redis();
   if (!r) return null;
@@ -46,11 +59,29 @@ export async function getBanner(): Promise<SiteBanner | null> {
 }
 
 /**
+ * Banners vigentes (multi-banner). Lee `override:banners` (lista); si aún no existe, cae al
+ * banner único heredado `override:banner` (le sintetiza `id`), de modo que la migración del
+ * panel es transparente. Null-safe: sin Redis, `[]`.
+ */
+export async function getBanners(): Promise<SiteBanner[]> {
+  const r = redis();
+  if (!r) return [];
+  try {
+    const list = await r.get<SiteBanner[]>(BANNERS_KEY);
+    if (Array.isArray(list)) return list.map((b, i) => withId(b, `b-${i}`));
+    const legacy = await r.get<SiteBanner>(BANNER_KEY);
+    return legacy ? [withId(legacy, 'legacy')] : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Lectura cacheada para el hot path público (layout de la app): evita pegarle a
  * Upstash en cada request. Se refresca cuando el panel invalida `BANNER_TAG` tras un
  * cambio y, como red de seguridad, cada 5 min.
  */
-export const getBannerCached = unstable_cache(async () => getBanner(), ['override-banner'], {
+export const getBannersCached = unstable_cache(async () => getBanners(), ['override-banners'], {
   tags: [BANNER_TAG],
   revalidate: 300,
 });
@@ -68,6 +99,18 @@ export function shouldShowBanner(
   if (!banner || !banner.active) return false;
   if (banner.dismissible && dismissedValue === String(banner.updatedAt)) return false;
   return true;
+}
+
+/** Ordena por gravedad (crítico → aviso → info) y, a igualdad, por más reciente. Puro. */
+export function sortBanners(banners: SiteBanner[]): SiteBanner[] {
+  return [...banners].sort(
+    (a, b) => LEVEL_PRIORITY[b.level] - LEVEL_PRIORITY[a.level] || b.updatedAt - a.updatedAt,
+  );
+}
+
+/** Clave de descarte en localStorage por banner (para que cada uno se recuerde por separado). */
+export function bannerDismissKey(id: string): string {
+  return `incendib-banner-dismissed:${id}`;
 }
 
 // ── Overrides por incendio ────────────────────────────────────────────────────────

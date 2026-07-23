@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   bannerText,
   shouldShowBanner,
+  sortBanners,
+  bannerDismissKey,
   getBanner,
+  getBanners,
   getOverrides,
   filterOutSlugs,
   filterOutIds,
@@ -12,6 +15,7 @@ import {
 } from './store';
 
 const base: SiteBanner = {
+  id: 'b1',
   active: true,
   level: 'warn',
   text: { es: 'Aviso', pt: 'Aviso PT' },
@@ -46,6 +50,31 @@ describe('overrides · banner', () => {
 
   it('getBanner es null-safe sin credenciales de Redis', async () => {
     expect(await getBanner()).toBeNull();
+  });
+
+  it('getBanners es null-safe sin Redis (lista vacía)', async () => {
+    expect(await getBanners()).toEqual([]);
+  });
+});
+
+describe('overrides · pila de banners', () => {
+  const mk = (over: Partial<SiteBanner>): SiteBanner => ({ ...base, ...over });
+
+  it('sortBanners: crítico → aviso → info y, a igualdad, más reciente primero', () => {
+    const list = [
+      mk({ id: 'i', level: 'info', updatedAt: 10 }),
+      mk({ id: 'c', level: 'critical', updatedAt: 5 }),
+      mk({ id: 'w', level: 'warn', updatedAt: 20 }),
+      mk({ id: 'i2', level: 'info', updatedAt: 30 }),
+    ];
+    expect(sortBanners(list).map((b) => b.id)).toEqual(['c', 'w', 'i2', 'i']);
+    // no muta el original
+    expect(list.map((b) => b.id)).toEqual(['i', 'c', 'w', 'i2']);
+  });
+
+  it('bannerDismissKey namespacia por id (descarte independiente por banner)', () => {
+    expect(bannerDismissKey('abc')).toBe('incendib-banner-dismissed:abc');
+    expect(bannerDismissKey('abc')).not.toBe(bannerDismissKey('xyz'));
   });
 });
 
