@@ -119,10 +119,14 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
   const peninsular = useMemo(() => fires.filter((f) => !isIslandFire(f)), [fires]);
   const islands = useMemo(() => fires.filter(isIslandFire), [fires]);
   const tipFire = tip ? fires.find((f) => f.slug === tip) : null;
+  const hasHotspots = hotspots.length > 0;
+  const showHotspots = hotspotsVisible && hasHotspots;
 
   // Agrupación de los marcadores de incendios peninsulares (evita el solape de
-  // pins a coordenadas reales → WCAG 2.5.8). Ver useFireClusters.
-  const { items: fireItems, index: fireIndex } = useFireClusters(peninsular, view.bbox, view.zoom);
+  // pins a coordenadas reales → WCAG 2.5.8). Ver useFireClusters. Sin la capa de
+  // focos FIRMS visible hay muchos menos incidentes en pantalla: se desactiva el
+  // agrupado y cada incendio aparece siempre individual, a cualquier zoom.
+  const { items: fireItems, index: fireIndex } = useFireClusters(peninsular, view.bbox, view.zoom, showHotspots);
   const expandCluster = useCallback(
     (id: number, lng: number, lat: number) => {
       const z = Math.min(fireIndex.getClusterExpansionZoom(id), MAX_ZOOM);
@@ -184,8 +188,6 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
     }),
     [hotspots, ageBucket],
   );
-  const hasHotspots = hotspots.length > 0;
-  const showHotspots = hotspotsVisible && hasHotspots;
 
   const handleMapClick = useCallback((e: MapLayerMouseEvent) => {
     const f = e.features?.[0];

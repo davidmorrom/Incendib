@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.40.2] - 2026-07-23
+
+### Cambiado
+
+- **Los incendios del mapa tardaban demasiado zoom en dejar de agruparse.**
+  El radio de cúmulo (`useFireClusters`) bajaba de 44 a 32 px — sigue por
+  encima de los 28 px del marcador (`FireMarker`), así que los sueltos
+  siguen sin solaparse, pero separan antes al acercar. Además, **sin la capa
+  de focos satelitales (FIRMS) visible** (el estado por defecto del mapa) el
+  agrupado se desactiva del todo: con muchos menos incidentes en pantalla,
+  cada incendio aparece siempre individual, a cualquier zoom. La lista de
+  incendios sigue siendo el equivalente accesible completo si dos marcadores
+  llegaran a solaparse a zoom muy bajo. Ficheros: `src/lib/map/useFireClusters.ts`,
+  `src/components/map/MapCanvas.tsx`.
+
 ## [0.40.1] - 2026-07-23
 
 ### Cambiado

@@ -9,11 +9,17 @@ import { MAX_ZOOM } from './config';
 /**
  * Agrupa (clustering) los marcadores de incendios para que no se solapen a zoom
  * bajo. A zoom alto o cuando hay sitio, cada incendio se muestra individual (su
- * marcador color+forma accesible); cuando dos o más caerían a <44 px se colapsan
+ * marcador color+forma accesible); cuando dos o más caerían a <32 px se colapsan
  * en una burbuja de recuento que, al pulsarla, amplía. Motivo: los pins a
  * coordenadas geográficas reales se apilan (varios incendios en la misma
  * comarca), lo que incumple WCAG 2.5.8 (Target Size) y dificulta pulsar el
  * correcto. La lista de incendios sigue siendo el equivalente accesible completo.
+ * `radius: 32` es el mínimo seguro por encima del marcador real (28 px,
+ * `FireMarker`): separa antes que el `44` original sin permitir solape visual.
+ *
+ * `cluster = false` (p.ej. sin la capa de focos FIRMS visible: hay muchos menos
+ * incidentes en pantalla) desactiva el agrupado por completo: cada incendio
+ * aparece siempre individual, a cualquier zoom.
  *
  * Determinista: `getClusters(bbox, zoom)` es una función pura del viewport, sin
  * depender de eventos de tiles del mapa (más robusto que `querySourceFeatures`).
@@ -49,10 +55,10 @@ export type FireClusterItem =
   | { kind: 'point'; fire: Fire; lng: number; lat: number }
   | { kind: 'cluster'; id: number; count: number; severity: number; lng: number; lat: number };
 
-export function useFireClusters(fires: Fire[], bbox: Bbox | null, zoom: number) {
+export function useFireClusters(fires: Fire[], bbox: Bbox | null, zoom: number, cluster = true) {
   const index = useMemo(() => {
     const sc = new Supercluster<PointProps, ClusterProps>({
-      radius: 44, // px: separación mínima; ≥24 px garantiza que los sueltos no se solapan
+      radius: 32, // px: separación mínima; > 28 px (tamaño del marcador) evita el solape
       maxZoom: MAX_ZOOM,
       map: (props) => ({ maxSeverity: SEVERITY[props.fire.state] }),
       reduce: (acc, props) => {
@@ -71,6 +77,12 @@ export function useFireClusters(fires: Fire[], bbox: Bbox | null, zoom: number) 
 
   const items = useMemo<FireClusterItem[]>(() => {
     if (!bbox) return [];
+    if (!cluster) {
+      const [w, s, e, n] = bbox;
+      return fires
+        .filter((f) => f.coordinates[0] >= w && f.coordinates[0] <= e && f.coordinates[1] >= s && f.coordinates[1] <= n)
+        .map((f) => ({ kind: 'point' as const, fire: f, lng: f.coordinates[0], lat: f.coordinates[1] }));
+    }
     return index.getClusters(bbox, Math.floor(zoom)).map((feat) => {
       const [lng, lat] = feat.geometry.coordinates as [number, number];
       if ('cluster' in feat.properties) {
@@ -85,7 +97,7 @@ export function useFireClusters(fires: Fire[], bbox: Bbox | null, zoom: number) 
       }
       return { kind: 'point', fire: feat.properties.fire, lng, lat };
     });
-  }, [index, bbox, zoom]);
+  }, [index, bbox, zoom, cluster, fires]);
 
   return { items, index };
 }
