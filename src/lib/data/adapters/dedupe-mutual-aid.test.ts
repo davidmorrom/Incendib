@@ -54,9 +54,98 @@ describe('dedupeMutualAidFires', () => {
     expect(out).toHaveLength(2);
   });
 
-  it('NO fusiona fuentes distintas si están lejos (>1 km)', () => {
+  it('NO fusiona fuentes distintas si están lejos (>1 km) y sin topónimo común', () => {
     const a = fire({ slug: 'a', coordinates: [-3.2, 40.9], sources: ['jcyl'] });
     const b = fire({ slug: 'b', coordinates: [-3.1, 40.9], sources: ['infoca'] });
+    const out = dedupeMutualAidFires([a, b]);
+    expect(out).toHaveLength(2);
+  });
+
+  it('fusiona el caso real Selas (INFORCYL + INFOCAM, mismo municipio+provincia a 2,85 km)', () => {
+    // Dos sistemas de emergencia reportan el mismo fuego de Selas (Guadalajara)
+    // en apoyo mutuo, pero cada uno lo geolocaliza en un punto distinto: 2,85 km,
+    // por encima del umbral de proximidad pura (1 km). El topónimo idéntico
+    // (municipio + provincia) los identifica como el mismo incendio.
+    const cyl = fire({
+      slug: 'cyl-selas-42-107-26',
+      name: 'Selas',
+      municipality: 'Selas',
+      province: 'Guadalajara',
+      coordinates: [-2.100190112678745, 40.95174413758945],
+      hectares: 0,
+      sources: ['jcyl'],
+    });
+    const clm = fire({
+      slug: 'clm-selas-2026190290',
+      name: 'Selas',
+      municipality: 'Selas',
+      province: 'Guadalajara',
+      coordinates: [-2.070653953723189, 40.93912443222499],
+      hectares: 1429,
+      perimeterSourceSlug: 'effis-selas',
+      sources: ['infocam'],
+    });
+    const out = dedupeMutualAidFires([cyl, clm]);
+    expect(out).toHaveLength(1);
+    expect(out[0]?.sources).toEqual(expect.arrayContaining(['jcyl', 'infocam']));
+  });
+
+  it('NO fusiona dos incendios distintos que comparten municipio+provincia pero están lejos (>tope)', () => {
+    // Salvaguarda: un municipio grande puede tener dos fuegos reales separados.
+    // Ocultar uno sería peor que mostrar un duplicado, así que el topónimo común
+    // NO basta si superan el tope de distancia.
+    const a = fire({
+      slug: 'a',
+      municipality: 'Cáceres',
+      province: 'Cáceres',
+      coordinates: [-6.4, 39.4],
+      sources: ['jcyl'],
+    });
+    const b = fire({
+      slug: 'b',
+      municipality: 'Cáceres',
+      province: 'Cáceres',
+      coordinates: [-6.2, 39.35], // ~18 km
+      sources: ['infoca'],
+    });
+    const out = dedupeMutualAidFires([a, b]);
+    expect(out).toHaveLength(2);
+  });
+
+  it('municipio homónimo de PROVINCIAS distintas + fuera de proximidad pura → NO fusiona', () => {
+    const a = fire({
+      slug: 'a',
+      municipality: 'San Martín',
+      province: 'Ávila',
+      coordinates: [-4.4, 40.35],
+      sources: ['jcyl'],
+    });
+    const b = fire({
+      slug: 'b',
+      municipality: 'San Martín',
+      province: 'Madrid',
+      coordinates: [-4.36, 40.36], // ~3,5 km, provincia distinta
+      sources: ['infoca'],
+    });
+    const out = dedupeMutualAidFires([a, b]);
+    expect(out).toHaveLength(2);
+  });
+
+  it('sin provincia (p. ej. Cataluña, «—») no fusiona por topónimo, solo por proximidad', () => {
+    const a = fire({
+      slug: 'a',
+      municipality: 'Tortosa',
+      province: '—',
+      coordinates: [0.5, 40.8],
+      sources: ['catalunya'],
+    });
+    const b = fire({
+      slug: 'b',
+      municipality: 'Tortosa',
+      province: '—',
+      coordinates: [0.53, 40.81], // ~2,6 km, sin provincia → no aplica el topónimo
+      sources: ['jcyl'],
+    });
     const out = dedupeMutualAidFires([a, b]);
     expect(out).toHaveLength(2);
   });

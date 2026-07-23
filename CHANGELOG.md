@@ -5,6 +5,27 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.40.4] - 2026-07-23
+
+### Corregido
+
+- **Un mismo incendio salía dos veces cuando dos sistemas de emergencia lo
+  reportaban en apoyo mutuo con coordenadas dispares.** Caso real: Selas
+  (Guadalajara), listado a la vez por INFORCYL (Castilla y León) e INFOCAM
+  (Castilla-La Mancha) a 2,85 km entre sí — el mismo fuego, dos marcadores.
+  `dedupeMutualAidFires` solo fundía partes de fuentes distintas a ≤1 km, y
+  Selas quedaba fuera. Ahora también funde dos partes de fuentes distintas
+  que comparten **municipio y provincia oficiales** dentro de un tope de
+  distancia de seguridad (`MUTUAL_AID_SAME_PLACE_KM`, 12 km). El tope evita
+  fusionar por error dos incendios realmente distintos que compartan un
+  municipio grande (ocultar un fuego real sería peor que un duplicado);
+  verificado contra el feed en vivo: de 55 incidentes, la regla nueva solo
+  une el par de Selas. La fusión conserva el parte con perímetro propio, así
+  que Selas queda como un único incidente con su perímetro y deja de depender
+  del gate FIRMS para no parpadear. Ficheros:
+  `src/lib/data/adapters/index.ts`,
+  `src/lib/data/adapters/dedupe-mutual-aid.test.ts`.
+
 ## [0.40.3] - 2026-07-23
 
 ### Corregido

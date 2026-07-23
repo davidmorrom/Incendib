@@ -1194,12 +1194,39 @@ export function attachPerimeters(fires: Fire[], perimeters: Fire[]): Fire[] {
 }
 
 /** Distancia (km) bajo la cual dos incidentes de FUENTES distintas se tratan como
- * el mismo incendio físico. Caso real detectado: La Mierla/Guadalajara, a ~0,12 km
- * de diferencia entre el parte de INFORCYL (CyL en apoyo mutuo) y el de INFOCA
- * (Andalucía en apoyo mutuo) — el mismo fuego, dos sistemas de emergencia. Margen
- * amplio: en producción, el siguiente par de fuentes distintas más próximo está
- * a >45 km, así que este umbral no roza incidentes realmente independientes. */
+ * el mismo incendio físico AUNQUE no compartan topónimo. Caso real: La
+ * Mierla/Guadalajara, a ~0,12 km entre el parte de INFORCYL (CyL en apoyo mutuo)
+ * y el de INFOCA (Andalucía) — el mismo fuego, dos sistemas de emergencia. */
 const MUTUAL_AID_DUP_KM = 1;
+
+/**
+ * Distancia (km) bajo la cual se fusionan dos partes de FUENTES distintas que
+ * además comparten municipio y provincia oficiales. El topónimo idéntico es la
+ * señal fuerte de «mismo incendio» (dos sistemas reportando el mismo fuego en
+ * apoyo mutuo); las coordenadas discrepan porque cada sistema lo geolocaliza en
+ * un punto distinto (ignición, frente o centroide del municipio). Caso real:
+ * Selas (Guadalajara) — INFORCYL (CyL) e INFOCAM (CLM) a 2,85 km, fuera del
+ * umbral de 1 km. Se mantiene un TOPE (no una fusión incondicional por nombre)
+ * como red de seguridad: dos incendios realmente distintos en un municipio
+ * grande pueden llevar el mismo topónimo, y OCULTAR un fuego real (fusionarlo
+ * por error) es peor que mostrar un duplicado. En el feed live actual, tras
+ * Selas la siguiente pareja de fuentes distintas está a >45 km, así que este
+ * tope no roza incidentes independientes; y supera el radio de los municipios
+ * grandes de España, donde dos fuegos separados quedarían por encima. */
+const MUTUAL_AID_SAME_PLACE_KM = 12;
+
+/**
+ * ¿Dos partes describen el MISMO topónimo oficial (municipio + provincia)?
+ * Normaliza (minúsculas/acentos vía `slugify`) y descarta los marcadores «—» y
+ * vacíos: una fuente sin provincia (p. ej. Cataluña, que solo publica municipio)
+ * no puede afirmar «mismo sitio», así que cae al criterio de pura proximidad.
+ */
+function sameOfficialPlace(a: Fire, b: Fire): boolean {
+  const norm = (s: string) => (s && s.trim() && s.trim() !== '—' ? slugify(s) : '');
+  const muni = norm(a.municipality);
+  const prov = norm(a.province);
+  return !!muni && !!prov && muni === norm(b.municipality) && prov === norm(b.province);
+}
 
 /**
  * Dos CCAA pueden desplegar apoyo mutuo al MISMO incendio y cada una lo reporta
@@ -1207,10 +1234,13 @@ const MUTUAL_AID_DUP_KM = 1;
  * Mierla»/«Guadalajara»). Sin fusionar, el incidente se cuenta dos veces en los
  * KPI («activos», total) y el mapa lo muestra como un cúmulo de 2 que nunca se
  * separa (dos marcadores a la misma coordenada están siempre a <44 px, a
- * cualquier zoom). Se fusiona en el más informativo (con preferencia por el
- * que ya tiene forma propia — la adjudicación geográfica de `attachPerimeters`
- * es una señal más fuerte que un número de hectáreas mayor en el otro gemelo —
- * y se anotan ambas fuentes.
+ * cualquier zoom). Se consideran el mismo fuego cuando: (a) caen casi en el
+ * mismo punto (`MUTUAL_AID_DUP_KM`, topónimos aparte), o (b) comparten
+ * municipio+provincia oficial dentro de `MUTUAL_AID_SAME_PLACE_KM` (caso Selas:
+ * coords a 2,85 km pero mismo topónimo). Se fusiona en el más informativo (con
+ * preferencia por el que ya tiene forma propia — la adjudicación geográfica de
+ * `attachPerimeters` es una señal más fuerte que un número de hectáreas mayor en
+ * el otro gemelo — y se anotan ambas fuentes.
  */
 export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
   const pairs: { i: number; j: number; km: number }[] = [];
@@ -1222,7 +1252,12 @@ export function dedupeMutualAidFires(fires: Fire[]): Fire[] {
       if (a.state === 'extinguido' || b.state === 'extinguido') continue;
       if (a.sources.some((s) => b.sources.includes(s))) continue; // misma fuente: no aplica
       const km = haversineKm(a.coordinates, b.coordinates);
-      if (km <= MUTUAL_AID_DUP_KM) pairs.push({ i, j, km });
+      // Mismo incendio si los partes caen casi encima (≤1 km, topónimos aparte)
+      // o si comparten municipio+provincia oficial dentro del tope de seguridad
+      // (apoyo mutuo con coordenadas dispares — caso Selas).
+      const sameFire =
+        km <= MUTUAL_AID_DUP_KM || (sameOfficialPlace(a, b) && km <= MUTUAL_AID_SAME_PLACE_KM);
+      if (sameFire) pairs.push({ i, j, km });
     }
   }
   if (!pairs.length) return fires;

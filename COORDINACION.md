@@ -31,6 +31,44 @@
 
 ## Log
 
+### 2026-07-23 — Agente A (datos): fusión de incendio reportado por dos CCAA con coords dispares (v0.40.4)
+
+**Encargo del propietario:** «¿por qué hay 2 incendios en Selas?» → tras
+diagnóstico en vivo, «implementa la fusión por municipio, pero solo si el origen
+del incendio es el mismo».
+
+**Diagnóstico (verificado contra INFOCAM, INFORCYL y `GET /api/fires` en prod):**
+Selas (Guadalajara) es UN incendio (ID INFOCAM 2026190290) reportado por dos
+sistemas en apoyo mutuo: INFORCYL (`cyl-selas-42-107-26`, CyL) e INFOCAM
+(`clm-selas-2026190290`, CLM), a **2,85 km** entre sí. `dedupeMutualAidFires`
+solo fundía a ≤1 km (`MUTUAL_AID_DUP_KM`), así que quedaban dos marcadores. De
+paso, INFOCAM trae DOS puntos para el mismo ID a ~3 km y el gate FIRMS conserva
+el más lejano del gemelo de INFORCYL, agravando la separación.
+
+**Hecho (typecheck + lint + 336 tests + build; todo en verde):**
+- `dedupeMutualAidFires` (`src/lib/data/adapters/index.ts`): además del criterio
+  de proximidad pura (≤1 km), funde dos partes de FUENTES distintas que comparten
+  **municipio+provincia** oficiales (helper `sameOfficialPlace`: normaliza vía
+  `slugify` y descarta «—»/vacío → Cataluña sin provincia NO aplica) dentro de un
+  tope de seguridad `MUTUAL_AID_SAME_PLACE_KM = 12 km`. El tope evita fusionar dos
+  fuegos reales distintos en un municipio grande (ocultar un fuego real es peor
+  que mostrar un duplicado). El desempate (perímetro propio > hectáreas) no
+  cambia: Selas conserva su perímetro y, al sobrevivir el lado NO gateado
+  (INFORCYL), deja de parpadear con el gate FIRMS.
+- Tests (`dedupe-mutual-aid.test.ts`, +4): caso Selas y salvaguardas (mismo
+  municipio lejos = NO; provincia distinta = NO; sin provincia = solo proximidad).
+- **Verificación anti-sobre-fusión contra el feed live:** de 55 incidentes, la
+  regla nueva une SOLO el par de Selas (0 fusiones colaterales).
+
+**Árbol compartido:** al empezar y al integrar, `git status` limpio (solo 2
+capturas sin trackear en `docs/`, ajenas). Ningún WIP de otro agente en el árbol;
+trabajé sobre `main` con commit por ruta explícita.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`,
+`src/lib/data/adapters/dedupe-mutual-aid.test.ts`, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.40.4** (último tag v0.40.3; fix). **Siguiente tag libre: 0.40.5.**
+
 ### 2026-07-23 — Agente H (ficha/UI): franja de mapa fija + hoja a pantalla completa (v0.40.1)
 
 **Encargo del propietario:** «en móvil se sigue viendo enana la ventanita. Hay
