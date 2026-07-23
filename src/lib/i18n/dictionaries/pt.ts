@@ -90,6 +90,7 @@ const pt: Dictionary = {
     viewCurrentIncident: 'Ver incidente atual',
     viewEarlierIncident: 'Ver incêndio anterior',
     otherEpisodes: 'Outros episódios neste local',
+    episodesShort: 'Episódios',
     episodeOngoing: 'em curso',
     episodeHistorical: 'histórico',
     viewProvince: 'Ver incêndios de {province}',

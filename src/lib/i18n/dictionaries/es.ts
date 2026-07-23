@@ -89,6 +89,7 @@ const es = {
     viewCurrentIncident: 'Ver incidente actual',
     viewEarlierIncident: 'Ver incendio anterior',
     otherEpisodes: 'Otros episodios en este paraje',
+    episodesShort: 'Episodios',
     episodeOngoing: 'en curso',
     episodeHistorical: 'histórico',
     viewProvince: 'Ver incendios de {province}',

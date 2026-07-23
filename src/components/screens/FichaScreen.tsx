@@ -58,6 +58,11 @@ export function FichaScreen({
   const toggleFollow = useFollowStore((s) => s.toggle);
   const following = mounted && followedFires.some((f) => f.slug === fire.slug);
   const [copied, setCopied] = useState(false);
+  // Pestaña activa del detalle inferior. Por defecto «Evolución» en emergencia
+  // (la cronología con evacuaciones/confinamientos), si hay; si no, «Medios».
+  const [detailTab, setDetailTab] = useState<'medios' | 'evolucion' | 'episodios'>(
+    fire.timeline && fire.timeline.length > 0 ? 'evolucion' : 'medios',
+  );
   // Modo histórico: el incendio ya no está en las fuentes en vivo. Se muestra el
   // último dato conocido, sin señales de «ahora» (meteo, confirmación satelital,
   // avance 24 h) y con banner sobrio.
@@ -69,6 +74,17 @@ export function FichaScreen({
   const reactEarlier = !reactCurrent ? related?.prior?.[0] : undefined;
   const otherEpisodes = related?.related ?? [];
   const provSlug = fire.province && fire.province !== '—' ? provinceSlug(fire.province) : null;
+
+  // Detalle en pestañas (Medios / Evolución / Episodios): en móvil, apilar todo
+  // dejaba estas secciones en una ventana minúscula. Con pestañas cada una usa
+  // toda la altura desplazable. Solo se muestran las que tienen contenido.
+  const hasTimeline = Boolean(fire.timeline && fire.timeline.length > 0);
+  const detailTabs: { id: 'medios' | 'evolucion' | 'episodios'; label: string }[] = [
+    { id: 'medios', label: d.fire.resources },
+    ...(hasTimeline ? [{ id: 'evolucion' as const, label: d.fire.evolution }] : []),
+    ...(otherEpisodes.length > 0 ? [{ id: 'episodios' as const, label: d.fire.episodesShort }] : []),
+  ];
+  const activeDetailTab = detailTabs.some((t) => t.id === detailTab) ? detailTab : 'medios';
 
   const stateLabel =
     fire.country === 'PT' && fire.ptState ? PT_TEXT[fire.ptState] : d.states[STATE_LABEL_KEY[fire.state]];
@@ -209,6 +225,11 @@ export function FichaScreen({
           </div>
         )}
 
+        {/* Zona desplazable: procedencia + cabecera + cifras + pestañas
+            (Medios/Evolución/Episodios). El mapa y el aviso de evacuación (arriba)
+            y las acciones (abajo) quedan fijos; así el detalle dispone de toda la
+            altura y no queda recortado en una ventana diminuta en móvil. */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Procedencia: ficha reconstruida a partir de prensa (no oficial). Marca
             visible y sobria para no falsear el origen del dato. */}
         {fire.reconstructed && (
@@ -305,7 +326,7 @@ export function FichaScreen({
           </div>
         )}
 
-        <div className="flex-none px-4">
+        <div className="px-4 pt-1">
           <div className="flex items-center gap-1.5">
             {/* En histórico el chip va NEUTRO (gris): el color codifica dato (rojo =
                 activo = ardiendo ahora) y no debe leerse como actividad en vivo. */}
@@ -467,19 +488,44 @@ export function FichaScreen({
           </div>
         </div>
 
-        {/* Medios desplegados + Evolución */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3">
-          <ResourcesPanel resources={fire.resources} />
-          {fire.timeline && fire.timeline.length > 0 ? (
-            <>
-              <div className="mt-4 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
-                {d.fire.evolution}
-              </div>
-              {/* Carrusel horizontal (más reciente primero, a la izquierda):
-                  cada hito es una tarjeta con espacio propio en vez de una
-                  línea apretada en una lista vertical. */}
-              <ScrollCarousel ariaLabel={d.fire.evolution} className="mt-2 pb-3">
-                {fire.timeline.map((e, i) => {
+        {/* Detalle en pestañas. La barra queda pegada (sticky) al hacer scroll:
+            Medios / Evolución / Episodios son accesibles de un toque y cada uno
+            usa toda la altura disponible, en vez de apilarse en una ventana
+            diminuta. Solo se muestra la barra si hay más de una pestaña. */}
+        {detailTabs.length > 1 && (
+          <div
+            role="tablist"
+            aria-label={d.fire.evolution}
+            className="sticky top-0 z-[2] flex gap-5 border-b bg-bg-card px-4 pt-2.5"
+          >
+            {detailTabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={activeDetailTab === t.id}
+                onClick={() => setDetailTab(t.id)}
+                className={cn(
+                  '-mb-px border-b-2 pb-2 text-[13px] font-semibold transition-colors',
+                  activeDetailTab === t.id
+                    ? 'border-action-text text-action-text'
+                    : 'border-transparent text-fg-mute',
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="px-4 pb-5 pt-3">
+          {activeDetailTab === 'medios' && <ResourcesPanel resources={fire.resources} />}
+
+          {/* Carrusel horizontal (más reciente primero, a la izquierda): cada
+              hito es una tarjeta con espacio propio. */}
+          {activeDetailTab === 'evolucion' && hasTimeline && (
+            <ScrollCarousel ariaLabel={d.fire.evolution} className="pb-1">
+              {fire.timeline!.map((e, i) => {
                   const press = Boolean(e.url);
                   const dot = (
                     <span
@@ -536,16 +582,11 @@ export function FichaScreen({
                   );
                 })}
               </ScrollCarousel>
-            </>
-          ) : null}
+          )}
 
-          {otherEpisodes.length > 0 && (
-            <>
-              <div className="mt-4 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
-                {d.fire.otherEpisodes}
-              </div>
-              <ul className="mt-2">
-                {otherEpisodes.slice(0, 6).map((e) => (
+          {activeDetailTab === 'episodios' && otherEpisodes.length > 0 && (
+              <ul>
+                {otherEpisodes.slice(0, 8).map((e) => (
                   <li key={e.slug}>
                     <Link href={`/f/${e.slug}`} className="flex items-center gap-2 py-1.5">
                       <StateGlyph state={e.state} size={11} className="flex-none" />
@@ -558,8 +599,8 @@ export function FichaScreen({
                   </li>
                 ))}
               </ul>
-            </>
           )}
+        </div>
         </div>
 
         {/* Acciones */}
