@@ -78,10 +78,11 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Selector de mapa base (radiogroup accesible). Independiente del tema de la UI:
- * la UI sigue clara por defecto, pero el mapa puede verse en satélite/relieve.
- * La opción resaltada es la resuelta según el tema cuando la preferencia es
- * `auto`. Flechas para navegar; Enter/Espacio para elegir.
+ * Selector de mapa base (radiogroup accesible). Satélite/relieve son vistas
+ * propias, independientes del tema de la UI; claro/oscuro en cambio siguen al
+ * tema si luego se conmuta (ver `setTheme`). La opción resaltada es la
+ * resuelta según el tema cuando la preferencia es `auto`. Flechas para
+ * navegar; Enter/Espacio para elegir.
  */
 function BasemapPicker() {
   const d = useDict();

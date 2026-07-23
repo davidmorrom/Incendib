@@ -4,9 +4,10 @@ import type { Theme } from '@/lib/design/tokens';
 /**
  * Configuración del mapa MapLibre.
  *
- * El usuario elige el **mapa base** (`Basemap`) con independencia del tema de
- * la UI: el tema sigue siendo claro por defecto, pero el mapa puede mostrarse
- * con imagen de satélite o relieve. Todos los estilos son **sin API key**:
+ * El usuario elige el **mapa base** (`Basemap`); satélite/relieve son vistas
+ * propias (sin par claro/oscuro) que se mantienen al margen del tema de la UI,
+ * pero el par claro/oscuro sigue al tema al conmutarlo (ver `setTheme` en
+ * `src/lib/store.ts`). Todos los estilos son **sin API key**:
  * - claro/oscuro: vectoriales OpenFreeMap (OSM).
  * - satélite: mosaico anual sin nubes Sentinel-2 (EOX) + etiquetas OSM (EOX).
  * - relieve: EOX Terrain Light.

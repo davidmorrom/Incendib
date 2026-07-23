@@ -29,7 +29,11 @@ interface UIState {
   perimetersVisible: boolean;
   /** Capa de focos satelitales (FIRMS) visible en el mapa. */
   hotspotsVisible: boolean;
-  /** Mapa base elegido (claro/satélite/relieve/oscuro); `auto` sigue el tema. */
+  /**
+   * Mapa base elegido (claro/satélite/relieve/oscuro); `auto` sigue el tema.
+   * Satélite/relieve son vistas propias (no tienen claro/oscuro) y no cambian
+   * al conmutar el tema; claro/oscuro sí lo siguen (ver `setTheme`).
+   */
   basemap: Basemap;
   network: NetworkState;
   /** null = seguir preferencia del sistema. */
@@ -76,6 +80,15 @@ export const useUIStore = create<UIState>((set) => ({
   closeShare: () => set({ shareOpen: false }),
   setCopied: (copied) => set({ copied }),
   setNetwork: (network) => set({ network }),
-  setTheme: (theme) => set({ theme }),
+  // El mapa base "claro"/"oscuro" es la vista por defecto (sin satélite ni
+  // relieve): al conmutar el tema de la UI, sigue con él. Si el usuario tiene
+  // elegido satélite/relieve (vistas propias, sin par claro/oscuro) o `auto`
+  // (ya sigue el tema por sí solo vía `resolveBasemap`), se deja igual.
+  setTheme: (theme) =>
+    set((s) => {
+      if (s.basemap !== 'claro' && s.basemap !== 'oscuro') return { theme };
+      const effective = theme ?? 'light';
+      return { theme, basemap: effective === 'dark' ? 'oscuro' : 'claro' };
+    }),
   setLocale: (locale) => set({ locale }),
 }));

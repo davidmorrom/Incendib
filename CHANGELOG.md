@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.40.3] - 2026-07-23
+
+### Corregido
+
+- **El mapa base "claro"/"oscuro" no seguía el tema de la UI tras elegirlo
+  a mano.** Al abrir el selector de capas y fijar explícitamente "Claro" u
+  "Oscuro" (`useUIStore.basemap`), el mapa quedaba fijo en esa opción para
+  siempre, incluso al conmutar después el tema con el botón de cabecera —
+  la superficie del mapa y la UI acababan en temas distintos. Ahora
+  `setTheme` reconoce si el mapa base activo es el par claro/oscuro (no
+  satélite/relieve, que son vistas propias sin par claro/oscuro y siguen
+  independientes) y lo actualiza a la vez que el tema. `auto` (por defecto,
+  sin tocar el selector) ya seguía el tema correctamente y no cambia.
+  Fichero: `src/lib/store.ts`.
+
 ## [0.40.2] - 2026-07-23
 
 ### Cambiado
