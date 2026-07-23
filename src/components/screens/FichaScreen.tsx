@@ -193,6 +193,22 @@ export function FichaScreen({
           aria-hidden
         />
 
+        {/* Evacuaciones/confinamientos: información más urgente de la ficha, va
+            la primera y en tono de alerta. aria-live para lectores de pantalla.
+            En histórico se oculta (dato operativo caduco). */}
+        {!historical && fire.evacuation && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.activo, 55), background: mix(V.activo, 10) }}
+            aria-live="polite"
+          >
+            <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-state-activo-text">
+              {d.fire.evacuationNotice}
+            </p>
+            <p className="mt-0.5 text-[11.5px] font-medium leading-snug text-fg-body">{fire.evacuation}</p>
+          </div>
+        )}
+
         {/* Procedencia: ficha reconstruida a partir de prensa (no oficial). Marca
             visible y sobria para no falsear el origen del dato. */}
         {fire.reconstructed && (
@@ -217,6 +233,21 @@ export function FichaScreen({
           >
             <p className="text-[11px] font-semibold leading-snug text-state-foco-text">
               ⚠ {d.fire.perimeterApprox}
+            </p>
+          </div>
+        )}
+
+        {/* Perímetro/extensión provisional dibujado a mano en una emergencia
+            (prensa/seguimiento): mismo tono satelital, aviso propio para no
+            leerse como un perímetro oficial ni definitivo. La extensión
+            (`perimeterExtra`) se suma al perímetro satelital sin sustituirlo. */}
+        {(fire.perimeterProvisional || fire.perimeterExtra) && (
+          <div
+            className="mx-4 mt-1.5 flex-none rounded-btn border px-3 py-2"
+            style={{ borderColor: mix(V.foco, 45), background: mix(V.foco, 8) }}
+          >
+            <p className="text-[11px] font-semibold leading-snug text-state-foco-text">
+              ⚠ {d.fire.perimeterProvisional}
             </p>
           </div>
         )}

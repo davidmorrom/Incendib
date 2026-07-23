@@ -31,6 +31,18 @@
 
 ## Log
 
+### 2026-07-23 — Modo emergencia: overrides editoriales + `perimeterExtra` (v0.41.0)
+
+**Contrato compartido tocado:** `src/types/fire.ts` — añadidos `perimeterExtra`
+(polígono de extensión provisional que se suma al perímetro sin sustituirlo) y
+`perimeterProvisional`. Nueva capa `src/lib/data/emergency.ts` aplicada en
+`getFires` tras los overrides del panel. `computeKpis` ahora suma
+`hotspotHectares` cuando no hay cifra (KPI de la home). Ficheros: `fire.ts`,
+`data/emergency.ts(+test)`, `data/index.ts`, `fires/derive.ts(+test)`,
+`screens/FichaScreen.tsx`, `map/FireMiniMap.tsx`, `map/MapCanvas.tsx`, i18n
+(es/pt/en). Datos de emergencia **temporales** (caducan 2026-08-06). Detalle en
+`docs/notas-sesion-2026-07-23-emergencia.md`.
+
 ### 2026-07-23 — Agente A (datos): fusión de incendio reportado por dos CCAA con coords dispares (v0.40.4)
 
 **Encargo del propietario:** «¿por qué hay 2 incendios en Selas?» → tras

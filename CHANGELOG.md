@@ -5,6 +5,45 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.41.0] - 2026-07-23
+
+### Añadido
+
+- **Modo emergencia: capa de overrides editoriales para incendios en curso**
+  (`src/lib/data/emergency.ts`). Permite reflejar en el visor información
+  verificada en prensa que las fuentes automáticas aún no publican, **sin tocar
+  los adaptadores**: si el incendio ya existe en una fuente en vivo se localiza
+  por proximidad y se le **fusionan** campos (queda marcado «corregido a mano»);
+  si no existe en ninguna fuente, se **añade** una ficha reconstruida a partir de
+  prensa. Cada entrada caduca (`expiresAt`) como red de seguridad y cada hito de
+  la cronología va **atribuido a su medio con enlace**; lo no confirmado de forma
+  independiente se etiqueta como reportado, no como parte oficial.
+- **Emergencia del 23-jul-2026 (Sierra de Gredos / Valle del Alberche):**
+  - **Burgohondo (Ávila, Nivel 2):** se conserva su **perímetro satelital**
+    (EFFIS) y su superficie, y se **añade** una **extensión provisional**
+    (`perimeterExtra`, línea discontinua) hasta La Rinconada y el camping del
+    Valle de Iruelas; evacuación de Puente Nueva/Matalaceña, confinamiento por
+    humo (ES-Alert) y cronología con enlaces a Ávilared, COPE, eldiario.es, etc.
+  - **Almorox (Toledo→Madrid)** y **San Martín de Valdeiglesias (Madrid,** coche
+    en la M-501): superficie/estado/evacuaciones y cronología atribuida (San
+    Martín, sin fuente autonómica, se añade reconstruido de prensa).
+- **Campo `perimeterExtra`** en el modelo `Fire`: polígono de extensión
+  provisional que se **suma** al perímetro satelital sin sustituirlo, dibujado con
+  línea discontinua en el mapa y el minimapa de la ficha. Campo
+  `perimeterProvisional` para perímetros principales provisionales.
+- **Aviso de evacuaciones/confinamientos en la ficha** (`aria-live`), la
+  información más urgente, arriba y en tono de alerta.
+- El **minimapa de la ficha** ahora **encuadra el perímetro** (y su extensión)
+  para que un frente alargado no quede recortado.
+
+### Cambiado
+
+- **El KPI de superficie total de la pantalla principal incluye ahora las
+  estimaciones:** cuando un incendio activo no tiene cifra oficial ni EFFIS, se
+  suma su estimación por focos (`hotspotHectares`) al recuento general, en vez de
+  contar 0. Cada cifra individual se sigue comunicando como «~». Ranking y
+  boletín no cambian.
+
 ## [0.40.4] - 2026-07-23
 
 ### Corregido

@@ -56,6 +56,16 @@ describe('sortByGravity', () => {
 });
 
 describe('computeKpis', () => {
+  it('suma la estimación por focos (hotspotHectares) cuando no hay cifra oficial', () => {
+    const oficial = fire('a', 'activo', 2, 1000);
+    const estimado: Fire = { ...fire('b', 'activo', null, 0), hotspotHectares: 300 };
+    // El oficial cuenta su cifra; el estimado (sin hectares) aporta su estimación.
+    expect(computeKpis([oficial, estimado])).toEqual({ activos: 2, hectares: 1300 });
+    // Si el incendio SÍ tiene cifra, no se duplica con la estimación.
+    const conAmbos: Fire = { ...fire('c', 'activo', 2, 500), hotspotHectares: 999 };
+    expect(computeKpis([conAmbos]).hectares).toBe(500);
+  });
+
   it('cuenta activos y suma hectáreas', () => {
     const fires = [
       fire('a', 'activo', 2, 3241),

@@ -31,12 +31,21 @@ export interface Kpis {
   hectares: number;
 }
 
-/** KPIs del encabezado: nº de activos y hectáreas totales. */
+/**
+ * KPIs del encabezado: nº de activos y hectáreas totales.
+ *
+ * La superficie total incluye también las estimaciones: la cifra oficial/EFFIS
+ * (`hectares`, ya sea exacta o marcada `hectaresApprox`) cuando existe y, cuando
+ * no hay ninguna, la estimación por focos FIRMS (`hotspotHectares`). Así el
+ * recuento general no deja fuera incendios activos confirmados que aún no tienen
+ * superficie oficial (decisión del propietario). El total es, por tanto, un
+ * agregado con parte estimada; la UI comunica cada cifra individual como «~».
+ */
 export function computeKpis(fires: Fire[]): Kpis {
   return fires.reduce<Kpis>(
     (acc, f) => {
       if (f.state === 'activo') acc.activos += 1;
-      acc.hectares += f.hectares;
+      acc.hectares += f.hectares || f.hotspotHectares || 0;
       return acc;
     },
     { activos: 0, hectares: 0 },

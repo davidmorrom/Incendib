@@ -33,6 +33,7 @@ import {
   EMPTY_STATE,
   type OverrideState,
 } from '@/lib/overrides/store';
+import { applyEmergencyOverrides } from './emergency';
 
 export type DataMode = 'mock' | 'live';
 
@@ -101,7 +102,12 @@ export async function getFires(): Promise<Fire[]> {
   // Overrides manuales del panel: ocultar incidentes y aplicar correcciones por
   // campo (marcadas `edited`). Inerte si no hay overrides.
   const state = await safeOverrides();
-  return applyPatches(filterOutSlugs(fires, state.hidden), state.patches);
+  const patched = applyPatches(filterOutSlugs(fires, state.hidden), state.patches);
+  // Overrides EDITORIALES DE EMERGENCIA (versionados, temporales): fusionan datos
+  // verificados en prensa (perímetro provisional, superficie, evacuaciones,
+  // cronología) sobre el incendio en vivo, o añaden fichas reconstruidas donde no
+  // hay fuente. Inerte fuera de la ventana de emergencia (ver emergency.ts).
+  return applyEmergencyOverrides(patched);
 }
 
 /**

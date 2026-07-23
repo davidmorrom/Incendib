@@ -196,14 +196,34 @@ export interface Fire {
    */
   perimeterApprox?: boolean;
   /**
-   * Superficie (ha) del casco de `perimeterApprox`, SOLO para mostrarla junto
-   * al incidente (lista principal del mapa, ficha) cuando no hay cifra
-   * oficial ni EFFIS. Deliberadamente SEPARADO de `hectares`: un casco de unos
-   * pocos focos térmicos sobrestima el área real y es una base más floja que
-   * una clasificación de imagen EFFIS, así que NUNCA debe sumarse en
-   * `hectares`/KPI («HA AFECTADAS»)/ranking/boletín — solo se lee este campo
-   * por su nombre, en las vistas que lo muestran explícitamente marcado como
-   * tal.
+   * El `perimeter` PRINCIPAL es un trazado PROVISIONAL dibujado a mano (no
+   * oficial ni EFFIS). Se dibuja con la cartografía «estimada» (línea
+   * discontinua) y la UI lo comunica siempre. Distinto de `perimeterApprox`
+   * (casco de focos FIRMS): este procede de prensa/seguimiento. Dato editorial
+   * temporal (ver `src/lib/data/emergency.ts`).
+   */
+  perimeterProvisional?: boolean;
+  /**
+   * Polígono de EXTENSIÓN provisional (anillo [lon,lat]) que se SUMA al
+   * `perimeter` sin sustituirlo: la zona hasta la que ha llegado el frente según
+   * prensa/seguimiento, más allá del área satelital (EFFIS/FIRMS) que se conserva
+   * intacta. Se dibuja aparte, con línea discontinua («estimado»), y la UI lo
+   * comunica como provisional/no oficial. NUNCA se usa para derivar
+   * `hectares`/KPI (el dato de superficie sigue siendo el del `perimeter`
+   * satelital). Dato editorial temporal (ver `src/lib/data/emergency.ts`).
+   */
+  perimeterExtra?: [number, number][];
+  /**
+   * Superficie (ha) del casco de `perimeterApprox`, para mostrarla junto al
+   * incidente (lista principal del mapa, ficha) cuando no hay cifra oficial ni
+   * EFFIS. Deliberadamente SEPARADO de `hectares`: un casco de unos pocos focos
+   * térmicos sobrestima el área real y es una base más floja que una
+   * clasificación de imagen EFFIS. Por eso NUNCA debe entrar en `hectares` en sí,
+   * ni en el ranking ni en el boletín. EXCEPCIÓN (decisión del propietario): el
+   * KPI de superficie total del encabezado (`computeKpis`) SÍ lo suma como
+   * estimación cuando el incendio no tiene otra cifra, para no dejar fuera del
+   * recuento general los incendios activos sin superficie oficial. Cada cifra
+   * individual se comunica siempre como «~» (estimación).
    */
   hotspotHectares?: number;
   /**

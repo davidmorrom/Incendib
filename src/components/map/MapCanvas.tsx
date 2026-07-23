@@ -144,24 +144,41 @@ export function MapCanvas({ fires, hotspots = [], burnedAreas = [], onSelect, ho
       ...burnedAreas.map((f) => [f, 'area'] as const),
       ...fires.map((f) => [f, 'fire'] as const),
     ];
-    return {
-      type: 'FeatureCollection',
-      features: tagged
-        .filter(([f]) => f.perimeter && f.perimeter.length > 2)
-        .map(([f, kind]) => ({
-          type: 'Feature',
+    const features = tagged
+      .filter(([f]) => f.perimeter && f.perimeter.length > 2)
+      .map(([f, kind]) => ({
+        type: 'Feature' as const,
+        properties: {
+          kind,
+          slug: f.slug,
+          color: palette[f.state].base,
+          name: f.name,
+          ha: f.hectares,
+          date: f.startedAt,
+          approx: f.perimeterApprox === true || f.perimeterProvisional === true,
+        },
+        geometry: { type: 'Polygon' as const, coordinates: [f.perimeter!] },
+      }));
+    // Extensiones provisionales (`perimeterExtra`): se SUMAN al perímetro
+    // satelital sin sustituirlo; siempre discontinuas (approx).
+    for (const f of fires) {
+      if (f.perimeterExtra && f.perimeterExtra.length > 2) {
+        features.push({
+          type: 'Feature' as const,
           properties: {
-            kind,
+            kind: 'fire' as const,
             slug: f.slug,
             color: palette[f.state].base,
             name: f.name,
             ha: f.hectares,
             date: f.startedAt,
-            approx: f.perimeterApprox === true,
+            approx: true,
           },
-          geometry: { type: 'Polygon', coordinates: [f.perimeter!] },
-        })),
-    };
+          geometry: { type: 'Polygon' as const, coordinates: [f.perimeterExtra] },
+        });
+      }
+    }
+    return { type: 'FeatureCollection', features };
   }, [fires, burnedAreas, theme]);
   const hasPerimeters = perimeters.features.length > 0;
 
