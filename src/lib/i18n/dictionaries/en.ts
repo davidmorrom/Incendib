@@ -105,6 +105,11 @@ const en: Dictionary = {
     nationalInterestFull:
       'Emergency of national interest (Operational Situation 3, the top level of the National Civil Protection System), declared by the Ministry of the Interior for the territory. Distinct from the fire’s severity level.',
     approxHotspot: 'very rough estimate (hotspots)',
+    shareStory: 'Instagram Story',
+    shareStoryHint: 'Vertical image for your story.',
+    shareStoryPreparing: 'Preparing image…',
+    shareImageDownloaded: '✓ Image downloaded',
+    shareLinkOption: 'Copy link',
   },
   resources: {
     heading: 'Deployed resources',

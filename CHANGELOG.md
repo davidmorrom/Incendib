@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.46.0] - 2026-07-24
+
+### Añadido
+
+- **Compartir en Instagram Stories desde la ficha.** El botón de compartir abre
+  ahora un menú con **«Historia de Instagram»**, que genera una imagen vertical
+  1080×1920 del incendio (nombre, estado con su color, superficie con el mismo
+  criterio que la ficha, hora y «No sustituye al 112») y la comparte como fichero
+  con la Web Share API; en escritorio, la descarga para subirla a mano. El fondo
+  es el mosaico Sentinel-2 cloudless (EOX) del propio lugar del incendio
+  —best-effort, con tiempo de espera y respaldo a un card de degradado de marca
+  si tarda o falla—, con la ubicación marcada en el centro y el crédito
+  «Sentinel-2 cloudless 2024 © EOX · Copernicus» estampado. El menú conserva
+  «Compartir enlace…» y «Copiar enlace».
+
 ## [0.45.1] - 2026-07-24
 
 ### Corregido

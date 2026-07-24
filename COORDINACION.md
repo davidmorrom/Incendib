@@ -31,6 +31,55 @@
 
 ## Log
 
+### 2026-07-24 — Agente (ficha/UI): compartir en Instagram Stories (v0.46.0)
+
+**Encargo del propietario:** «¿podemos hacer que al compartir la ficha de un
+incendio aparezca la opción de compartir en Instagram Stories, y se comparta de
+forma vistosa?»
+
+**Hecho (typecheck + lint + build + 366 tests en verde; verificación visual REAL
+—satélite y degradado renderizados, menú claro/oscuro— y `navigator.canShare({files})`
+confirmado en navegador; revisión adversarial de 3 lentes con 2 hallazgos major
+corregidos):**
+- NUEVO `src/app/f/[slug]/story/route.tsx`: Route Handler (next/og) que devuelve
+  una imagen VERTICAL 1080×1920 del incendio, con fondo satélite Sentinel-2
+  cloudless (EOX WMS GetMap, best-effort con timeout 3 s + caché en memoria por
+  coords) y respaldo a un card de degradado de marca. Node runtime + force-dynamic
+  + `Cache-Control: max-age=60`. Respeta las zonas seguras de Stories; marca de
+  ubicación NEUTRA (no en color de estado, para no leerse como perímetro); sello
+  temporal por `updatedAt` (no hora de render); atribución EOX/Copernicus completa
+  estampada; «No sustituye al 112» siempre. Solo golpea EOX al abrir el menú de
+  compartir (precarga), no en cada vista de ficha.
+- NUEVO `src/components/fires/ShareMenu.tsx`: popover de compartir sobrio
+  (monocromo) en los dos disparadores de la ficha; «Historia de Instagram» (Web
+  Share nivel 2 con fichero → degradado a descarga en escritorio) + «Compartir
+  enlace…» + «Copiar enlace». Precarga la imagen al abrir (user-activation iOS),
+  foco inicial/Escape/clic-fuera con retorno de foco, hint asociado por
+  aria-describedby. El padre le pasa `key={fire.slug}` (remonta al cambiar de
+  ficha → nunca comparte la imagen del incendio anterior).
+- REFACTOR `src/lib/fires/surface.ts` (+`.test.ts`): helper `fireSurface()` que
+  unifica la escalera de superficie (oficial/EFFIS «~»/focos «~»/«sin dato»),
+  antes triplicada; adoptado por `opengraph-image.tsx` y `page.tsx` (metadata).
+- `FichaScreen.tsx`: los dos disparadores usan `ShareMenu` (retirados `share`/`copied`
+  inline). i18n es/pt/en: 5 claves nuevas del bloque `fire` (shareStory,
+  shareStoryHint, shareStoryPreparing, shareImageDownloaded, shareLinkOption).
+
+**Decisión consciente (parqueada):** la imagen de story va en ES (misma paridad
+que la imagen OG, también ES-only). Localizarla es un hueco de i18n a resolver a
+la vez en OG + story, fuera del alcance de esta tarea.
+
+**Árbol compartido:** al empezar, `git status` limpio salvo 3 capturas sin
+trackear en `docs/` (ajenas, NO tocadas). HEAD == origin/main. Commit por rutas
+explícitas.
+
+**Tocado (solo míos, por ruta):** `src/app/f/[slug]/story/route.tsx` (nuevo),
+`src/components/fires/ShareMenu.tsx` (nuevo), `src/lib/fires/surface.ts` +
+`surface.test.ts` (nuevos), `src/components/screens/FichaScreen.tsx`,
+`src/app/f/[slug]/opengraph-image.tsx`, `src/app/f/[slug]/page.tsx`, i18n
+es/pt/en, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.46.0** (último tag v0.45.1; feature). **Siguiente tag libre: 0.46.1.**
+
 ### 2026-07-23 — Modo emergencia: overrides editoriales + `perimeterExtra` (v0.41.0)
 
 **Contrato compartido tocado:** `src/types/fire.ts` — añadidos `perimeterExtra`

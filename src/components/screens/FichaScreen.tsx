@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
 import { ScrollCarousel } from '@/components/ui/ScrollCarousel';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
+import { ShareMenu } from '@/components/fires/ShareMenu';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
@@ -57,7 +58,6 @@ export function FichaScreen({
   const followedFires = useFollowStore((s) => s.fires);
   const toggleFollow = useFollowStore((s) => s.toggle);
   const following = mounted && followedFires.some((f) => f.slug === fire.slug);
-  const [copied, setCopied] = useState(false);
   // Pestaña activa del detalle inferior. Por defecto «Evolución» en emergencia
   // (la cronología con evacuaciones/confinamientos), si hay; si no, «Medios».
   const [detailTab, setDetailTab] = useState<'medios' | 'evolucion' | 'episodios'>(
@@ -109,26 +109,6 @@ export function FichaScreen({
   const back = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
     else router.push('/');
-  };
-
-  const share = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    const nav = typeof navigator !== 'undefined' ? navigator : undefined;
-    if (nav?.share) {
-      try {
-        await nav.share({ title: interpolate(d.fire.incidentOf, { name: fire.name }), url });
-        return;
-      } catch {
-        /* cancelado */
-      }
-    }
-    try {
-      await nav?.clipboard?.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* noop */
-    }
   };
 
   return (
@@ -378,14 +358,7 @@ export function FichaScreen({
               </span>
             )}
             <div className="flex-1" />
-            <button type="button" onClick={share} aria-label={d.fire.share} className="text-action-text">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
-                <circle cx="8" cy="3" r="1.6" />
-                <circle cx="3" cy="9" r="1.6" />
-                <circle cx="13" cy="9" r="1.6" />
-                <path d="M8 4.5 L3.8 7.7 M8 4.5 L12.2 7.7" />
-              </svg>
-            </button>
+            <ShareMenu key={fire.slug} fire={fire} variant="icon" />
           </div>
 
           <h1 className="mt-2.5 text-[18px] font-bold tracking-[-0.01em]">
@@ -647,16 +620,7 @@ export function FichaScreen({
               {following ? `✓ ${d.fire.following}` : d.fire.follow}
             </button>
           )}
-          <button
-            type="button"
-            onClick={share}
-            className={cn(
-              'flex h-10 items-center justify-center rounded-btn border border-strong text-[12.5px] font-semibold text-fg-secondary',
-              historical ? 'flex-1' : 'w-[120px]',
-            )}
-          >
-            {copied ? d.fire.copied : d.fire.shareCta}
-          </button>
+          <ShareMenu key={fire.slug} fire={fire} variant="button" className={historical ? 'flex-1' : 'w-[120px]'} />
         </div>
 
         <p className="flex-none px-4 pb-2.5 text-[9.5px] text-fg-mute">

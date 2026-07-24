@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { resolveFire } from '@/lib/fires/resolve';
 import { dark } from '@/lib/design/tokens';
-import { formatNumber } from '@/lib/utils/format';
+import { fireSurface } from '@/lib/fires/surface';
 
 // Imagen OG por incendio: estado + superficie + hora estampados en servidor.
 // Paleta oscura de la marca (misma que la UI). Se regenera con cada request.
@@ -22,13 +22,10 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
   const fire = resolved?.fire ?? null;
   const historical = Boolean(resolved && resolved.origin !== 'live');
 
-  // Superficie con el mismo criterio que la ficha: cifra oficial/EFFIS si la hay;
-  // si no, la estimación por focos FIRMS (`hotspotHectares`), marcada «~»; si
+  // Superficie con el mismo criterio que la ficha (helper `fireSurface`): cifra
+  // oficial/EFFIS si la hay; si no, la estimación por focos FIRMS marcada «~»; si
   // tampoco, «sin dato». (Antes se estampaba `hectares` a secas → «0 ha».)
-  const surfaceHa = fire ? (fire.hectares > 0 ? fire.hectares : (fire.hotspotHectares ?? 0)) : 0;
-  const surfaceApprox = Boolean(
-    fire && (fire.hectaresApprox || (fire.hectares === 0 && fire.hotspotHectares)),
-  );
+  const surfaceLabel = fire ? fireSurface(fire).label : '';
 
   const stamped = new Date().toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -96,9 +93,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
                 />
                 {fire.state.toUpperCase()}
               </span>
-              <span style={{ fontSize: 34, color: dark.text.body }}>
-                {surfaceHa > 0 ? `${surfaceApprox ? '~' : ''}${formatNumber(surfaceHa)} ha` : 'sin dato'}
-              </span>
+              <span style={{ fontSize: 34, color: dark.text.body }}>{surfaceLabel}</span>
             </div>
           )}
         </div>
