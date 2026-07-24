@@ -5,6 +5,32 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.49.0] - 2026-07-24
+
+### Añadido
+
+- **La imagen de «Historia» al compartir un incendio ahora enseña el ÁREA
+  QUEMADA.** Antes el fondo era el mosaico Sentinel-2 cloudless anual (paisaje
+  intacto, sin rastro del fuego). Ahora, cuando el incendio tiene perímetro:
+  - el lienzo se **encuadra a la cicatriz** (recuadro 9:16 ajustado al perímetro
+    + extensión, con margen y topes de zoom), y
+  - se **superpone el perímetro real de área quemada** resaltado —relleno
+    translúcido + borde incandescente del color del estado— alineado píxel a
+    píxel con el fondo. Sólido para perímetros reales; **discontinuo** para los
+    estimados/provisionales (convención «no oficial»).
+- **Imagen Sentinel-2 en falso color (Copernicus), opt-in.** Si se definen
+  `SENTINEL_HUB_CLIENT_ID/SECRET` (cliente OAuth gratuito de Copernicus Data
+  Space Ecosystem), el fondo usa la escena Sentinel-2 **más reciente posterior
+  al inicio del incendio** en falso color SWIR (B12/B08/B04): la cicatriz de
+  quemado se ve en los propios píxeles. Se compone **sobre** el mosaico EOX con
+  transparencia (`dataMask`): donde no hay dato reciente (nubes, sin pasada aún)
+  se ve el terreno EOX, nunca un recuadro negro. Sin clave, el respaldo keyless
+  (EOX) sigue funcionando igual. Crédito honesto según las capas presentes
+  («Contains modified Copernicus Sentinel data»; «EFFIS (Copernicus)» solo si el
+  perímetro proviene realmente de un área EFFIS adjuntada).
+- Nuevo módulo puro `src/lib/fires/story-frame.ts` (proyección Web Mercator,
+  encuadre 9:16 y proyección anillo→píxel) con pruebas unitarias.
+
 ## [0.48.2] - 2026-07-24
 
 ### Corregido
