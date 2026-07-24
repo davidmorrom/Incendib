@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getFires, getHotspots } from '@/lib/data';
+import { getFiresAndPersistFirmsGrowth, getHotspots } from '@/lib/data';
 import { sendPush, pushConfigured, type PushPayload } from '@/lib/push/server';
 import {
   storeConfigured,
@@ -110,7 +110,11 @@ async function handle(req: Request) {
     return NextResponse.json({ ok: false, reason: 'push o almacén no configurado' });
   }
 
-  const fires = await getFires();
+  // Además de agregar, persiste en Redis el crecimiento acumulado del perímetro
+  // por focos FIRMS (única ruta donde se escribe: esta ya es dinámica de por
+  // sí, así que no rompe la caché estática/ISR de las páginas — ver el
+  // docstring de `getFires` en `lib/data/index.ts`).
+  const fires = await getFiresAndPersistFirmsGrowth();
   // Registra el histórico de cambios (nivel, medios) para el timeline de la ficha.
   await recordFireHistory(fires, new Date().toISOString());
   const seen = await getLastSeen();

@@ -1499,75 +1499,141 @@ function minDistToCluster(pt: [number, number], cluster: [number, number][]): nu
   return best;
 }
 
+/** Tope de puntos acumulados por incendio (higiene de memoria/cómputo; de sobra
+ * para el frente más sinuoso — muy por encima de cualquier caso real). */
+const FIRMS_GROWTH_MAX_POINTS = 2000;
+
+/** Deduplica por rejilla de ~11 m (4 decimales) y, si se excede el tope, diezma
+ * de forma uniforme (mantiene la traza del frente sin crecer sin fin). Pura. */
+function dedupeGrowthPoints(points: [number, number][]): [number, number][] {
+  const seen = new Set<string>();
+  const out: [number, number][] = [];
+  for (const p of points) {
+    const k = `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(p);
+  }
+  if (out.length <= FIRMS_GROWTH_MAX_POINTS) return out;
+  const step = out.length / FIRMS_GROWTH_MAX_POINTS;
+  const thinned: [number, number][] = [];
+  for (let i = 0; i < FIRMS_GROWTH_MAX_POINTS; i++) thinned.push(out[Math.floor(i * step)]!);
+  return thinned;
+}
+
+/** Memoria de crecimiento de un incendio: focos acumulados y último anillo/
+ * superficie mostrados (para no retroceder nunca). Sin `updatedAt` (eso es
+ * responsabilidad del almacén persistente, no de este cómputo puro). */
+export interface FirmsGrowthEntry {
+  points: [number, number][];
+  ring?: [number, number][];
+  areaHa?: number;
+}
+export type FirmsGrowthState = Record<string, FirmsGrowthEntry>;
+
 /**
  * Dibuja, para CADA incendio no extinguido, el perímetro de su cúmulo de focos
- * FIRMS (envolvente cóncava del componente conexo que le corresponde). Autónomo y
- * al día: se recalcula en cada consulta con los focos vigentes, así que crece solo
- * conforme aparecen focos nuevos fuera del perímetro anterior.
+ * FIRMS ACUMULADO: la envolvente cóncava de TODOS los focos vistos alguna vez
+ * para ese incendio (no solo los de la ventana viva de FIRMS, ~2 días), fusionando
+ * `previous` (el estado devuelto por una llamada anterior, persistido por el
+ * llamador — ver `firms-growth-store.ts`) con los focos de esta ronda. Así el
+ * anillo SOLO PUEDE CRECER: si el frente se enfría y deja de haber focos activos
+ * en la ventana viva (p. ej. un incendio ya perimetrado/controlado), el perímetro
+ * sigue mostrando su mayor extensión conocida en vez de encoger. Devuelve también
+ * `nextState`, a persistir para la siguiente ronda.
  *
  * - Si el incendio ya tiene un perímetro REAL de área quemada (EFFIS,
- *   `perimeterSourceSlug`), se CONSERVA y el cúmulo FIRMS se añade como
- *   `perimeterExtra` (extensión discontinua) solo si supera claramente su extensión.
- * - Si no, el cúmulo FIRMS pasa a ser el `perimeter` (marcado `perimeterApprox`,
- *   detección satelital) y su superficie va a `hotspotHectares` (estimación por
- *   focos; nunca pisa una cifra oficial de `hectares`).
+ *   `perimeterSourceSlug`) y su superficie sigue siendo MAYOR que la del cúmulo
+ *   acumulado, se CONSERVA tal cual.
+ * - En cualquier otro caso (sin EFFIS, o el cúmulo ya lo iguala o supera) el
+ *   cúmulo acumulado pasa a ser el ÚNICO `perimeter` (marcado `perimeterApprox`;
+ *   superficie en `hotspotHectares`, nunca en `hectares`).
  *
- * Nunca lanza; identidad sin focos.
+ * Nunca lanza; identidad sin focos nuevos ni memoria previa.
  */
-export function deriveFirmsPerimeters(fires: Fire[], hotspots: Hotspot[]): Fire[] {
-  if (!hotspots.length) return fires;
-  const comps = connectedComponents(
-    hotspots.map((h) => h.coordinates),
-    FIRMS_LINK_KM,
-  ).filter((c) => c.length >= FIRMS_MIN_HOTSPOTS);
-  if (!comps.length) return fires;
+export function deriveFirmsPerimeters(
+  fires: Fire[],
+  hotspots: Hotspot[],
+  previous: FirmsGrowthState = {},
+): { fires: Fire[]; nextState: FirmsGrowthState } {
+  if (!hotspots.length && !Object.keys(previous).length) return { fires, nextState: {} };
 
-  const candidates = fires
-    .map((f, i) => ({ f, i }))
-    .filter(({ f }) => f.state !== 'extinguido');
-  // Adjudica cada componente al incendio candidato más cercano (a ≤ ASSIGN_MAX_KM);
-  // cada incendio se queda con la componente MÁS GRANDE que le toque.
-  const assigned = new Map<number, [number, number][]>();
+  const comps = hotspots.length
+    ? connectedComponents(
+        hotspots.map((h) => h.coordinates),
+        FIRMS_LINK_KM,
+      ).filter((c) => c.length >= FIRMS_MIN_HOTSPOTS)
+    : [];
+
+  const candidates = fires.filter((f) => f.state !== 'extinguido');
+  // Adjudica cada componente de ESTA ronda al incendio candidato más cercano (a
+  // ≤ ASSIGN_MAX_KM); cada incendio se queda con la componente MÁS GRANDE que le
+  // toque. Los focos de rondas anteriores ya llevan su adjudicación resuelta
+  // (por incendio, en `previous`), así que no se reasignan aquí.
+  const assignedNow = new Map<string, [number, number][]>();
   for (const comp of comps) {
-    let bestIdx = -1;
+    let best: Fire | null = null;
     let bestKm = Infinity;
-    for (const { f, i } of candidates) {
+    for (const f of candidates) {
       const km = minDistToCluster(f.coordinates, comp);
       if (km < bestKm) {
         bestKm = km;
-        bestIdx = i;
+        best = f;
       }
     }
-    if (bestIdx < 0 || bestKm > FIRMS_ASSIGN_MAX_KM) continue;
-    const prev = assigned.get(bestIdx);
-    if (!prev || comp.length > prev.length) assigned.set(bestIdx, comp);
+    if (!best || bestKm > FIRMS_ASSIGN_MAX_KM) continue;
+    const prevComp = assignedNow.get(best.slug);
+    if (!prevComp || comp.length > prevComp.length) assignedNow.set(best.slug, comp);
   }
-  if (!assigned.size) return fires;
 
-  return fires.map((f, i) => {
-    const comp = assigned.get(i);
-    if (!comp) return f;
-    const ring = clusterHullRing(comp);
-    if (!ring) return f;
-    const area = Math.round(estimatePerimeterHectares(ring) / 100) * 100; // centenas (estimación)
+  const activeSlugs = new Set(candidates.map((f) => f.slug));
+  const touchedSlugs = [...new Set([...assignedNow.keys(), ...Object.keys(previous)])].filter((s) =>
+    activeSlugs.has(s),
+  );
+  if (!touchedSlugs.length) return { fires, nextState: {} };
+
+  const nextState: FirmsGrowthState = {};
+  const outBySlug = new Map<string, Fire>();
+  for (const slug of touchedSlugs) {
+    const f = candidates.find((x) => x.slug === slug);
+    if (!f) continue;
+    const priorEntry = previous[slug];
+    const merged = dedupeGrowthPoints([...(priorEntry?.points ?? []), ...(assignedNow.get(slug) ?? [])]);
+    if (merged.length < FIRMS_MIN_HOTSPOTS) continue;
+
+    const candidateRing = clusterHullRing(merged);
+    const candidateArea = candidateRing ? estimatePerimeterHectares(candidateRing) : 0;
+    const priorArea = priorEntry?.areaHa ?? 0;
+    // El anillo NUNCA retrocede: si el recálculo de esta ronda diera una
+    // superficie menor que la ya mostrada, se conserva la anterior tal cual.
+    const useCandidate = !!candidateRing && candidateArea >= priorArea;
+    const ring = useCandidate ? candidateRing : priorEntry?.ring;
+    const area = useCandidate ? candidateArea : priorArea;
+    nextState[slug] = { points: merged, ring, areaHa: area };
+    if (!ring) continue;
+
     const out: Fire = { ...f };
     const effisArea =
       f.perimeterSourceSlug && f.perimeter && f.perimeter.length >= 4
         ? estimatePerimeterHectares(f.perimeter)
         : 0;
-    if (effisArea > 0 && area <= effisArea * 1.5) {
-      // El perímetro EFFIS (área quemada real mapeada) es representativo del cúmulo:
-      // se conserva tal cual, sin añadir una segunda silueta casi igual.
-      return out;
+    if (effisArea > 0 && area <= effisArea) {
+      // El perímetro EFFIS (área quemada real mapeada) sigue siendo mayor o
+      // igual que el cúmulo acumulado: se conserva tal cual.
+      outBySlug.set(slug, out);
+      continue;
     }
-    // Sin EFFIS, o el fuego ha crecido muy por encima de la cicatriz EFFIS (que va
-    // con retraso): el cúmulo FIRMS —más actual— pasa a ser el ÚNICO perímetro.
+    // Sin EFFIS, o el cúmulo acumulado ya lo iguala o supera: el cúmulo —siempre
+    // creciente— pasa a ser el ÚNICO perímetro.
     out.perimeter = ring;
     out.perimeterApprox = true;
     out.perimeterExtra = undefined;
-    out.hotspotHectares = area;
-    return out;
-  });
+    out.hotspotHectares = Math.round(area / 100) * 100; // centenas (estimación)
+    outBySlug.set(slug, out);
+  }
+
+  if (!outBySlug.size) return { fires, nextState };
+  return { fires: fires.map((f) => outBySlug.get(f.slug) ?? f), nextState };
 }
 
 // ── Capa de calidad: confirmación por focos FIRMS ────────────────────────────

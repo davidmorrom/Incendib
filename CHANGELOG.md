@@ -5,6 +5,35 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.48.0] - 2026-07-24
+
+### Cambiado
+
+- **El perímetro por focos FIRMS ahora SOLO CRECE: nunca retrocede aunque el
+  frente se enfríe.** Antes, `deriveFirmsPerimeters` recalculaba el cúmulo de
+  focos en cada consulta a partir de la ventana viva de FIRMS (~2 días); si un
+  incendio ya perimetrado/controlado dejaba de tener focos térmicos activos, su
+  perímetro dibujado podía encoger o desaparecer aunque la cicatriz real
+  siguiera ahí (visto en Almorox: la estimación por focos caía a ~400 ha frente
+  a las ~1 000 ha ya verificadas en prensa). Ahora se guarda en Redis
+  (`firms-growth-store.ts`) el cúmulo de focos acumulado de cada incendio junto
+  con el último anillo/superficie mostrados; cada ronda fusiona lo nuevo con lo
+  ya visto, así que el anillo solo se expande cuando aparecen focos fuera de él
+  y nunca se muestra una superficie menor que la ya alcanzada.
+- **El perímetro EFFIS ya no se conserva por un margen de tolerancia cuando el
+  cúmulo de focos es mayor.** Antes se mantenía el área quemada EFFIS mientras
+  el cúmulo FIRMS no la superara en más de un 50 %; ahora se sustituye en
+  cuanto el cúmulo (acumulado) iguala o supera a EFFIS — la cicatriz EFFIS va
+  con retraso y no debe mostrarse como definitiva si los focos ya indican más
+  extensión.
+- La persistencia en Redis se hace **solo desde el cron de alertas**
+  (`/api/push/cron`, `getFiresAndPersistFirmsGrowth`), nunca desde el camino de
+  render de página: escribir ahí habría marcado `/`, `/informe`, `/fuentes`,
+  `/noticias` e `/incendios-hoy` como rutas dinámicas, perdiendo su caché
+  ISR de 2 min (detectado y corregido en la misma sesión, verificado con
+  `next build` antes/después). La lectura (`getFires`) usa una versión
+  cacheada (`unstable_cache`, mismo patrón que los overrides del panel).
+
 ## [0.47.3] - 2026-07-24
 
 ### Corregido

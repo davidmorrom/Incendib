@@ -35,6 +35,12 @@ import {
   type OverrideState,
 } from '@/lib/overrides/store';
 import { applyEmergencyOverrides } from './emergency';
+import {
+  readFirmsGrowth,
+  readFirmsGrowthCached,
+  writeFirmsGrowth,
+  type StoredFirmsGrowthState,
+} from './firms-growth-store';
 
 export type DataMode = 'mock' | 'live';
 
@@ -48,7 +54,11 @@ export function getDataMode(): DataMode {
 }
 
 /**
- * Incendios agregados y normalizados.
+ * Agrega y normaliza las fuentes (sin aplicar todavía el perímetro acumulado
+ * por focos FIRMS: eso lo hace cada llamador a su manera, ver `getFires` y
+ * `getFiresAndPersistFirmsGrowth` más abajo — uno con lectura cacheada, el otro
+ * persistiendo la escritura). Factorizado para no recalcular el pipeline dos
+ * veces cuando el cron necesita también los `hotspots` crudos.
  *
  * En live combina las fuentes con datos reales usables: ANEPC (Portugal, feed
  * oficial; respaldo fogos.pt), Castilla y León (INFORCYL), Andalucía (INFOCA),
@@ -67,7 +77,7 @@ export function getDataMode(): DataMode {
  * satélite (ya marcan estado y filtran por recencia; ahí un fallo de detección de
  * FIRMS sería un falso negativo).
  */
-export async function getFires(): Promise<Fire[]> {
+async function buildLiveFires(): Promise<{ fires: Fire[]; hotspots: Hotspot[] }> {
   let fires: Fire[];
   // Focos FIRMS de esta consulta (para actualizar extensiones de emergencia con
   // el dato satelital real; vacío en mock).
@@ -128,11 +138,61 @@ export async function getFires(): Promise<Fire[]> {
         f.reconstructed && !withEmergency[i]!.satelliteConfirmed ? f : withEmergency[i]!,
       )
     : withEmergency;
-  // Perímetro por focos FIRMS para TODOS los incendios (autónomo y al día): la
-  // envolvente del cúmulo de focos de cada incendio, que crece sola con los focos
-  // nuevos. Va al final para cubrir también las fichas de emergencia añadidas
-  // arriba. Sin focos (mock / sin clave) es identidad.
-  return deriveFirmsPerimeters(withReconstructedConfirmed, firmsHotspots);
+  return { fires: withReconstructedConfirmed, hotspots: firmsHotspots };
+}
+
+/**
+ * Incendios agregados y normalizados, con el perímetro por focos FIRMS
+ * ACUMULATIVO aplicado (envolvente del cúmulo de cada incendio, fusionada con
+ * lo ya visto en rondas anteriores para que SOLO CREZCA, incluso si el frente
+ * se enfría y la ventana viva de FIRMS —~2 días— deja de tener focos). Lee la
+ * memoria acumulada con `readFirmsGrowthCached` (envuelta en `unstable_cache`,
+ * igual que los overrides): así esta función sigue siendo compatible con
+ * páginas estáticas/ISR. NO escribe nada — la persistencia del crecimiento la
+ * dispara solo el cron de alertas (`getFiresAndPersistFirmsGrowth`), porque
+ * escribir en Redis durante el render de una página la convertiría en
+ * dinámica (perdería la caché de `/`, `/informe`, `/fuentes`...). Nunca lanza.
+ */
+export async function getFires(): Promise<Fire[]> {
+  const { fires, hotspots } = await buildLiveFires();
+  const previousGrowth = getDataMode() === 'live' ? await safeGrowth() : {};
+  return deriveFirmsPerimeters(fires, hotspots, previousGrowth).fires;
+}
+
+/**
+ * Como `getFires`, pero además PERSISTE en Redis el crecimiento acumulado de
+ * esta ronda. Llamar SOLO desde una ruta ya dinámica (el cron de alertas,
+ * `/api/push/cron`): nunca desde el camino de render de una página (ver el
+ * docstring de `getFires`). Nunca lanza.
+ */
+export async function getFiresAndPersistFirmsGrowth(): Promise<Fire[]> {
+  const { fires, hotspots } = await buildLiveFires();
+  if (getDataMode() !== 'live') return fires;
+  try {
+    const previous = await readFirmsGrowth();
+    const { fires: grown, nextState } = deriveFirmsPerimeters(fires, hotspots, previous);
+    if (Object.keys(nextState).length) {
+      const now = Date.now();
+      const stamped: StoredFirmsGrowthState = {};
+      for (const [slug, entry] of Object.entries(nextState)) stamped[slug] = { ...entry, updatedAt: now };
+      await writeFirmsGrowth({ ...previous, ...stamped });
+    }
+    return grown;
+  } catch {
+    return fires;
+  }
+}
+
+/** `readFirmsGrowthCached` (unstable_cache) lanza fuera de un request/prerender
+ * (tests unitarios, scripts) — mismo gotcha que `safeOverrides`. Se degrada a
+ * `{}` (sin memoria acumulada = el perímetro se comporta como una pasada sin
+ * historial, igual que antes de esta capa). */
+async function safeGrowth(): Promise<StoredFirmsGrowthState> {
+  try {
+    return await readFirmsGrowthCached();
+  } catch {
+    return {};
+  }
 }
 
 /**

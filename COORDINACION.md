@@ -31,6 +31,72 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos): el perímetro por focos FIRMS ya SOLO CRECE (v0.48.0)
+
+**Encargo del propietario:** «mantén el sistema de perímetro aproximado por
+focos, pero que se actualice porque hay focos nuevos; no quiero el perímetro
+EFFIS si es más pequeño que los focos; que el perímetro solo crezca, siempre
+que haya nuevos focos fuera de él».
+
+**Diagnóstico:** `deriveFirmsPerimeters` (ver v0.47.3 más abajo) ya existía y
+recalculaba el cúmulo de focos EN CADA consulta a partir de la ventana viva de
+FIRMS (~2 días) — autónomo, pero SIN memoria: si el frente se enfriaba (menos
+focos térmicos activos, p. ej. un incendio ya perimetrado/controlado como
+Almorox), el cúmulo de esa ronda encogía aunque la cicatriz real siguiera ahí
+(Almorox: ~400 ha por focos frente a ~1 000 ha ya verificadas en prensa). Y el
+margen de tolerancia (1,5×) conservaba EFFIS aunque el cúmulo de focos ya fuera
+mayor — justo lo que el propietario pidió quitar.
+
+**Hecho (typecheck + lint + 374 tests + build; verificado en vivo antes/después
+de cada cambio con datos reales — ver detalle):**
+- `deriveFirmsPerimeters` (`src/lib/data/adapters/index.ts`) ahora recibe un
+  tercer parámetro `previous: FirmsGrowthState` (focos acumulados + último
+  anillo/superficie por incendio) y devuelve `{ fires, nextState }` en vez de
+  `Fire[]` a secas. Cada ronda fusiona los focos de esta ventana con los ya
+  vistos (`dedupeGrowthPoints`, dedup por rejilla ~11 m + tope 2000 puntos con
+  diezmado uniforme) y recalcula el casco desde el conjunto acumulado; un guard
+  explícito (`candidateArea >= priorArea`) garantiza que el área mostrada NUNCA
+  retrocede aunque el recálculo geométrico diera, por lo que sea, algo menor.
+- EFFIS ya no se conserva por el margen 1,5×: se sustituye en cuanto el cúmulo
+  acumulado lo iguala o supera (`area <= effisArea`, antes `area <= effisArea *
+  1.5`).
+- `src/lib/data/firms-growth-store.ts` (nuevo): persistencia en el mismo
+  Upstash Redis que alertas/histórico (`firms:growth`, TTL de higiene 45 días
+  por incendio). `readFirmsGrowth`/`writeFirmsGrowth` (crudas, para el cron) +
+  `readFirmsGrowthCached` (envuelta en `unstable_cache`, para el render de
+  página).
+- ⚠️ **Regresión detectada y corregida en la misma sesión:** mi primer intento
+  llamaba a `readFirmsGrowth`/`writeFirmsGrowth` DIRECTAMENTE dentro de
+  `getFires`. `npm run build` reveló que eso convertía `/`, `/informe`,
+  `/fuentes`, `/noticias`, `/incendios-hoy` y `/sitemap.xml` de `○` (estático,
+  ISR 2 min) a `ƒ` (dinámico, sin caché) — un I/O sin caché de Next dentro del
+  camino de render fuerza el modo dinámico. Fix: `getFires` (`data/index.ts`)
+  solo LEE con `readFirmsGrowthCached` (mismo patrón que `getOverridesCached`);
+  la ESCRITURA se movió a una función nueva, `getFiresAndPersistFirmsGrowth`,
+  llamada SOLO desde `/api/push/cron` (ruta que ya era dinámica). Confirmado
+  con `next build` antes/después: las 6 rutas volvieron a `○`/ISR 2 min.
+- Verificado extremo a extremo contra Redis/FIRMS reales: `getFiresAndPersist
+  FirmsGrowth()` vía script puebla `firms:growth` (11 incendios); `next start`
+  + `GET /api/fires` real confirma que la lectura cacheada aplica la memoria
+  correctamente (Burgohondo ~15 600-15 700 ha, San Martín ~10 500 ha, estables
+  entre llamadas); disparado el cron real (`POST /api/push/cron` con
+  `CRON_SECRET` local) y confirmado que persiste sin romper nada.
+- Tests (`firms-cluster.test.ts`, reescrito para el nuevo contrato `{fires,
+  nextState}`): +5 casos nuevos — crecimiento tras enfriarse, crecimiento por
+  foco nuevo fuera del anillo, memoria no se mezcla entre incendios (por slug),
+  guard de "nunca retrocede", y el caso límite de la franja 1×-1,5× donde EFFIS
+  antes se conservaba y ahora se sustituye.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`
+(`deriveFirmsPerimeters` + `dedupeGrowthPoints` + tipos `FirmsGrowthEntry`/
+`FirmsGrowthState`), `src/lib/data/firms-growth-store.ts` (nuevo),
+`src/lib/data/index.ts` (`buildLiveFires`/`getFires`/
+`getFiresAndPersistFirmsGrowth`/`safeGrowth`), `src/app/api/push/cron/route.ts`,
+`src/lib/data/adapters/firms-cluster.test.ts`, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.48.0** (último tag v0.47.3; cambio de comportamiento, no
+solo fix). **Siguiente tag libre: 0.48.1.**
+
 ### 2026-07-24 — Agente (datos): confirmación satélite para fichas de emergencia reconstruidas (v0.47.3)
 
 **Encargo del propietario:** «revisa los focos de satélite y haz que el
