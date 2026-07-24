@@ -31,6 +31,27 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos): `getFires` nunca lanza de verdad → build robusto (v0.46.1)
+
+**Motivo:** el deploy de v0.46.0 falló en Vercel al prerenderizar `/f/[slug]` de
+`pt-seia-…` con `TypeError: terminated` (socket cerrado). Causa: `getFires` hacía
+`Promise.all` de las 7 fuentes SIN aislar cada una, así que un fallo de red
+transitorio en UNA sola fuente hacía lanzar la función y, al prerenderizar una
+ficha por incendio, tumbaba el build entero. El docstring ya prometía «nunca
+lanza», pero no se cumplía. El mismo código pasó en local por azar (ningún socket
+cayó en el momento justo) — de ahí que no se detectara en la verificación de v0.46.0.
+
+**Hecho (typecheck + lint + build 112/112 + 366 tests, todo en verde):** aislado
+cada fetch de fuente con `.catch(() => [])` en `getFires`, y envueltos igual los
+awaits de `getHotspots` y `getBurnedAreas` (honran su propio «nunca lanza»). El
+resto del prerender de la ficha ya era seguro (getWeather/getNews/getFireEvents/
+getPlacePool/getArchivedFire/readArchivedFireGit capturan). El build ya no depende
+de que respondan todas las fuentes ni ningún incendio concreto.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/index.ts`, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.46.1** (último tag v0.46.0; fix). **Siguiente tag libre: 0.46.2.**
+
 ### 2026-07-24 — Agente (ficha/UI): compartir en Instagram Stories (v0.46.0)
 
 **Encargo del propietario:** «¿podemos hacer que al compartir la ficha de un

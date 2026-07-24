@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.46.1] - 2026-07-24
+
+### Corregido
+
+- **El build de producción podía fallar por un incendio cualquiera.** `getFires`
+  (y `getHotspots`/`getBurnedAreas`) prometían «nunca lanza», pero agregaban las
+  fuentes con `Promise.all` sin aislar cada una: un fallo de red transitorio
+  (socket cerrado a mitad del build) en UNA sola fuente hacía lanzar la función y,
+  al prerenderizarse una ficha por incendio, tumbaba el build entero (visto en
+  Vercel: `/f/pt-seia-…` con `TypeError: terminated`). Ahora cada fuente cae a
+  «[]» de forma independiente si falla; el build ya no depende de que respondan
+  todas las fuentes —ni ningún incendio concreto—.
+
 ## [0.46.0] - 2026-07-24
 
 ### Añadido

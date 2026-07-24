@@ -73,14 +73,19 @@ export async function getFires(): Promise<Fire[]> {
   // el dato satelital real; vacío en mock).
   let firmsHotspots: Hotspot[] = [];
   if (getDataMode() === 'live') {
+    // Cada fuente se aísla con `.catch(() => [])`: un fallo de red (socket cerrado,
+    // timeout) en UNA fuente la deja vacía esta ronda pero no arrastra a las demás
+    // ni hace lanzar a `getFires`. Es lo que hace cierto el «nunca lanza» del
+    // docstring: sin esto, `Promise.all` propaga el rechazo y, al prerenderizar
+    // una ficha por incendio en el build, un único socket caído tumba el build entero.
     const [pt, cyl, and, cat, clm, hotspots, perimeters] = await Promise.all([
-      fetchPortugalFires(),
-      fetchJcylFires(),
-      fetchInfocaFires(),
-      fetchCatalunyaFires(),
-      fetchInfocamFires(),
-      fetchFirmsHotspots({ days: 2 }),
-      fetchEffisPerimeters(),
+      fetchPortugalFires().catch(() => []),
+      fetchJcylFires().catch(() => []),
+      fetchInfocaFires().catch(() => []),
+      fetchCatalunyaFires().catch(() => []),
+      fetchInfocamFires().catch(() => []),
+      fetchFirmsHotspots({ days: 2 }).catch(() => []),
+      fetchEffisPerimeters().catch(() => []),
     ]);
     // INFOCAM es un log acumulativo poco fiable (ver docstring): solo dejamos
     // pasar los incidentes confirmados por un foco FIRMS cercano. Al resto de
@@ -161,7 +166,8 @@ export async function getFire(slug: string): Promise<Fire | null> {
 export async function getHotspots(): Promise<Hotspot[]> {
   // 2 días: robusto ante ventanas VIIRS/NRT vacías (madrugada). El mapa los
   // atenúa por antigüedad y el KPI "Focos 24 h" cuenta solo las últimas 24 h.
-  const hotspots = getDataMode() === 'live' ? await fetchFirmsHotspots({ days: 2 }) : MOCK_HOTSPOTS;
+  const hotspots =
+    getDataMode() === 'live' ? await fetchFirmsHotspots({ days: 2 }).catch(() => []) : MOCK_HOTSPOTS;
   return filterOutIds(hotspots, (await safeOverrides()).hiddenHotspots);
 }
 
@@ -173,7 +179,7 @@ export async function getHotspots(): Promise<Hotspot[]> {
  */
 export async function getBurnedAreas(): Promise<Fire[]> {
   if (getDataMode() !== 'live') return [];
-  const areas = await fetchEffisPerimeters();
+  const areas = await fetchEffisPerimeters().catch(() => []);
   // Cap por higiene visual/perf; ya vienen ordenadas por actualización reciente.
   const capped = areas.slice(0, 250);
   return filterOutSlugs(capped, (await safeOverrides()).hiddenBurned);
