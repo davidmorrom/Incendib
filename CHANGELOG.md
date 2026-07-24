@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.45.1] - 2026-07-24
+
+### Corregido
+
+- **Al compartir un incendio salía «0 ha».** La imagen OG y la descripción del
+  enlace estampaban `hectares` a secas; para un incendio sin cifra oficial (como
+  Burgohondo) eso daba «0 ha». Ahora usan el mismo criterio que la ficha: cifra
+  oficial/EFFIS si la hay, si no la estimación por focos FIRMS marcada «~» (p. ej.
+  «~12 600 ha»), y «sin dato» si no hay ninguna.
+
 ## [0.45.0] - 2026-07-24
 
 ### Añadido

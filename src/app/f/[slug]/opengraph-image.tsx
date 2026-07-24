@@ -22,6 +22,14 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
   const fire = resolved?.fire ?? null;
   const historical = Boolean(resolved && resolved.origin !== 'live');
 
+  // Superficie con el mismo criterio que la ficha: cifra oficial/EFFIS si la hay;
+  // si no, la estimación por focos FIRMS (`hotspotHectares`), marcada «~»; si
+  // tampoco, «sin dato». (Antes se estampaba `hectares` a secas → «0 ha».)
+  const surfaceHa = fire ? (fire.hectares > 0 ? fire.hectares : (fire.hotspotHectares ?? 0)) : 0;
+  const surfaceApprox = Boolean(
+    fire && (fire.hectaresApprox || (fire.hectares === 0 && fire.hotspotHectares)),
+  );
+
   const stamped = new Date().toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit',
@@ -89,7 +97,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
                 {fire.state.toUpperCase()}
               </span>
               <span style={{ fontSize: 34, color: dark.text.body }}>
-                {formatNumber(fire.hectares)} ha
+                {surfaceHa > 0 ? `${surfaceApprox ? '~' : ''}${formatNumber(surfaceHa)} ha` : 'sin dato'}
               </span>
             </div>
           )}

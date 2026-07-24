@@ -9,6 +9,7 @@ import { getFireEvents } from '@/lib/history/store';
 import { getPlacePool } from '@/lib/fires/history-pool';
 import { findEpisodeLinks } from '@/lib/fires/reactivation';
 import { FichaScreen } from '@/components/screens/FichaScreen';
+import { formatNumber } from '@/lib/utils/format';
 import type { TimelineEntry } from '@/types/fire';
 
 // Pantalla canónica 1c: ficha con URL propia y compartible. En vivo muestra el
@@ -44,11 +45,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const place = fire.municipality && fire.municipality !== '—' ? fire.municipality : region;
   const loc = [fire.province, region].filter((x) => x && x !== '—').join(', ');
   const title = `Incendio de ${fire.name} · ${place}`;
+  // Superficie con el mismo criterio que la ficha/OG: oficial/EFFIS si la hay; si
+  // no, estimación por focos FIRMS marcada «~»; si tampoco, «sin dato» (evita el
+  // «0 ha» que salía al compartir un incendio sin cifra oficial).
+  const surfaceHa = fire.hectares > 0 ? fire.hectares : (fire.hotspotHectares ?? 0);
+  const surfaceApprox = fire.hectaresApprox || (fire.hectares === 0 && !!fire.hotspotHectares);
+  const haStr = surfaceHa > 0 ? `${surfaceApprox ? '~' : ''}${formatNumber(surfaceHa)} ha` : 'sin dato';
   // Histórico: nunca afirmar el estado (p. ej. «activo») como si fuera actual.
   const description =
-    origin === 'live'
-      ? `${fire.state} · ${fire.hectares} ha · ${loc}`
-      : `Ficha histórica · ${fire.hectares} ha · ${loc}`;
+    origin === 'live' ? `${fire.state} · ${haStr} · ${loc}` : `Ficha histórica · ${haStr} · ${loc}`;
   return {
     title,
     description,
