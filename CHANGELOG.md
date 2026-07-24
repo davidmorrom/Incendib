@@ -5,6 +5,21 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.47.3] - 2026-07-24
+
+### Corregido
+
+- **Las fichas de emergencia reconstruidas (sin fuente oficial) ya quedan
+  «confirmadas por satélite».** `confirmWithHotspots` se aplicaba antes de
+  `applyEmergencyOverrides`, así que San Martín de Valdeiglesias (Madrid, sin
+  API de incidentes) nunca pasaba por esa capa pese a tener cientos de focos
+  FIRMS encima: le faltaban `satelliteConfirmed`/`hotspotKm`, y el filtro
+  «confirmado por satélite: sí» del Informe lo excluía por error. Verificado en
+  vivo (antes/después) sobre los incendios activos de mayor tamaño: el
+  perímetro por focos (`deriveFirmsPerimeters`) ya se recalculaba bien para
+  todos ellos (Burgohondo ~15 600 ha, San Martín ~10 500 ha, Murias de Ponjos,
+  Marjaliza…); el único fallo real era esta insignia/filtro.
+
 ## [0.47.2] - 2026-07-24
 
 ### Cambiado

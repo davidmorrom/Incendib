@@ -31,6 +31,41 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos): confirmación satélite para fichas de emergencia reconstruidas (v0.47.3)
+
+**Encargo del propietario:** «revisa los focos de satélite y haz que el
+perímetro se actualice, en los mayores incendios que haya».
+
+**Diagnóstico (verificado en vivo, no supuesto):** monté un script temporal
+(vitest, `.env.local` con datos live) que llamó a `getFires()`/`getHotspots()`
+reales y volcó, para los incendios activos ordenados por tamaño, si tenían
+perímetro derivado de focos. Resultado: `deriveFirmsPerimeters` (ya existente
+desde antes) funcionaba correctamente para TODOS los grandes activos —
+Burgohondo (~15 600 ha), San Martín de Valdeiglesias (~10 500 ha), Murias de
+Ponjos, Marjaliza, Almorox, Castropodame…—, cada uno con perímetro actualizado
+y `perimeterApprox`. Confirmado también en producción (`incendib.es/fuentes`:
+FIRMS y EFFIS «ok»; `incendib.es/f/cyl-burgohondo-…`: ~10 787 ha, «estimación
+satelital», perímetro «aproximado»). El único fallo real: San Martín de
+Valdeiglesias (ficha `reconstructed` que añade `emergency.ts`, sin fuente
+oficial) nunca tenía `satelliteConfirmed`/`hotspotKm`, porque en `getFires`
+`confirmWithHotspots` se aplicaba ANTES de `applyEmergencyOverrides` — la ficha
+reconstruida no existía todavía en ese punto del pipeline. Efecto real: el
+filtro «confirmado por satélite: sí» del Informe la excluía pese a tener ~700+
+focos FIRMS encima.
+
+**Hecho (typecheck + lint + build 116/116 + 368 tests, todo en verde; probado
+antes/después con datos live — San Martín pasa de sin `satelliteConfirmed` a
+`satelliteConfirmed: true, hotspotKm: 1.4`):** en `src/lib/data/index.ts`, tras
+`applyEmergencyOverrides`, una segunda pasada de `confirmWithHotspots` que solo
+rellena el campo en las fichas `reconstructed` que aún no lo tuvieran (las
+fichas ya confirmadas o fusionadas con una fuente oficial no se tocan, para no
+pisar un override manual del panel). `deriveFirmsPerimeters` sigue yendo al
+final, sin cambios.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/index.ts`, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.47.3** (último tag v0.47.2; fix). **Siguiente tag libre: 0.47.4.**
+
 ### 2026-07-24 — Agente (ficha/UI): story de Burgohondo encuadra El Burguillo (v0.47.2)
 
 **Encargo del propietario:** que el fondo satélite de la story de Burgohondo destaque

@@ -118,11 +118,21 @@ export async function getFires(): Promise<Fire[]> {
   // cronología) sobre el incendio en vivo, o añaden fichas reconstruidas donde no
   // hay fuente. Inerte fuera de la ventana de emergencia (ver emergency.ts).
   const withEmergency = applyEmergencyOverrides(patched);
+  // Las fichas `reconstructed` que añade la capa de emergencia (sin fuente
+  // oficial, p. ej. Madrid sin API de incidentes) no existían cuando se aplicó
+  // `confirmWithHotspots` más arriba, así que se confirman aquí: si no, un
+  // incendio con cientos de focos FIRMS encima quedaría sin `satelliteConfirmed`
+  // y el filtro «confirmado por satélite» del Informe lo excluiría por error.
+  const withReconstructedConfirmed = firmsHotspots.length
+    ? confirmWithHotspots(withEmergency, firmsHotspots).map((f, i) =>
+        f.reconstructed && !withEmergency[i]!.satelliteConfirmed ? f : withEmergency[i]!,
+      )
+    : withEmergency;
   // Perímetro por focos FIRMS para TODOS los incendios (autónomo y al día): la
   // envolvente del cúmulo de focos de cada incendio, que crece sola con los focos
   // nuevos. Va al final para cubrir también las fichas de emergencia añadidas
   // arriba. Sin focos (mock / sin clave) es identidad.
-  return deriveFirmsPerimeters(withEmergency, firmsHotspots);
+  return deriveFirmsPerimeters(withReconstructedConfirmed, firmsHotspots);
 }
 
 /**
