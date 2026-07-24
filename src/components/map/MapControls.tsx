@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
 import { useEffectiveTheme } from '@/lib/hooks/useTheme';
@@ -153,7 +153,11 @@ export function MapControls({
   hasHotspots?: boolean;
 }) {
   const d = useDict();
-  const [open, setOpen] = useState(false);
+  // El estado abierto/cerrado del selector de capas vive en el store para que sea
+  // mutuamente excluyente con la leyenda (nunca ambos paneles a la vez).
+  const panel = useUIStore((s) => s.mapPanel);
+  const toggle = useUIStore((s) => s.toggleMapPanel);
+  const open = panel === 'layers';
   const perimetersVisible = useUIStore((s) => s.perimetersVisible);
   const togglePerimeters = useUIStore((s) => s.togglePerimeters);
   const hotspotsVisible = useUIStore((s) => s.hotspotsVisible);
@@ -166,7 +170,14 @@ export function MapControls({
     (hotspotsVisible && hasHotspots);
 
   return (
-    <div className="absolute right-[10px] top-[10px] z-[3] flex flex-col items-end gap-2">
+    // Con el panel abierto subimos toda la pila de controles por encima de la
+    // leyenda (z-[3]) para que el panel reciba los toques y no la píldora de abajo.
+    <div
+      className={cn(
+        'absolute right-[10px] top-[10px] flex flex-col items-end gap-2',
+        open ? 'z-[20]' : 'z-[3]',
+      )}
+    >
       <div className="relative">
         <button
           type="button"
@@ -174,7 +185,7 @@ export function MapControls({
           aria-label={d.map.layersAria}
           aria-expanded={open}
           title={d.map.layersAria}
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => toggle('layers')}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
             <path d="M8 2 L14 5 L8 8 L2 5 Z" />

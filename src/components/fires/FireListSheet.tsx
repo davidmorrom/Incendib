@@ -1,12 +1,15 @@
 'use client';
 
+import type { Ref } from 'react';
 import { FireRow } from './FireRow';
+import { SheetGrabber } from '@/components/ui/SheetGrabber';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { formatClock } from '@/lib/utils/format';
 import { useNow } from '@/components/time/NowProvider';
 import { interpolate } from '@/lib/i18n';
 import { cn } from '@/lib/utils/cn';
 import { mix, V } from '@/lib/design/color';
+import type { SheetGrabberProps } from '@/lib/hooks/useBottomSheet';
 import type { Fire } from '@/types/fire';
 import type { FireFilters } from '@/lib/fires/filters';
 
@@ -58,6 +61,8 @@ export function FireListSheet({
   onHover,
   hoveredSlug,
   onOpenFilters,
+  sheetRef,
+  grabberProps,
 }: {
   className?: string;
   fires: Fire[];
@@ -69,6 +74,11 @@ export function FireListSheet({
   hoveredSlug?: string | null;
   /** Abre el panel de filtros avanzados (modal en móvil). */
   onOpenFilters?: () => void;
+  /** Ref del elemento de la hoja (para controlar su altura arrastrable). */
+  sheetRef?: Ref<HTMLElement>;
+  /** Props del tirador arrastrable (de useBottomSheet). Si no llegan, el tirador
+   *  queda como asa decorativa. */
+  grabberProps?: SheetGrabberProps;
 }) {
   const d = useDict();
   const now = useNow();
@@ -78,17 +88,25 @@ export function FireListSheet({
 
   return (
     <section
+      ref={sheetRef}
       aria-label={interpolate(d.map.firesCount, { n: fires.length })}
       className={cn(
-        'relative -mt-[14px] flex h-[320px] flex-none flex-col rounded-t-[14px] border-t bg-bg-card',
+        // Alto de reserva (SSR/pre-medición) ≈ el anclaje por defecto que fija
+        // useBottomSheet tras medir (~52 % del contenedor), para minimizar el
+        // salto de layout al hidratar. Tras montar, la altura la controla el hook.
+        'relative -mt-[14px] flex h-[45dvh] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card',
         className,
       )}
     >
-      <div
-        className="mx-auto mt-2 h-1 w-9 flex-none rounded-full"
-        style={{ background: 'var(--border-strong)' }}
-        aria-hidden
-      />
+      {grabberProps ? (
+        <SheetGrabber {...grabberProps} label={d.map.sheetHandle} className="mt-1.5" />
+      ) : (
+        <div
+          className="mx-auto mt-2 h-1 w-9 flex-none rounded-full"
+          style={{ background: 'var(--border-strong)' }}
+          aria-hidden
+        />
+      )}
 
       <div className="flex flex-none items-baseline justify-between px-screen pb-2 pt-0.5">
         <span className="text-[13px] font-semibold text-fg">

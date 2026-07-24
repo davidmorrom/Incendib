@@ -31,6 +31,31 @@
 
 ## Log
 
+### 2026-07-24 — Agente (UX/mapa): hoja inferior arrastrable + fix solape leyenda/capas (v0.50.0)
+
+**Encargo del propietario:** que la hoja de incendios del mapa (y la de las
+fichas) se pueda plegar/desplegar arrastrando para ver el mapa más grande, en
+móvil; y arreglar que la leyenda se solape con el selector de capas y le robe
+los toques.
+
+**Hecho (typecheck + lint + 396 tests + build mock 100 % de páginas; revisión
+adversarial multiagente de 5 lentes con verificación por hallazgo):**
+- Nuevo `useBottomSheet` (arrastre imperativo, sin re-render del mapa por frame;
+  anclajes; teclado `slider`; `prefers-reduced-motion`; gate `enabled` para
+  escritorio) + `useMediaQuery` + `SheetGrabber`. Cableado en `MapaScreen`
+  (home) y `FichaScreen` con wrappers `lg:contents` (no tocan la rejilla
+  desktop). `sanitizeSnaps` con tests.
+- ⚠️ **Contrato compartido `src/lib/store.ts`:** sustituyo `legendOpen`/
+  `toggleLegend` por `mapPanel:'none'|'legend'|'layers'` + `toggleMapPanel`/
+  `closeMapPanel` (paneles del mapa mutuamente excluyentes). Único consumidor era
+  `MapLegend` (actualizado). `MapControls` pasa a leer `mapPanel`.
+- ⚠️ **i18n** `dictionaries/{es,pt,en}.ts`: claves nuevas dentro de `map:`
+  (`sheetHandle`, `sheetHeightMin/Mid/Max`) — aditivas, no tocan otros namespaces.
+- Solo toco ficheros de UI de mapa/hoja + store + i18n; NO toco adapters, datos,
+  boletín ni story. Sin solape con los commits v0.48.1/0.48.2/0.49.0 de datos.
+
+**Versión:** tomo **v0.50.0** (último tag v0.49.0). **Siguiente tag libre: 0.50.1.**
+
 ### 2026-07-24 — Agente (datos/mapa): el área quemada EFFIS ya no se duplica cuando hay perímetro por focos (v0.48.2)
 
 **Encargo del propietario:** «quiero que, si hay perímetro aproximado con los

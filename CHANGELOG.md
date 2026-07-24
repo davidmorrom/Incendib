@@ -5,6 +5,33 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.50.0] - 2026-07-24
+
+### Añadido
+
+- **La hoja de incendios del mapa ahora es una hoja inferior ARRASTRABLE en
+  móvil.** El tirador ya no es decorativo: se puede arrastrar (o usar el teclado)
+  para plegar la lista y ver el mapa mucho más grande, o desplegarla para ver más
+  incendios. Tres alturas de anclaje (asomo · media · desplegada) con animación
+  suave y ajuste al soltar. Al encoger la hoja el mapa crece por CSS (sin
+  re-render del mapa: el arrastre escribe la altura de forma imperativa, así que
+  MapLibre se redimensiona solo y el gesto va fluido). Mismo gesto en la **ficha
+  de cada incendio** (`/f/{slug}`): el detalle es una hoja arrastrable sobre el
+  mapa enfocado. Solo en móvil; en escritorio manda la rejilla de columnas.
+  Accesible: el tirador es un `slider` con teclado (flechas/Inicio/Fin) y
+  `aria-valuetext` localizado; respeta `prefers-reduced-motion`.
+
+### Corregido
+
+- **La leyenda del mapa ya no se solapa con el selector de capas ni le roba los
+  toques.** Antes, al desplegar el selector de capas (arriba-derecha) su panel
+  llegaba a la píldora de la leyenda (abajo-derecha) y, al tocar el panel, se
+  abría la leyenda en su lugar (ambos compartían nivel de apilamiento y ganaba
+  el que se pintaba después). Ahora los dos paneles son **mutuamente
+  excluyentes** (solo uno abierto a la vez), el panel abierto sube por encima de
+  los disparadores y la píldora de leyenda se oculta mientras el selector de
+  capas está abierto.
+
 ## [0.49.0] - 2026-07-24
 
 ### Añadido

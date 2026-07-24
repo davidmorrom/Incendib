@@ -13,6 +13,8 @@ import { computeKpis, sortByGravity } from '@/lib/fires/derive';
 import { DEFAULT_FILTERS, applyFilters, type FireFilters } from '@/lib/fires/filters';
 import { useNow } from '@/components/time/NowProvider';
 import { useDict } from '@/components/i18n/I18nProvider';
+import { useBottomSheet, sanitizeSnaps } from '@/lib/hooks/useBottomSheet';
+import { useMediaQuery } from '@/lib/hooks/useMediaQuery';
 import type { Fire } from '@/types/fire';
 
 /**
@@ -47,6 +49,21 @@ export function MapaScreen({
   const reset = useCallback(() => setFilters(DEFAULT_FILTERS), []);
   const select = useCallback((f: Fire) => router.push(`/f/${f.slug}`), [router]);
 
+  // Hoja de incendios arrastrable (solo móvil; en `lg:` la lista es una columna
+  // fija). Tres anclajes: asomo (ver casi todo el mapa) · medio (por defecto) ·
+  // desplegada (más lista, un asomo de mapa arriba).
+  const isMobile = useMediaQuery('(max-width: 1023px)');
+  const getSnaps = useCallback(
+    (h: number) =>
+      sanitizeSnaps([Math.round(h * 0.34), Math.round(h * 0.52), h - 92], h, { min: 128 }),
+    [],
+  );
+  const { containerRef, sheetRef, grabberProps } = useBottomSheet<HTMLDivElement, HTMLElement>({
+    getSnaps,
+    initialSnap: 1,
+    enabled: isMobile,
+  });
+
   return (
     <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[264px_1fr_340px] lg:grid-rows-1">
       {/* Móvil: cabecera + KPIs */}
@@ -66,34 +83,45 @@ export function MapaScreen({
         total={fires.length}
       />
 
-      {/* Mapa compartido */}
-      <div className="relative min-h-0 flex-1 bg-bg-map lg:col-start-2">
-        <MapCanvasClient
+      {/* Región mapa + hoja. En móvil es una columna medible (el mapa `flex-1`
+          crece cuando la hoja encoge y a la inversa). En `lg:` este contenedor
+          desaparece (`display:contents`) y sus hijos entran directos en la
+          rejilla de 3 columnas (mapa · col-2, la hoja se oculta). */}
+      <div
+        ref={containerRef}
+        className="relative flex min-h-0 flex-1 flex-col lg:contents"
+      >
+        {/* Mapa compartido */}
+        <div className="relative min-h-0 flex-1 bg-bg-map lg:col-start-2">
+          <MapCanvasClient
+            fires={visible}
+            onSelect={select}
+            hoveredSlug={hovered}
+            onHover={setHovered}
+          />
+          <DesktopKpiOverlay
+            className="hidden lg:flex lg:flex-col"
+            activos={kpis.activos}
+            hectares={kpis.hectares}
+            focos24h={focos24h}
+          />
+        </div>
+
+        {/* Móvil: bottom sheet arrastrable */}
+        <FireListSheet
+          className="lg:hidden"
           fires={visible}
+          activeCount={activeCount}
+          filters={filters}
+          onChange={patch}
           onSelect={select}
-          hoveredSlug={hovered}
           onHover={setHovered}
-        />
-        <DesktopKpiOverlay
-          className="hidden lg:flex lg:flex-col"
-          activos={kpis.activos}
-          hectares={kpis.hectares}
-          focos24h={focos24h}
+          hoveredSlug={hovered}
+          onOpenFilters={() => setFiltersOpen(true)}
+          sheetRef={sheetRef}
+          grabberProps={isMobile ? grabberProps : undefined}
         />
       </div>
-
-      {/* Móvil: bottom sheet */}
-      <FireListSheet
-        className="lg:hidden"
-        fires={visible}
-        activeCount={activeCount}
-        filters={filters}
-        onChange={patch}
-        onSelect={select}
-        onHover={setHovered}
-        hoveredSlug={hovered}
-        onOpenFilters={() => setFiltersOpen(true)}
-      />
 
       {/* Móvil: filtros avanzados en modal (la barra lateral es solo desktop) */}
       {filtersOpen && (

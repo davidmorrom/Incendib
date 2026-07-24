@@ -17,12 +17,20 @@ export type CountryFilter = 'todos' | 'es' | 'pt';
  */
 export type NetworkState = 'loading' | 'ok' | 'error' | 'offline' | 'reconnecting';
 
+/**
+ * Panel flotante abierto sobre el mapa. Mutuamente excluyentes: solo uno puede
+ * estar abierto (leyenda abajo-derecha, capas arriba-derecha) para que sus
+ * superficies nunca se solapen ni se roben los toques entre sí.
+ */
+export type MapPanel = 'none' | 'legend' | 'layers';
+
 interface UIState {
   tab: Tab;
   /** slug del incendio seleccionado, o null. Espeja la URL /f/{slug}. */
   selectedFire: string | null;
   filter: CountryFilter;
-  legendOpen: boolean;
+  /** Panel flotante abierto sobre el mapa (leyenda/capas), excluyentes. */
+  mapPanel: MapPanel;
   shareOpen: boolean;
   copied: boolean;
   /** Capa de perímetros de área quemada (EFFIS) visible en el mapa. */
@@ -43,7 +51,10 @@ interface UIState {
   setTab: (tab: Tab) => void;
   selectFire: (slug: string | null) => void;
   setFilter: (filter: CountryFilter) => void;
-  toggleLegend: () => void;
+  /** Abre el panel indicado; si ya estaba abierto, lo cierra. */
+  toggleMapPanel: (panel: Exclude<MapPanel, 'none'>) => void;
+  /** Cierra cualquier panel flotante del mapa. */
+  closeMapPanel: () => void;
   togglePerimeters: () => void;
   toggleHotspots: () => void;
   setBasemap: (b: Basemap) => void;
@@ -59,7 +70,7 @@ export const useUIStore = create<UIState>((set) => ({
   tab: 'mapa',
   selectedFire: null,
   filter: 'todos',
-  legendOpen: false,
+  mapPanel: 'none',
   shareOpen: false,
   copied: false,
   perimetersVisible: true,
@@ -70,9 +81,10 @@ export const useUIStore = create<UIState>((set) => ({
   locale: 'es',
 
   setTab: (tab) => set({ tab }),
-  selectFire: (selectedFire) => set({ selectedFire, legendOpen: false }),
+  selectFire: (selectedFire) => set({ selectedFire, mapPanel: 'none' }),
   setFilter: (filter) => set({ filter }),
-  toggleLegend: () => set((s) => ({ legendOpen: !s.legendOpen })),
+  toggleMapPanel: (panel) => set((s) => ({ mapPanel: s.mapPanel === panel ? 'none' : panel })),
+  closeMapPanel: () => set({ mapPanel: 'none' }),
   togglePerimeters: () => set((s) => ({ perimetersVisible: !s.perimetersVisible })),
   toggleHotspots: () => set((s) => ({ hotspotsVisible: !s.hotspotsVisible })),
   setBasemap: (basemap) => set({ basemap }),

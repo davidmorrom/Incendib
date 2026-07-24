@@ -17,8 +17,13 @@ const ENTRIES: { state: GlyphState; key: keyof ReturnType<typeof useDict>['legen
 /** Leyenda del mapa: píldora plegada (abajo-derecha) que abre un panel flotante. */
 export function MapLegend() {
   const d = useDict();
-  const open = useUIStore((s) => s.legendOpen);
-  const toggle = useUIStore((s) => s.toggleLegend);
+  const panel = useUIStore((s) => s.mapPanel);
+  const toggle = useUIStore((s) => s.toggleMapPanel);
+  const open = panel === 'legend';
+  // El selector de capas (arriba-derecha) despliega hacia abajo y puede llegar a
+  // la esquina de la píldora en mapas cortos: mientras esté abierto, ocultamos la
+  // píldora para que no le robe los toques al panel de capas.
+  const layersOpen = panel === 'layers';
 
   return (
     <>
@@ -26,7 +31,7 @@ export function MapLegend() {
         <div
           role="dialog"
           aria-label={d.legend.title}
-          className="if-overlay absolute bottom-[52px] right-[10px] z-[4] flex w-[210px] flex-col gap-2 rounded-card p-3"
+          className="if-overlay absolute bottom-[52px] right-[10px] z-[20] flex w-[210px] flex-col gap-2 rounded-card p-3"
         >
           {ENTRIES.map(({ state, key }) => (
             <div key={state} className="flex items-center gap-2">
@@ -56,20 +61,22 @@ export function MapLegend() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        aria-label={d.legend.title}
-        className="if-overlay absolute bottom-[10px] right-[10px] z-[3] flex h-8 items-center gap-[7px] rounded-full px-3"
-      >
-        <span className="inline-flex items-center gap-1">
-          <StateGlyph state="activo" size={12} />
-          <StateGlyph state="controlado" size={11} />
-          <StateGlyph state="estabilizado" size={11} />
-        </span>
-        <span className="text-[11px] font-semibold text-fg-body">{d.map.legendPill}</span>
-      </button>
+      {!layersOpen && (
+        <button
+          type="button"
+          onClick={() => toggle('legend')}
+          aria-expanded={open}
+          aria-label={d.legend.title}
+          className="if-overlay absolute bottom-[10px] right-[10px] z-[3] flex h-8 items-center gap-[7px] rounded-full px-3"
+        >
+          <span className="inline-flex items-center gap-1">
+            <StateGlyph state="activo" size={12} />
+            <StateGlyph state="controlado" size={11} />
+            <StateGlyph state="estabilizado" size={11} />
+          </span>
+          <span className="text-[11px] font-semibold text-fg-body">{d.map.legendPill}</span>
+        </button>
+      )}
     </>
   );
 }

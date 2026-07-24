@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StateGlyph } from '@/components/ui/StateGlyph';
+import { SheetGrabber } from '@/components/ui/SheetGrabber';
 import { ScrollCarousel } from '@/components/ui/ScrollCarousel';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
 import { ShareMenu } from '@/components/fires/ShareMenu';
 import { fireSurface } from '@/lib/fires/surface';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
+import { useBottomSheet, sanitizeSnaps } from '@/lib/hooks/useBottomSheet';
+import { useMediaQuery } from '@/lib/hooks/useMediaQuery';
 import { useUIStore } from '@/lib/store';
 import { useFollowStore } from '@/lib/follow';
 import { formatNumber, formatClock, timeAgo } from '@/lib/utils/format';
@@ -116,18 +119,36 @@ export function FichaScreen({
     else router.push('/');
   };
 
+  // Hoja de detalle arrastrable (solo móvil; en `lg:` el detalle es una columna
+  // fija a la izquierda). Anclajes: asomo · detalle (por defecto, mapa ~208px) ·
+  // detalle casi completo (un asomo de mapa arriba).
+  const isMobile = useMediaQuery('(max-width: 1023px)');
+  const getSnaps = useCallback(
+    (h: number) => sanitizeSnaps([Math.round(h * 0.26), h - 208, h - 96], h, { min: 132, minMap: 80 }),
+    [],
+  );
+  const { containerRef, sheetRef, grabberProps } = useBottomSheet<HTMLDivElement, HTMLElement>({
+    getSnaps,
+    initialSnap: 1,
+    enabled: isMobile,
+  });
+
   return (
     <main
       id="contenido"
       className="flex h-dvh flex-col overflow-hidden bg-bg-base text-fg lg:grid lg:grid-cols-[440px_1fr] lg:grid-rows-1"
     >
+      {/* Región mapa + hoja. En móvil, columna medible (mapa `flex-1` que crece
+          cuando la hoja encoge). En `lg:` desaparece (`display:contents`) y map y
+          detalle entran directos en la rejilla de 2 columnas con su `lg:order`. */}
+      <div ref={containerRef} className="relative flex min-h-0 flex-1 flex-col lg:contents">
       {/* Mapa enfocado (oculto si no hay coordenadas reales, p. ej. dato del boletín).
-          En móvil, franja fija y modesta (h-[200px], no flex-1): solo da
-          contexto de ubicación, el contenido principal es el detalle de abajo
-          (ver sección siguiente). En escritorio pasa a columna derecha
-          (lg:order-2) de alto completo: el panel de detalle sigue siendo el
-          contenido principal y se lee primero, de izquierda a derecha. */}
-      <div className="relative h-[200px] flex-none overflow-hidden bg-bg-map lg:order-2 lg:h-dvh">
+          En móvil ocupa el espacio sobre la hoja (`flex-1`): con el detalle en su
+          anclaje por defecto queda una franja modesta (~208px), pero el usuario
+          puede arrastrar la hoja hacia abajo para agrandar el mapa. En escritorio
+          pasa a columna derecha (lg:order-2) de alto completo; el panel de detalle
+          sigue siendo el contenido principal y se lee primero, de izq. a der. */}
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-bg-map lg:order-2 lg:h-dvh">
         {hasLocation ? (
           <FireMiniMapClient fire={fire} />
         ) : (
@@ -194,12 +215,19 @@ export function FichaScreen({
           escritorio (lg:order-1), columna fija a la izquierda de alto
           completo — el tirador (decorativo, solo sube visualmente sobre el
           mapa) se oculta, ya no hace falta. */}
-      <section className="relative -mt-[14px] flex flex-1 flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card lg:order-1 lg:mt-0 lg:flex-none lg:h-dvh lg:rounded-none lg:border-r lg:border-t-0">
-        <div
-          className="mx-auto mt-2 h-1 w-9 flex-none rounded-full lg:hidden"
-          style={{ background: 'var(--border-strong)' }}
-          aria-hidden
-        />
+      <section
+        ref={sheetRef}
+        className="relative -mt-[14px] flex h-[calc(100dvh_-_208px)] flex-none flex-col overflow-hidden rounded-t-[14px] border-t bg-bg-card lg:order-1 lg:mt-0 lg:h-dvh lg:flex-none lg:rounded-none lg:border-r lg:border-t-0"
+      >
+        {isMobile ? (
+          <SheetGrabber {...grabberProps} label={d.map.sheetHandle} className="mt-1.5 lg:hidden" />
+        ) : (
+          <div
+            className="mx-auto mt-2 h-1 w-9 flex-none rounded-full lg:hidden"
+            style={{ background: 'var(--border-strong)' }}
+            aria-hidden
+          />
+        )}
 
         {/* Evacuaciones/confinamientos: información más urgente de la ficha, va
             la primera y en tono de alerta. aria-live para lectores de pantalla.
@@ -636,6 +664,7 @@ export function FichaScreen({
           <span className="font-semibold text-state-activo-text">112</span>
         </p>
       </section>
+      </div>
     </main>
   );
 }
