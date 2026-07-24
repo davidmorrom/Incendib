@@ -188,37 +188,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
           }}
         />
 
-        {/* Marca de UBICACIÓN en el centro exacto (solo sobre satélite). Neutra
-            (blanca), no en color de estado, y sin relleno: un localizador, para
-            que no se lea como el perímetro/extensión del incendio (que no se dibuja). */}
-        {backdrop && (
-          <div
-            style={{
-              position: 'absolute',
-              left: SIZE.width / 2 - 66,
-              top: SIZE.height / 2 - 66,
-              width: 132,
-              height: 132,
-              borderRadius: '50%',
-              border: '4px solid rgba(255,255,255,0.92)',
-              boxShadow: '0 0 0 3px rgba(8,12,18,0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: '50%',
-                background: '#fff',
-                boxShadow: '0 0 0 3px rgba(8,12,18,0.6)',
-              }}
-            />
-          </div>
-        )}
-
         {/* Contenido: marca arriba, bloque de datos abajo (zonas seguras de IG). */}
         <div
           style={{
@@ -235,10 +204,37 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             color: dark.text.primary,
           }}
         >
-          {/* Cabecera de marca */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 16, background: dark.state.activo.base }} />
-            <span style={{ fontSize: 46, fontWeight: 700, letterSpacing: '-0.01em' }}>Incendib</span>
+          {/* Cabecera de marca: logo (gota de retardante en negativo sobre cuadrado
+              rojo) + wordmark «Incend» + «IB» en rojo. Réplica de Logo/Wordmark. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 66,
+                height: 66,
+                borderRadius: 14,
+                background: dark.state.activo.base,
+              }}
+            >
+              <div
+                style={{
+                  width: 22,
+                  height: 22,
+                  background: dark.bg.base,
+                  borderTopLeftRadius: '50%',
+                  borderTopRightRadius: '50%',
+                  borderBottomRightRadius: '50%',
+                  borderBottomLeftRadius: 0,
+                  transform: 'rotate(-45deg)',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', fontSize: 46, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              <span style={{ color: dark.text.primary }}>Incend</span>
+              <span style={{ color: dark.state.activo.base }}>IB</span>
+            </div>
           </div>
 
           {/* Bloque de datos */}

@@ -48,16 +48,35 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               width: 56,
               height: 56,
               background: dark.state.activo.base,
-              borderRadius: 14,
+              borderRadius: 12,
             }}
-          />
-          <span style={{ fontSize: 34, fontWeight: 700 }}>Incendib</span>
+          >
+            <div
+              style={{
+                width: 19,
+                height: 19,
+                background: dark.bg.base,
+                borderTopLeftRadius: '50%',
+                borderTopRightRadius: '50%',
+                borderBottomRightRadius: '50%',
+                borderBottomLeftRadius: 0,
+                transform: 'rotate(-45deg)',
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', fontSize: 34, fontWeight: 700 }}>
+            <span style={{ color: dark.text.primary }}>Incend</span>
+            <span style={{ color: dark.state.activo.base }}>IB</span>
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.47.1] - 2026-07-24
+
+### Corregido
+
+- **Imágenes de compartir (Stories y previsualización del enlace): logo real y sin
+  marcador.** El logo era un cuadrado rojo de relleno; ahora lleva la gota de
+  retardante en negativo y el wordmark «Incend**IB**» (IB en rojo), como en la app.
+  Retirado también el marcador de ubicación del centro de la imagen satelital
+  (redundante y sin etiqueta).
+
 ## [0.47.0] - 2026-07-24
 
 ### Cambiado

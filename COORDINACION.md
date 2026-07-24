@@ -31,6 +31,22 @@
 
 ## Log
 
+### 2026-07-24 — Agente (ficha/UI): logo real + sin marcador en imágenes de compartir (v0.47.1)
+
+**Encargo del propietario:** «quita el marcador de la imagen satelital» y «el logo
+tampoco sale bien».
+
+**Hecho (typecheck + lint + build 116/116; verificado en navegador):** retirado el
+marcador de ubicación del centro de la story. Logo de marca reproducido de verdad en
+la story (`route.tsx`) y en la OG (`opengraph-image.tsx`): cuadrado rojo con la gota
+de retardante en negativo (réplica de `Logo.tsx`) + wordmark «Incend» + «IB» en rojo
+(réplica de `Wordmark.tsx`), en vez del cuadrado rojo de relleno que había.
+
+**Tocado (solo míos, por ruta):** `src/app/f/[slug]/story/route.tsx`,
+`src/app/f/[slug]/opengraph-image.tsx`, CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.47.1** (último tag v0.47.0; fix). **Siguiente tag libre: 0.47.2.**
+
 ### 2026-07-24 — Agente (ficha/UI): superficie prioriza focos + muestra ambas (v0.47.0)
 
 **Encargo del propietario:** al ver Burgohondo mostrar 5 074 ha (oficial) cuando el
