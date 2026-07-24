@@ -7,6 +7,7 @@ import { StateGlyph } from '@/components/ui/StateGlyph';
 import { ScrollCarousel } from '@/components/ui/ScrollCarousel';
 import { ResourcesPanel } from '@/components/fires/ResourcesPanel';
 import { ShareMenu } from '@/components/fires/ShareMenu';
+import { fireSurface } from '@/lib/fires/surface';
 import { FireMiniMapClient } from '@/components/map/FireMiniMapClient';
 import { useDict } from '@/components/i18n/I18nProvider';
 import { useUIStore } from '@/lib/store';
@@ -67,6 +68,10 @@ export function FichaScreen({
   // último dato conocido, sin señales de «ahora» (meteo, confirmación satelital,
   // avance 24 h) y con banner sobrio.
   const historical = origin !== 'live';
+
+  // Superficie a mostrar (criterio único): prioriza la estimación por focos cuando
+  // iguala/supera a la oficial, y conserva la oficial como secundaria (ver fireSurface).
+  const surf = fireSurface(fire);
 
   // Reactivación: si este incendio se reactivó, apuntamos al incidente actual;
   // si es él mismo una reactivación, apuntamos al episodio anterior. (Excluyentes.)
@@ -398,43 +403,46 @@ export function FichaScreen({
         >
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.surface}</div>
-            {fire.hectares > 0 ? (
-              <>
-                <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
-                  {fire.hectaresApprox ? '~' : ''}
-                  {formatNumber(fire.hectares)} <span className="text-[11px] text-fg-secondary">ha</span>
-                </div>
-                {(fire.hectaresApprox || !historical) && (
-                  <div
-                    className={cn(
-                      'whitespace-nowrap font-mono text-[10px] font-medium',
-                      fire.hectaresApprox || historical || !(fire.delta24h && fire.delta24h > 0)
-                        ? 'text-fg-mute'
-                        : 'text-state-activo-text',
-                    )}
-                  >
-                    {fire.hectaresApprox
-                      ? d.fire.approx
-                      : fire.delta24h && fire.delta24h > 0
-                        ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
-                        : d.fire.noProgress}
-                  </div>
-                )}
-              </>
-            ) : fire.hotspotHectares ? (
-              <>
-                <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
-                  ~{formatNumber(fire.hotspotHectares)}{' '}
-                  <span className="text-[11px] text-fg-secondary">ha</span>
-                </div>
-                <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
-                  {d.fire.approxHotspot}
-                </div>
-              </>
-            ) : (
+            {!surf.hasData ? (
               <div className="mt-1 whitespace-nowrap font-mono text-[13px] font-semibold text-fg-secondary">
                 {d.kpis.noData}
               </div>
+            ) : (
+              <>
+                <div className="whitespace-nowrap font-mono text-[20px] font-semibold">
+                  {surf.approx ? '~' : ''}
+                  {formatNumber(surf.ha)} <span className="text-[11px] text-fg-secondary">ha</span>
+                </div>
+                {surf.fromHotspots ? (
+                  <>
+                    <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
+                      {d.fire.approxHotspot}
+                    </div>
+                    {surf.officialLabel && (
+                      <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
+                        {d.fire.official} · {surf.officialLabel}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  (fire.hectaresApprox || !historical) && (
+                    <div
+                      className={cn(
+                        'whitespace-nowrap font-mono text-[10px] font-medium',
+                        fire.hectaresApprox || historical || !(fire.delta24h && fire.delta24h > 0)
+                          ? 'text-fg-mute'
+                          : 'text-state-activo-text',
+                      )}
+                    >
+                      {fire.hectaresApprox
+                        ? d.fire.approx
+                        : fire.delta24h && fire.delta24h > 0
+                          ? interpolate(d.fire.delta24h, { n: formatNumber(fire.delta24h) })
+                          : d.fire.noProgress}
+                    </div>
+                  )
+                )}
+              </>
             )}
           </div>
           <div className="bg-bg-card px-4 py-2.5">

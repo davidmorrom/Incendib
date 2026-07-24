@@ -104,6 +104,7 @@ const es = {
     nationalInterestFull:
       'Emergencia de interés nacional (Situación Operativa 3, el máximo del Sistema Nacional de Protección Civil), declarada por el Ministerio del Interior para el territorio. Distinta del nivel de gravedad del incendio.',
     approxHotspot: 'estimación muy aproximada (focos)',
+    official: 'Oficial',
     shareStory: 'Historia de Instagram',
     shareStoryHint: 'Imagen vertical para tu historia.',
     shareStoryPreparing: 'Preparando imagen…',

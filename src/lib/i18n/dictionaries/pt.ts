@@ -105,6 +105,7 @@ const pt: Dictionary = {
     nationalInterestFull:
       'Emergência de interesse nacional (Situação Operacional 3, o nível máximo do Sistema Nacional de Proteção Civil), declarada pelo Ministério do Interior para o território. Distinta do nível de gravidade do incêndio.',
     approxHotspot: 'estimativa muito aproximada (focos)',
+    official: 'Oficial',
     shareStory: 'Story do Instagram',
     shareStoryHint: 'Imagem vertical para a tua story.',
     shareStoryPreparing: 'A preparar imagem…',

@@ -31,6 +31,32 @@
 
 ## Log
 
+### 2026-07-24 — Agente (ficha/UI): superficie prioriza focos + muestra ambas (v0.47.0)
+
+**Encargo del propietario:** al ver Burgohondo mostrar 5 074 ha (oficial) cuando el
+perímetro por focos daba ~12 700, pidió (AskUserQuestion) «mostrar ambas pero
+priorizar la de los focos».
+
+**Hecho (typecheck + lint + build 115/115 + 368 tests; verificado en navegador —
+Murias de Ponjos muestra «~2 000 ha / estimación muy aproximada (focos) / Oficial ·
+327 ha»):** `fireSurface` (helper compartido) elige ahora la estimación por focos
+como PRINCIPAL cuando iguala/supera a la oficial (o no hay oficial), marcada «~»
+como estimación, y devuelve la oficial como SECUNDARIA. Adoptado por FichaScreen
+(muestra ambas), FireRow (focos con «≈» + oficial en el title) y, por herencia,
+OG/story/metadata (usan `.label`, ahora focos-principal). Nueva clave i18n
+`fire.official`.
+
+**Alcance/decisión:** es SOLO presentación. `hotspotHectares` sigue SIN entrar en
+KPI/ranking/boletín (`computeKpis` intacto): el total «HA AFECTADAS» de la home
+sigue conservador (oficial cuando la hay). Criterio: focos-principal cuando focos ≥
+oficial (no mostrar una estimación menor como titular).
+
+**Tocado (solo míos, por ruta):** `src/lib/fires/surface.ts` (+`.test.ts`),
+`src/components/screens/FichaScreen.tsx`, `src/components/fires/FireRow.tsx`, i18n
+es/pt/en (`fire.official`), CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.47.0** (último tag v0.46.2; cambio de comportamiento). **Siguiente tag libre: 0.47.1.**
+
 ### 2026-07-24 — Agente (ficha/UI): fondo satélite de la story fiable (v0.46.2)
 
 **Motivo:** el propietario reportó que el fondo satélite de la imagen para Stories

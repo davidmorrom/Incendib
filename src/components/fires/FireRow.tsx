@@ -12,6 +12,7 @@ import { useUIStore } from '@/lib/store';
 import { interpolate } from '@/lib/i18n';
 import { STATE_LABEL_KEY } from '@/lib/fires/style';
 import { PT_TEXT } from '@/lib/fires/labels';
+import { fireSurface } from '@/lib/fires/surface';
 import type { Fire } from '@/types/fire';
 
 function subtitle(f: Fire): string {
@@ -49,6 +50,14 @@ export const FireRow = memo(function FireRow({
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
   const stateLabel = d.states[STATE_LABEL_KEY[fire.state]];
+  // Superficie con el criterio único (focos prioritarios sobre la oficial cuando la
+  // igualan/superan). En la lista, los focos van con «≈» (no «~» de EFFIS).
+  const surf = fireSurface(fire);
+  const surfLabel = !surf.hasData
+    ? d.kpis.noData
+    : surf.fromHotspots
+      ? `≈${formatNumber(surf.ha)} ha`
+      : `${surf.approx ? '~' : ''}${formatNumber(surf.ha)} ha`;
 
   return (
     <button
@@ -92,13 +101,15 @@ export const FireRow = memo(function FireRow({
       <span className="flex-none text-right">
         <span
           className="block font-mono text-[13px] font-semibold text-fg"
-          title={!fire.hectares && fire.hotspotHectares ? d.fire.approxHotspot : undefined}
+          title={
+            surf.fromHotspots
+              ? surf.officialLabel
+                ? `${d.fire.approxHotspot} · ${d.fire.official} ${surf.officialLabel}`
+                : d.fire.approxHotspot
+              : undefined
+          }
         >
-          {fire.hectares > 0
-            ? `${fire.hectaresApprox ? '~' : ''}${formatNumber(fire.hectares)} ha`
-            : fire.hotspotHectares
-              ? `≈${formatNumber(fire.hotspotHectares)} ha`
-              : d.kpis.noData}
+          {surfLabel}
         </span>
         <span className="block font-mono text-[9.5px] text-fg-mute">
           {timeAgo(fire.updatedAt, now, locale)}

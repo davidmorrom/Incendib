@@ -5,6 +5,20 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.47.0] - 2026-07-24
+
+### Cambiado
+
+- **La superficie prioriza la estimación por focos cuando iguala o supera a la
+  cifra oficial, y muestra ambas.** Antes se prefería siempre la oficial; para un
+  activo en expansión eso podía quedarse corto (Burgohondo: 5 074 ha oficiales
+  frente a ~12 700 ha del cúmulo de focos FIRMS). Ahora la ficha muestra la
+  estimación por focos como cifra principal —siempre marcada «~» y «estimación muy
+  aproximada (focos)», porque sobrestima— y la oficial debajo («Oficial · 5 074
+  ha»); en el listado, la estimación por focos con «≈». La estimación por focos
+  sigue SIN entrar en el KPI/ranking/boletín, que se mantienen con la cifra oficial
+  (conservadores).
+
 ## [0.46.2] - 2026-07-24
 
 ### Corregido
