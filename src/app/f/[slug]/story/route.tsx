@@ -112,6 +112,17 @@ async function satelliteBackdrop(coords: [number, number]): Promise<string | nul
   }
 }
 
+// Encuadre editorial del satélite (TEMPORAL, emergencia Gredos jul 2026): por
+// defecto se centra en el foco del incendio, pero para incendios concretos interesa
+// destacar un punto de referencia reconocible del entorno. Burgohondo → embalse de
+// El Burguillo (referencia del valle, dentro de la zona de evacuación del Valle de
+// Iruelas). Retirar cuando termine la emergencia.
+const EL_BURGUILLO: [number, number] = [-4.5775, 40.4236]; // Wikipedia
+function storyCenter(fire: { municipality: string; coordinates: [number, number] }): [number, number] {
+  if (fire.municipality?.toLowerCase() === 'burgohondo') return EL_BURGUILLO;
+  return fire.coordinates;
+}
+
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const resolved = await resolveFire(slug);
@@ -119,7 +130,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const historical = Boolean(resolved && resolved.origin !== 'live');
   const hasLocation = Boolean(resolved?.hasLocation);
 
-  const backdrop = fire && hasLocation ? await satelliteBackdrop(fire.coordinates) : null;
+  const backdrop = fire && hasLocation ? await satelliteBackdrop(storyCenter(fire)) : null;
 
   const stateColor = historical
     ? dark.text.mute

@@ -5,6 +5,16 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.47.2] - 2026-07-24
+
+### Cambiado
+
+- **La imagen de Stories de Burgohondo encuadra el embalse de El Burguillo.**
+  Encuadre editorial temporal (emergencia Gredos): en vez de centrar el fondo
+  satélite en el foco del incendio, se centra en el pantano de El Burguillo,
+  referencia reconocible del valle y dentro de la zona de evacuación del Valle de
+  Iruelas.
+
 ## [0.47.1] - 2026-07-24
 
 ### Corregido

@@ -31,6 +31,22 @@
 
 ## Log
 
+### 2026-07-24 — Agente (ficha/UI): story de Burgohondo encuadra El Burguillo (v0.47.2)
+
+**Encargo del propietario:** que el fondo satélite de la story de Burgohondo destaque
+el embalse de El Burguillo.
+
+**Hecho (typecheck + lint + build 116/116; verificado en navegador — el pantano de El
+Burguillo, con su forma ramificada, domina la imagen):** `storyCenter(fire)` en
+`story/route.tsx`: por defecto el foco del incendio; para `municipality === 'Burgohondo'`
+centra en El Burguillo (`[-4.5775, 40.4236]`, Wikipedia). Encuadre editorial TEMPORAL
+(emergencia Gredos jul 2026); retirar con el resto de overrides de Burgohondo.
+
+**Tocado (solo míos, por ruta):** `src/app/f/[slug]/story/route.tsx`, CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.47.2** (último tag v0.47.1; cambio editorial). **Siguiente tag libre: 0.47.3.**
+
 ### 2026-07-24 — Agente (ficha/UI): logo real + sin marcador en imágenes de compartir (v0.47.1)
 
 **Encargo del propietario:** «quita el marcador de la imagen satelital» y «el logo
