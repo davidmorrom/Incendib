@@ -50,8 +50,8 @@ export const FireRow = memo(function FireRow({
   const locale = useUIStore((s) => s.locale);
   const now = useNow();
   const stateLabel = d.states[STATE_LABEL_KEY[fire.state]];
-  // Superficie con el criterio único (focos prioritarios sobre la oficial cuando la
-  // igualan/superan). En la lista, los focos van con «≈» (no «~» de EFFIS).
+  // Superficie con el criterio único (oficial manda si existe). En la lista,
+  // los focos (sin oficial) van con «≈» (no «~» de EFFIS).
   const surf = fireSurface(fire);
   const surfLabel = !surf.hasData
     ? d.kpis.noData
@@ -101,13 +101,7 @@ export const FireRow = memo(function FireRow({
       <span className="flex-none text-right">
         <span
           className="block font-mono text-[13px] font-semibold text-fg"
-          title={
-            surf.fromHotspots
-              ? surf.officialLabel
-                ? `${d.fire.approxHotspot} · ${d.fire.official} ${surf.officialLabel}`
-                : d.fire.approxHotspot
-              : undefined
-          }
+          title={surf.fromHotspots ? d.fire.approxHotspot : undefined}
         >
           {surfLabel}
         </span>

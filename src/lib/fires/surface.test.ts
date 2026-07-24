@@ -7,28 +7,23 @@ describe('fireSurface', () => {
     const s = fireSurface({ hectares: 3241 });
     expect(s).toMatchObject({ ha: 3241, approx: false, fromHotspots: false, hasData: true });
     expect(s.label).toBe(`${formatNumber(3241)} ha`);
-    expect(s.officialHa).toBeUndefined();
   });
 
   it('cae a la estimación por focos con «~» cuando no hay cifra oficial', () => {
     const s = fireSurface({ hectares: 0, hotspotHectares: 600 });
     expect(s).toMatchObject({ ha: 600, approx: true, fromHotspots: true, hasData: true });
     expect(s.label).toBe(`~${formatNumber(600)} ha`);
-    expect(s.officialHa).toBeUndefined();
   });
 
-  it('prioriza los focos y conserva la oficial cuando los focos superan a la oficial', () => {
+  it('mantiene la oficial cuando los focos estiman más (la oficial siempre manda si existe)', () => {
     const s = fireSurface({ hectares: 5074, hotspotHectares: 12700 });
-    expect(s).toMatchObject({ ha: 12700, approx: true, fromHotspots: true, hasData: true });
-    expect(s.label).toBe(`~${formatNumber(12700)} ha`);
-    expect(s.officialHa).toBe(5074);
-    expect(s.officialLabel).toBe(`${formatNumber(5074)} ha`);
+    expect(s).toMatchObject({ ha: 5074, approx: false, fromHotspots: false, hasData: true });
+    expect(s.label).toBe(`${formatNumber(5074)} ha`);
   });
 
-  it('mantiene la oficial cuando es mayor que los focos (no muestra la estimación menor)', () => {
+  it('mantiene la oficial cuando es mayor que los focos', () => {
     const s = fireSurface({ hectares: 8000, hotspotHectares: 3000 });
     expect(s).toMatchObject({ ha: 8000, approx: false, fromHotspots: false });
-    expect(s.officialHa).toBeUndefined();
   });
 
   it('marca «~» cuando la oficial es una estimación EFFIS (hectaresApprox) sin focos', () => {

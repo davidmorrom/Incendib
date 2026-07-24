@@ -72,8 +72,8 @@ export function FichaScreen({
   // avance 24 h) y con banner sobrio.
   const historical = origin !== 'live';
 
-  // Superficie a mostrar (criterio único): prioriza la estimación por focos cuando
-  // iguala/supera a la oficial, y conserva la oficial como secundaria (ver fireSurface).
+  // Superficie a mostrar (criterio único, ver fireSurface): la oficial manda
+  // siempre que exista; si no, estimación por focos FIRMS marcada «~».
   const surf = fireSurface(fire);
 
   // Reactivación: si este incendio se reactivó, apuntamos al incidente actual;
@@ -442,16 +442,9 @@ export function FichaScreen({
                   {formatNumber(surf.ha)} <span className="text-[11px] text-fg-secondary">ha</span>
                 </div>
                 {surf.fromHotspots ? (
-                  <>
-                    <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
-                      {d.fire.approxHotspot}
-                    </div>
-                    {surf.officialLabel && (
-                      <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
-                        {d.fire.official} · {surf.officialLabel}
-                      </div>
-                    )}
-                  </>
+                  <div className="whitespace-nowrap font-mono text-[10px] font-medium text-fg-mute">
+                    {d.fire.approxHotspot}
+                  </div>
                 ) : (
                   (fire.hectaresApprox || !historical) && (
                     <div

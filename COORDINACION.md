@@ -31,6 +31,23 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos/ficha): la superficie vuelve a priorizar siempre la oficial (v0.50.1)
+
+**Encargo del propietario:** «recular» — revertir la decisión de v0.47.0 de que
+la estimación por focos pasara a ser la cifra principal cuando igualaba/superaba
+a la oficial. Vuelve al criterio original: oficial/EFFIS siempre que exista;
+si no, estimación por focos FIRMS marcada «~»/«≈»; si no hay ninguna, «sin dato».
+
+**Hecho (typecheck + lint + 397 tests + build 146 páginas):**
+- `fireSurface` (`src/lib/fires/surface.ts`) ya no compara focos vs. oficial ni
+  expone `officialHa`/`officialLabel`: la oficial manda sin condición.
+- `FireRow` y `FichaScreen` simplificados a la vez (quitan la cifra secundaria
+  «Oficial · N ha»); heredan el cambio sin tocarlas OG/story/metadata (ya
+  consumían solo `.label`).
+- Quitada la clave i18n `fire.official` (quedó sin uso) en es/en/pt.
+- Solo toco `src/lib/fires/surface.ts(.test.ts)`, `FireRow.tsx`,
+  `FichaScreen.tsx` e i18n. Sin solape con el commit de v0.50.0 (bottom sheet).
+
 ### 2026-07-24 — Agente (UX/mapa): hoja inferior arrastrable + fix solape leyenda/capas (v0.50.0)
 
 **Encargo del propietario:** que la hoja de incendios del mapa (y la de las

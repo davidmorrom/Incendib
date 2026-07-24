@@ -5,6 +5,20 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.50.1] - 2026-07-24
+
+### Corregido
+
+- **La superficie mostrada vuelve a priorizar siempre la cifra oficial.** Se
+  revierte el criterio de v0.47.0: cuando la estimación por cúmulo de focos
+  FIRMS igualaba o superaba a la oficial, pasaba a ser la cifra PRINCIPAL (con
+  la oficial como secundaria). Ahora la oficial/EFFIS manda siempre que exista
+  — el casco convexo del cúmulo de focos sobrestima (incluye huecos sin
+  quemar) y no debe desplazar un dato verificado. Sin cifra oficial, se sigue
+  cayendo a la estimación por focos marcada «~»/«≈»; sin ninguna, «sin dato».
+  Afecta a ficha, listado, imagen OG, historia y metadata del enlace
+  compartido (todos consumen el helper único `fireSurface`).
+
 ## [0.50.0] - 2026-07-24
 
 ### Añadido
