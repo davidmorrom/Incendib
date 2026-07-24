@@ -183,17 +183,19 @@ describe('applyEmergencyOverrides', () => {
 describe('EMERGENCY_OVERRIDES (datos reales)', () => {
   const burgo = EMERGENCY_OVERRIDES.find((o) => o.id === 'burgohondo-2026-07')!;
 
-  it('el override de Burgohondo NO pisa el perímetro satelital ni la superficie', () => {
-    // Instrucción del propietario: «el perímetro satelital no lo borres, solo
-    // añade este». El patch solo AÑADE la extensión; no toca perimeter/hectares.
+  it('el override de Burgohondo NO toca perímetro ni superficie (lo hace FIRMS)', () => {
+    // El perímetro y la superficie los pone `deriveFirmsPerimeters` (cúmulo de
+    // focos); el override solo añade evacuación y cronología.
     expect(burgo).toBeTruthy();
     expect(burgo.patch.perimeter).toBeUndefined();
     expect(burgo.patch.perimeterApprox).toBeUndefined();
+    expect(burgo.patch.perimeterExtra).toBeUndefined();
     expect(burgo.patch.hectares).toBeUndefined();
-    expect(burgo.patch.perimeterExtra?.length).toBeGreaterThan(3);
+    expect(burgo.patch.evacuation).toBeTruthy();
+    expect(Array.isArray(burgo.patch.timeline)).toBe(true);
   });
 
-  it('al fusionar sobre un incendio con perímetro EFFIS, lo conserva y añade la extensión', () => {
+  it('al fusionar sobre un incendio con perímetro/superficie, los conserva y añade evacuación+cronología', () => {
     const live = fire({
       slug: 'cyl-burgohondo-5-152-26',
       name: 'Burgohondo',
@@ -211,10 +213,10 @@ describe('EMERGENCY_OVERRIDES (datos reales)', () => {
     });
     const out = applyEmergencyOverrides([live], [burgo], NOW);
     const f = out.find((x) => x.slug === 'cyl-burgohondo-5-152-26')!;
-    expect(f.perimeter).toEqual(live.perimeter); // perímetro satelital intacto
-    expect(f.hectares).toBe(2547); // superficie satelital intacta
-    expect(f.perimeterExtra!.length).toBeGreaterThan(3); // extensión añadida
+    expect(f.perimeter).toEqual(live.perimeter); // perímetro intacto
+    expect(f.hectares).toBe(2547); // superficie intacta
     expect(f.edited).toBe(true);
     expect(f.evacuation).toContain('Iruelas');
+    expect((f.timeline?.length ?? 0)).toBeGreaterThan(0);
   });
 });

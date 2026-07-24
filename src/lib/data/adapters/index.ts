@@ -1379,76 +1379,45 @@ export function estimatePerimeterHectares(ring: [number, number][]): number {
   return Math.round((m2 / 10_000) * 10) / 10;
 }
 
-// ── Extensión por cúmulo de focos FIRMS (grandes incendios) ───────────────────
-// `deriveApproxPerimeters` está acotado a fuegos pequeños (radio de 3 km alrededor
-// del punto de ignición → diámetro máx. ~6,7 km). Un mega-incendio (p. ej.
-// Burgohondo, que arrasó ~27 km de valle) desborda ese tope y, además, si ya tiene
-// un perímetro EFFIS (parcial, con retraso), queda excluido. Aquí se calcula, para
-// incidentes que YA llevan una extensión editorial (`perimeterExtra`, ver
-// `emergency.ts`), la envolvente del CÚMULO CONEXO de focos FIRMS anclado en el
-// incidente, y se sustituye esa extensión provisional por el dato satelital REAL y
-// ACTUAL. El cúmulo se construye por conectividad (no por un radio fijo): así
-// abarca todo el frente contiguo por largo que sea, sin fundir un incendio vecino
-// que esté a más de `LINK_KM` de distancia. Es una EXTENSIÓN (se suma al perímetro
-// satelital EFFIS, no lo sustituye) y va siempre marcada como aproximada.
+// ── Perímetro por cúmulo de focos FIRMS (autónomo, todos los incendios) ────────
+// `deriveApproxPerimeters` da un casco pequeño (radio 3 km → diámetro máx. ~6,7 km):
+// suficiente para un fuego local, pero un mega-incendio (Burgohondo, jul 2026: ~27
+// km de valle) lo desborda. `deriveFirmsPerimeters` dibuja, para CADA incendio, la
+// envolvente de su CÚMULO de focos FIRMS, por grande que sea, y se actualiza sola
+// conforme aparecen focos nuevos.
+//
+// Cómo evita que un incendio "herede" el fuego de un vecino: no crece un cúmulo por
+// incendio (un fuego cercano a un mega-incendio arramplaría con todo), sino que (1)
+// agrupa TODOS los focos en COMPONENTES CONEXAS (dos focos enlazan a ≤`LINK_KM`) y
+// (2) adjudica cada componente al incendio NO extinguido MÁS CERCANO (a ≤`ASSIGN_
+// MAX_KM` de alguno de sus focos), y cada incendio se queda con la mayor que le
+// toque. Así cada frente físico (una componente) pertenece a un único incidente.
 
-/** Semilla: focos a ≤ este radio del incidente arrancan el cúmulo. */
-const CLUSTER_SEED_KM = 3.5;
-/** Dos focos se consideran del mismo frente si están a ≤ esta distancia. */
-const CLUSTER_LINK_KM = 1.3;
-/** Margen sobre la envolvente (el foco marca el centro de un píxel ~375 m). */
-const CLUSTER_BUFFER_KM = 0.3;
-/** Arista máxima del casco cóncavo (alpha-shape): traza mejor un frente sinuoso
- * que el casco convexo (que rellenaría zonas sin quemar entre brazos del fuego).
- * Ajustado (1,2 km) para ceñirse al footprint real de los focos y no sobrestimar
- * la superficie. */
-const CLUSTER_CONCAVE_MAXEDGE_KM = 1.2;
-/** Mínimo de focos en el cúmulo para fiarse de la envolvente como extensión. */
-const CLUSTER_MIN_HOTSPOTS = 12;
+/** Dos focos enlazan (misma componente) si están a ≤ esta distancia. */
+const FIRMS_LINK_KM = 1.3;
+/** Un incendio "posee" una componente si está a ≤ esta distancia de algún foco suyo. */
+const FIRMS_ASSIGN_MAX_KM = 5;
+/** Mínimo de focos en una componente para dibujar su envolvente (evita ruido). */
+const FIRMS_MIN_HOTSPOTS = 5;
+/** Margen sobre la envolvente (el foco marca el centro de un píxel VIIRS ~375 m). */
+const FIRMS_BUFFER_KM = 0.3;
+/** Arista máxima del casco cóncavo (alpha-shape): traza el frente sinuoso sin
+ * rellenar zonas sin quemar como haría el convexo, y sin sobrestimar superficie. */
+const FIRMS_CONCAVE_MAXEDGE_KM = 1.2;
 
-/** Cúmulo CONEXO de focos anclado en `seed`: crece enlazando focos a ≤`linkKm`. */
-function connectedHotspotCluster(
-  seed: [number, number],
-  hotspots: Hotspot[],
-  seedKm: number,
-  linkKm: number,
-): [number, number][] {
-  const pts = hotspots.map((h) => h.coordinates);
-  const inCluster = new Array<boolean>(pts.length).fill(false);
-  let frontier: number[] = [];
-  pts.forEach((c, i) => {
-    if (haversineKm(seed, c) <= seedKm) {
-      inCluster[i] = true;
-      frontier.push(i);
-    }
-  });
-  while (frontier.length) {
-    const next: number[] = [];
-    for (let i = 0; i < pts.length; i++) {
-      if (inCluster[i]) continue;
-      if (frontier.some((j) => haversineKm(pts[j]!, pts[i]!) <= linkKm)) {
-        inCluster[i] = true;
-        next.push(i);
-      }
-    }
-    frontier = next;
-  }
-  return pts.filter((_, i) => inCluster[i]);
-}
-
-/** Anillo exterior de la envolvente (cóncava, con respaldo convexo) del cúmulo,
- * con margen. `null` si no hay forma válida. */
+/** Anillo exterior de la envolvente (cóncava, respaldo convexo) de un cúmulo de
+ * puntos [lon,lat], con margen. `null` si no hay forma válida. */
 function clusterHullRing(cluster: [number, number][]): [number, number][] | null {
   const fc = turfPoints(cluster);
   let shape;
   try {
-    shape = concave(fc, { maxEdge: CLUSTER_CONCAVE_MAXEDGE_KM, units: 'kilometers' }) ?? convex(fc);
+    shape = concave(fc, { maxEdge: FIRMS_CONCAVE_MAXEDGE_KM, units: 'kilometers' }) ?? convex(fc);
   } catch {
     shape = convex(fc);
   }
   if (!shape) shape = convex(fc);
   if (!shape) return null;
-  const padded = buffer(shape, CLUSTER_BUFFER_KM, { units: 'kilometers' })?.geometry;
+  const padded = buffer(shape, FIRMS_BUFFER_KM, { units: 'kilometers' })?.geometry;
   if (!padded) return null;
   // concave puede devolver MultiPolygon: nos quedamos con el anillo más largo.
   let ring: [number, number][] | null = null;
@@ -1462,33 +1431,141 @@ function clusterHullRing(cluster: [number, number][]): [number, number][] | null
   return ring && ring.length >= 4 ? ring : null;
 }
 
-/**
- * Para cada incidente que ya trae una extensión editorial (`perimeterExtra`),
- * la SUSTITUYE por la envolvente del cúmulo conexo de focos FIRMS anclado en él
- * (dato satelital real y actual), si hay focos suficientes. Si no (sin clave
- * FIRMS, ventana sin focos, pocos), conserva la extensión editorial de respaldo.
- * El perímetro satelital EFFIS (`perimeter`) NO se toca.
- *
- * Además, si el área de esa envolvente SUPERA la superficie vigente del incidente,
- * actualiza `hectares` (marcada `hectaresApprox`) con la EXTENSIÓN AFECTADA
- * detectada por satélite: en un mega-incendio la cifra oficial/EFFIS va muy por
- * detrás del frente real (Burgohondo, jul 2026: EFFIS mapeó ~2 500 ha del arranque
- * mientras el fuego arrasaba ~9 000). Nunca REBAJA una cifra mayor ya presente.
- */
-export function upgradeExtraFromFirms(fires: Fire[], hotspots: Hotspot[]): Fire[] {
-  if (!hotspots.length) return fires;
-  return fires.map((f) => {
-    if (!f.perimeterExtra) return f;
-    const cluster = connectedHotspotCluster(f.coordinates, hotspots, CLUSTER_SEED_KM, CLUSTER_LINK_KM);
-    if (cluster.length < CLUSTER_MIN_HOTSPOTS) return f;
-    const ring = clusterHullRing(cluster);
-    if (!ring) return f;
-    const out: Fire = { ...f, perimeterExtra: ring };
-    const ha = Math.round(estimatePerimeterHectares(ring) / 100) * 100; // redondeo a centenas (estimación)
-    if (ha > (f.hectares || 0)) {
-      out.hectares = ha;
-      out.hectaresApprox = true;
+/** Componentes conexas de los focos (enlace a ≤`linkKm`). Union-find sobre una
+ * rejilla espacial (~linkKm/celda) para no comparar todos los pares. */
+function connectedComponents(pts: [number, number][], linkKm: number): [number, number][][] {
+  const n = pts.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = (x: number): number => {
+    let r = x;
+    while (parent[r] !== r) r = parent[r]!;
+    while (parent[x] !== r) {
+      const nx = parent[x]!;
+      parent[x] = r;
+      x = nx;
     }
+    return r;
+  };
+  const union = (a: number, b: number) => {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  };
+  const cellLon = linkKm / 84.7; // km/° de longitud en Iberia
+  const cellLat = linkKm / 111; // km/° de latitud
+  const grid = new Map<string, number[]>();
+  const key = (cx: number, cy: number) => `${cx},${cy}`;
+  const cellOf = (p: [number, number]): [number, number] => [
+    Math.floor(p[0] / cellLon),
+    Math.floor(p[1] / cellLat),
+  ];
+  pts.forEach((p, i) => {
+    const [cx, cy] = cellOf(p);
+    const k = key(cx, cy);
+    const arr = grid.get(k);
+    if (arr) arr.push(i);
+    else grid.set(k, [i]);
+  });
+  pts.forEach((p, i) => {
+    const [cx, cy] = cellOf(p);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const arr = grid.get(key(cx + dx, cy + dy));
+        if (!arr) continue;
+        for (const j of arr) {
+          if (j <= i) continue;
+          if (haversineKm(p, pts[j]!) <= linkKm) union(i, j);
+        }
+      }
+    }
+  });
+  const groups = new Map<number, [number, number][]>();
+  pts.forEach((p, i) => {
+    const r = find(i);
+    const g = groups.get(r);
+    if (g) g.push(p);
+    else groups.set(r, [p]);
+  });
+  return [...groups.values()];
+}
+
+/** Distancia mínima (km) de un punto a cualquier foco de una componente. */
+function minDistToCluster(pt: [number, number], cluster: [number, number][]): number {
+  let best = Infinity;
+  for (const c of cluster) {
+    const d = haversineKm(pt, c);
+    if (d < best) best = d;
+  }
+  return best;
+}
+
+/**
+ * Dibuja, para CADA incendio no extinguido, el perímetro de su cúmulo de focos
+ * FIRMS (envolvente cóncava del componente conexo que le corresponde). Autónomo y
+ * al día: se recalcula en cada consulta con los focos vigentes, así que crece solo
+ * conforme aparecen focos nuevos fuera del perímetro anterior.
+ *
+ * - Si el incendio ya tiene un perímetro REAL de área quemada (EFFIS,
+ *   `perimeterSourceSlug`), se CONSERVA y el cúmulo FIRMS se añade como
+ *   `perimeterExtra` (extensión discontinua) solo si supera claramente su extensión.
+ * - Si no, el cúmulo FIRMS pasa a ser el `perimeter` (marcado `perimeterApprox`,
+ *   detección satelital) y su superficie va a `hotspotHectares` (estimación por
+ *   focos; nunca pisa una cifra oficial de `hectares`).
+ *
+ * Nunca lanza; identidad sin focos.
+ */
+export function deriveFirmsPerimeters(fires: Fire[], hotspots: Hotspot[]): Fire[] {
+  if (!hotspots.length) return fires;
+  const comps = connectedComponents(
+    hotspots.map((h) => h.coordinates),
+    FIRMS_LINK_KM,
+  ).filter((c) => c.length >= FIRMS_MIN_HOTSPOTS);
+  if (!comps.length) return fires;
+
+  const candidates = fires
+    .map((f, i) => ({ f, i }))
+    .filter(({ f }) => f.state !== 'extinguido');
+  // Adjudica cada componente al incendio candidato más cercano (a ≤ ASSIGN_MAX_KM);
+  // cada incendio se queda con la componente MÁS GRANDE que le toque.
+  const assigned = new Map<number, [number, number][]>();
+  for (const comp of comps) {
+    let bestIdx = -1;
+    let bestKm = Infinity;
+    for (const { f, i } of candidates) {
+      const km = minDistToCluster(f.coordinates, comp);
+      if (km < bestKm) {
+        bestKm = km;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx < 0 || bestKm > FIRMS_ASSIGN_MAX_KM) continue;
+    const prev = assigned.get(bestIdx);
+    if (!prev || comp.length > prev.length) assigned.set(bestIdx, comp);
+  }
+  if (!assigned.size) return fires;
+
+  return fires.map((f, i) => {
+    const comp = assigned.get(i);
+    if (!comp) return f;
+    const ring = clusterHullRing(comp);
+    if (!ring) return f;
+    const area = Math.round(estimatePerimeterHectares(ring) / 100) * 100; // centenas (estimación)
+    const out: Fire = { ...f };
+    const effisArea =
+      f.perimeterSourceSlug && f.perimeter && f.perimeter.length >= 4
+        ? estimatePerimeterHectares(f.perimeter)
+        : 0;
+    if (effisArea > 0 && area <= effisArea * 1.5) {
+      // El perímetro EFFIS (área quemada real mapeada) es representativo del cúmulo:
+      // se conserva tal cual, sin añadir una segunda silueta casi igual.
+      return out;
+    }
+    // Sin EFFIS, o el fuego ha crecido muy por encima de la cicatriz EFFIS (que va
+    // con retraso): el cúmulo FIRMS —más actual— pasa a ser el ÚNICO perímetro.
+    out.perimeter = ring;
+    out.perimeterApprox = true;
+    out.perimeterExtra = undefined;
+    out.hotspotHectares = area;
     return out;
   });
 }

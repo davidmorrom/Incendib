@@ -63,7 +63,7 @@ export const useUIStore = create<UIState>((set) => ({
   shareOpen: false,
   copied: false,
   perimetersVisible: true,
-  hotspotsVisible: false,
+  hotspotsVisible: true,
   basemap: 'auto',
   network: 'loading',
   theme: null,

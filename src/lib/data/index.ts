@@ -24,7 +24,7 @@ import {
   gateByHotspots,
   dedupeMutualAidFires,
   deriveApproxPerimeters,
-  upgradeExtraFromFirms,
+  deriveFirmsPerimeters,
 } from './adapters';
 import {
   getOverridesCached,
@@ -113,10 +113,11 @@ export async function getFires(): Promise<Fire[]> {
   // cronología) sobre el incendio en vivo, o añaden fichas reconstruidas donde no
   // hay fuente. Inerte fuera de la ventana de emergencia (ver emergency.ts).
   const withEmergency = applyEmergencyOverrides(patched);
-  // La extensión editorial (`perimeterExtra`) se actualiza con el dato satelital
-  // REAL: la envolvente del cúmulo conexo de focos FIRMS anclado en el incidente
-  // (dato actual; el editorial queda solo de respaldo si no hay focos).
-  return upgradeExtraFromFirms(withEmergency, firmsHotspots);
+  // Perímetro por focos FIRMS para TODOS los incendios (autónomo y al día): la
+  // envolvente del cúmulo de focos de cada incendio, que crece sola con los focos
+  // nuevos. Va al final para cubrir también las fichas de emergencia añadidas
+  // arriba. Sin focos (mock / sin clave) es identidad.
+  return deriveFirmsPerimeters(withEmergency, firmsHotspots);
 }
 
 /**

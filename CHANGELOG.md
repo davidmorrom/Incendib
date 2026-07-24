@@ -5,6 +5,33 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.44.0] - 2026-07-24
+
+### Añadido
+
+- **Perímetro por focos FIRMS, autónomo y para TODOS los incendios**
+  (`deriveFirmsPerimeters`). En vez de un casco acotado a 3 km por incendio, el
+  sistema agrupa todos los focos FIRMS en **componentes conexas** (enlace ≤1,3 km)
+  y adjudica cada una al incendio no extinguido **más cercano**; el perímetro de
+  cada incendio es la envolvente cóncava de su componente. Así cada fuego —pequeño
+  o mega-incendio— dibuja su extensión real, **se actualiza solo** conforme
+  aparecen focos nuevos, y ningún incendio hereda el frente de un vecino (cada
+  componente pertenece a un único incidente). Verificado el 24 jul: Burgohondo
+  ~26 km, San Martín de Valdeiglesias ~8 km y Almorox ~3 km, cada uno con su propio
+  cúmulo. Si hay perímetro EFFIS y el fuego ha crecido muy por encima, el cúmulo
+  FIRMS (más actual) lo sustituye; si el EFFIS es representativo, se conserva. La
+  superficie del cúmulo va a `hotspotHectares` (estimación por focos; no pisa una
+  cifra oficial).
+
+### Cambiado
+
+- **La capa de focos (FIRMS) vuelve a estar ACTIVADA por defecto** al entrar en el
+  visor.
+- **Burgohondo deja de mostrar dos siluetas.** Antes coincidían el casco pequeño
+  (3 km) de `deriveApproxPerimeters` y el cúmulo completo; ahora el cúmulo FIRMS es
+  el único perímetro. La superficie estimada la fija el propio cúmulo, coherente
+  con lo dibujado. La declaración de interés nacional y la cronología se mantienen.
+
 ## [0.43.0] - 2026-07-24
 
 ### Añadido

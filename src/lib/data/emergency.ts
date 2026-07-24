@@ -269,13 +269,12 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
 ];
 
 /**
- * Campos a FUSIONAR sobre el incendio en vivo de Burgohondo (INFORCYL). Se
- * CONSERVA su perímetro satelital (EFFIS) y su superficie: solo se AÑADE el
- * lóbulo de extensión, la evacuación y la cronología (instrucción del
- * propietario: «el perímetro satelital no lo borres, solo añade este»).
+ * Campos a FUSIONAR sobre el incendio en vivo de Burgohondo (INFORCYL). El
+ * PERÍMETRO y la superficie los pone de forma autónoma `deriveFirmsPerimeters`
+ * (envolvente del cúmulo de focos FIRMS, para todos los incendios); aquí solo se
+ * añade la evacuación y la cronología (contexto verificado en prensa).
  */
 const BURGOHONDO_DATA: Partial<Fire> = {
-  perimeterExtra: BURGOHONDO_EXTENSION,
   evacuation:
     'Unos 1.500 evacuados (según medios): Puente Nueva y Matalaceña (Burgohondo), camping El Burguillo, Las Cruceras y La Rinconada del Valle de Iruelas, y la urbanización La Atalaya (El Tiemblo). Confinamiento por humo (ES-Alert) en El Tiemblo, Navaluenga y Burgohondo. Emergencia de interés nacional (situación operativa 3) declarada para Madrid y Ávila.',
   timeline: BURGOHONDO_TIMELINE,
@@ -356,10 +355,8 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       municipalityIncludes: 'burgohondo',
     },
     patch: BURGOHONDO_DATA,
-    // Respaldo de superficie si no hay focos FIRMS ni EFFIS en vivo. Normalmente
-    // `upgradeExtraFromFirms` fija la cifra con la envolvente satelital real
-    // (~9 000 ha el 24 jul, tras arrasar el Valle de Iruelas). Estimación.
-    hectaresFallback: 9000,
+    // La superficie y el perímetro los fija `deriveFirmsPerimeters` con el cúmulo
+    // de focos FIRMS real (hotspotHectares), coherente con el perímetro dibujado.
     // Respaldo si el registro de INFORCYL/EFFIS desapareciera de la fuente en
     // vivo: sin perímetro satelital, se dibuja la extensión como perímetro
     // provisional (discontinuo) y se estima la superficie (~ EFFIS observada).
