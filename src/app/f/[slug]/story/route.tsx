@@ -45,7 +45,7 @@ function rgba(hex: string, a: number): string {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-// lon/lat (WGS84) → EPSG:3857 (Web Mercator), R = radio ecuatorial.
+// lon/lat (WGS84) → EPSG:3857 (Web Mercator).
 const MERC_R = 6378137;
 function mercator(lon: number, lat: number): [number, number] {
   const x = (MERC_R * lon * Math.PI) / 180;
@@ -53,42 +53,41 @@ function mercator(lon: number, lat: number): [number, number] {
   return [x, y];
 }
 
-/**
- * URL GetMap (WMS) de EOX centrada en el incendio, con el bbox en proporción
- * 9:16 para llenar el lienzo sin deformar el píxel. Capa `_3857` (nativa Web
- * Mercator; la variante sin sufijo es EPSG:4326 y devolvería un recorte vacío).
- */
+// EOX WMS GetMap del mosaico Sentinel-2 cloudless. El render escala con el tamaño
+// de salida: a 1080×1920 tarda ~17 s (inservible para compartir → el fondo «se
+// quedaba en degradado»), pero a 486×864 ~1,8 s. Como el fondo va tras un velo
+// oscuro y el texto, esa resolución basta y se escala al lienzo. UNA imagen (Satori
+// la rasteriza rápido; componer decenas de teselas es mucho más lento).
+const SAT_W = 486; // 0,45× de 1080×1920 (mismo 9:16)
+const SAT_H = 864;
+const SAT_TIMEOUT_MS = 5000;
+
 function eoxUrl([lon, lat]: [number, number]): string {
   const [cx, cy] = mercator(lon, lat);
   const halfH = 9000; // metros proyectados (≈14 km de terreno a lat ~40)
-  const halfW = (halfH * SIZE.width) / SIZE.height;
+  const halfW = (halfH * SAT_W) / SAT_H;
   const bbox = [cx - halfW, cy - halfH, cx + halfW, cy + halfH].map((n) => n.toFixed(2)).join(',');
   const p = new URLSearchParams({
     service: 'WMS',
     request: 'GetMap',
     version: '1.1.1',
-    layers: 's2cloudless-2024_3857',
+    layers: 's2cloudless-2024_3857', // `_3857` (Web Mercator nativo); sin sufijo es EPSG:4326 y saldría vacío
     srs: 'EPSG:3857',
     bbox,
-    width: String(SIZE.width),
-    height: String(SIZE.height),
+    width: String(SAT_W),
+    height: String(SAT_H),
     format: 'image/jpeg',
   });
   return `https://tiles.maps.eox.at/wms?${p.toString()}`;
 }
 
-// Timeout corto: una imagen de compartir debe salir aunque EOX (best-effort,
-// sin SLA — se han visto de 2 s a 17 s) tarde o falle. Si EOX no llega a tiempo,
-// se usa el card de degradado.
-const SAT_TIMEOUT_MS = 3000;
-// Caché en memoria del fondo ya descargado: el mosaico Sentinel-2 de un lugar es
-// ESTÁTICO, así que un único acierto de EOX sirve a todas las comparticiones
-// siguientes de ese incendio (y no re-golpea un servicio best-effort). Se pierde
-// en cada arranque en frío de la función (aceptable: es una mejora oportunista).
+// Caché en memoria del fondo ya descargado: el mosaico de un lugar es ESTÁTICO, así
+// que un acierto sirve a las comparticiones siguientes de ese incendio. Se pierde en
+// cada arranque en frío de la función (aceptable: es una mejora oportunista).
 const SAT_TTL_MS = 24 * 60 * 60 * 1000;
 const satCache = new Map<string, { url: string; exp: number }>();
 
-/** Descarga el fondo de satélite como data URL, best-effort y cacheado. */
+/** Descarga el fondo de satélite (una imagen WMS pequeña) como data URL, cacheado. */
 async function satelliteBackdrop(coords: [number, number]): Promise<string | null> {
   const key = coords.map((n) => n.toFixed(3)).join(',');
   const hit = satCache.get(key);
@@ -102,7 +101,7 @@ async function satelliteBackdrop(coords: [number, number]): Promise<string | nul
     const type = res.headers.get('content-type') ?? '';
     if (!type.startsWith('image/')) return null;
     const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.byteLength < 3000) return null; // recorte casi vacío → descartar
+    if (buf.byteLength < 2000) return null; // recorte casi vacío → descartar
     const url = `data:${type};base64,${buf.toString('base64')}`;
     satCache.set(key, { url, exp: Date.now() + SAT_TTL_MS });
     return url;
@@ -152,7 +151,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
           background: dark.bg.base,
         }}
       >
-        {/* Fondo: satélite si lo hay; si no, degradado con la paleta de marca. */}
+        {/* Fondo: satélite (una imagen WMS) si lo hay; si no, degradado de marca. */}
         {backdrop ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

@@ -31,6 +31,32 @@
 
 ## Log
 
+### 2026-07-24 — Agente (ficha/UI): fondo satélite de la story fiable (v0.46.2)
+
+**Motivo:** el propietario reportó que el fondo satélite de la imagen para Stories
+«se queda en degradado». Diagnóstico (MEDIDO, no supuesto): EOX renderiza el WMS
+GetMap a demanda y el tiempo escala con el tamaño de salida —1080×1920 ≈ 17 s
+(constante: es CPU de EOX, no red; 4/4 medidas 16,6–17,9 s), 540×960 ≈ 2,9 s,
+486×864 ≈ 1,8 s, 360×640 ≈ 1,1 s—; con el timeout de 3 s casi siempre caía al
+respaldo. Las teselas WMTS de zoom alto (z14) también son lentas (render a
+demanda) y componer decenas en Satori es peor aún (~6-8 s solo de render, verificado).
+
+**Hecho (typecheck + lint + build 110/110 + 366 tests):** el fondo se pide como
+UNA imagen WMS pequeña (486×864, 0,45× · mismo 9:16) y se escala al lienzo tras el
+velo —calidad de sobra para un fondo bajo texto—; timeout 5 s; caché en memoria del
+fondo por incendio (coords redondeadas). Satori rasteriza una sola imagen. El
+satélite ya carga de forma fiable; el respaldo de degradado se conserva.
+
+**Nota conocida (no bloqueante):** codificar el PNG fotográfico 1080×1920 tarda ~6 s
+incluso en `next start` local; el menú muestra «Preparando imagen…» y precarga al
+abrirse. Aceptable para generar una imagen de compartir; si molesta, mejorable con
+caché de respuesta (s-maxage) o bajando la resolución de salida.
+
+**Tocado (solo míos, por ruta):** `src/app/f/[slug]/story/route.tsx`, CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.46.2** (último tag v0.46.1; fix). **Siguiente tag libre: 0.46.3.**
+
 ### 2026-07-24 — Agente (datos): `getFires` nunca lanza de verdad → build robusto (v0.46.1)
 
 **Motivo:** el deploy de v0.46.0 falló en Vercel al prerenderizar `/f/[slug]` de

@@ -5,6 +5,19 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.46.2] - 2026-07-24
+
+### Corregido
+
+- **El fondo satélite de la imagen para Stories se quedaba siempre en el degradado
+  de respaldo.** Se pedía a EOX un WMS GetMap a 1080×1920, que su servidor
+  renderiza a demanda en ~17 s (constante — es CPU de EOX, no red), muy por encima
+  del margen de espera, así que casi nunca llegaba a tiempo. Ahora se pide una
+  imagen pequeña (486×864, ~2 s) que se escala tras el velo oscuro —resolución de
+  sobra para un fondo—, de modo que el satélite ya carga de forma fiable. La
+  imagen tarda unos segundos en generarse («Preparando imagen…»); el respaldo de
+  degradado se conserva para cuando EOX falla o supera el tiempo de espera.
+
 ## [0.46.1] - 2026-07-24
 
 ### Corregido
