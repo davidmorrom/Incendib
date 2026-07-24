@@ -46,6 +46,30 @@ nunca como parte oficial (etiquetado «prensa» con enlace + perímetro marcado
   estimación satelital EFFIS (~2 547 ha en prod) marcada «~».
 - **Nivel 2 NO es el máximo** (el máximo del IGR es el 3, interés nacional).
 
+## Actualización 24 jul 2026 (Nivel 3 / interés nacional + FIRMS)
+
+- **«Nivel 3» = Situación Operativa 3 / emergencia de INTERÉS NACIONAL**, declarada
+  por el Ministro del Interior (~00:35 del 24 jul) para la **Comunidad de Madrid y
+  la provincia de Ávila** —primera vez en España por incendios—, motivada por
+  **Burgohondo, Villa del Prado (desde Almorox) y San Martín de Valdeiglesias**.
+  OJO: el IGP de un incendio solo llega a 2; NO existe «IGP 3». Por eso Burgohondo
+  se mantiene en **Nivel 2** y NO se le pone `level: 3`. La declaración es de
+  territorio, no de incendio; se refleja en la cronología de las tres fichas.
+- **Perímetro con focos FIRMS** (a petición del propietario, que revisó NASA
+  FIRMS): `upgradeExtraFromFirms` (en `adapters/index.ts`) calcula la envolvente
+  del cúmulo conexo de focos y sustituye la extensión editorial por el dato
+  satelital real/actual. Burgohondo: ~850 focos, ~21-27 km, arrasando el Valle de
+  Iruelas hacia El Tiemblo. Se conserva el perímetro EFFIS (satelital, oficial de
+  área quemada) y la extensión FIRMS va como `perimeterExtra` (discontinua).
+- **Superficie:** discrepancia importante a vigilar. Medios citan una estimación
+  satelital **~1.500 ha** (provisional, rezagada; el delegado NO dio cifra porque
+  el humo impedía medir). La envolvente FIRMS (48 h) da **~9.000 ha**. Se publica
+  la FIRMS (más actual y coherente con la devastación confirmada), marcada `~` y
+  «estimación por detección satelital». Si sale cifra oficial, ajustarla.
+- **Valle de Iruelas:** «prácticamente arrasado» (confirmado, delegado + varios
+  medios). **El Tiemblo:** confinado + La Atalaya evacuada; NO consta que ardiera
+  el casco urbano (no afirmarlo).
+
 ## Pendiente / a revisar por el propietario
 
 - Retirar `emergency.ts` (o dejar que caduque) cuando termine la emergencia.

@@ -5,6 +5,42 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.43.0] - 2026-07-24
+
+### Añadido
+
+- **Perímetro por cúmulo de focos FIRMS para grandes incendios**
+  (`upgradeExtraFromFirms`). `deriveApproxPerimeters` está acotado a fuegos
+  pequeños (radio de 3 km); un mega-incendio lo desborda y, si ya tiene perímetro
+  EFFIS, queda excluido. Ahora, para incidentes con extensión editorial, se
+  calcula la envolvente (casco cóncavo + margen) del **cúmulo conexo** de focos
+  FIRMS anclado en el incidente —crece por conectividad, así abarca todo el frente
+  contiguo por largo que sea sin fundir un incendio vecino— y **sustituye** la
+  extensión editorial por ese dato satelital **real y actual**. Si su área supera
+  la superficie vigente, actualiza `hectares` (marcada `~`); nunca rebaja una
+  cifra mayor. El perímetro EFFIS se conserva.
+
+### Cambiado
+
+- **Emergencia Burgohondo (24 jul):** tras arrasar gran parte del **Valle de
+  Iruelas** y forzar el confinamiento de **El Tiemblo** (evacuación de La Atalaya)
+  la noche del 23 al 24, la extensión pasa a dibujarse con los **focos FIRMS**
+  (dato actual) y la superficie estimada sube en consecuencia (estimación
+  satelital, sin cifra oficial: el humo impidió medir). Cronología ampliada con la
+  fase convectiva, los nuevos desalojos (~1.500 en total) y la declaración de
+  **emergencia de interés nacional (situación operativa 3)** para Madrid y la
+  provincia de Ávila —primera vez en España por incendios—, añadida también a las
+  fichas de Almorox/Villa del Prado y San Martín de Valdeiglesias. El incendio en
+  sí se mantiene en **Nivel 2** de gravedad potencial (el IGP no tiene un «nivel
+  3»: el 3 es la situación operativa estatal del territorio).
+
+### Corregido
+
+- **Ficha en móvil: «Medios desplegados» y «Evolución» ya no quedan en una ventana
+  diminuta.** Solo el mapa, el aviso de evacuación y las acciones quedan fijos; el
+  resto se desplaza, y esas secciones (más «Otros episodios») pasan a una barra de
+  **pestañas** para acceder a cada una con toda la altura disponible.
+
 ## [0.42.0] - 2026-07-23
 
 ### Añadido

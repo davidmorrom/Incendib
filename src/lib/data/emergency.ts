@@ -171,21 +171,27 @@ const EXPIRES = '2026-08-06T00:00:00+02:00'; // red de seguridad (2 semanas)
  * provisional, no oficial. No se usa para `hectares` (esa cifra sigue siendo la
  * del perímetro satelital).
  */
+// Nota: esta extensión editorial es solo un RESPALDO. En producción, con focos
+// FIRMS disponibles, `upgradeExtraFromFirms` la sustituye por la envolvente real
+// del cúmulo satelital (ver adapters). Aquí se dibuja el alcance del 23-24 jul:
+// desde el área EFFIS (O) arrasando el Valle de Iruelas y llegando a El Tiemblo (E).
 const BURGOHONDO_EXTENSION: [number, number][] = [
-  [-4.7, 40.392], // solape con el borde este del área EFFIS
-  [-4.668, 40.399],
-  [-4.636, 40.404],
-  [-4.606, 40.408],
-  [-4.582, 40.414], // brazo NE hacia La Rinconada
-  [-4.566, 40.409], // La Rinconada
-  [-4.553, 40.394],
-  [-4.551, 40.379], // Valle de Iruelas / Reserva (extremo E)
-  [-4.56, 40.366],
-  [-4.582, 40.358],
-  [-4.606, 40.356], // lóbulo SE (Cerro de la Escusa)
-  [-4.634, 40.36],
-  [-4.662, 40.366],
-  [-4.69, 40.37], // solape con el borde este del área EFFIS
+  [-4.7, 40.394], // solape con el borde este del área EFFIS
+  [-4.66, 40.402],
+  [-4.615, 40.408],
+  [-4.575, 40.412], // borde N del valle (La Rinconada)
+  [-4.54, 40.414],
+  [-4.512, 40.412],
+  [-4.497, 40.406], // El Tiemblo (extremo E)
+  [-4.495, 40.392],
+  [-4.508, 40.378],
+  [-4.532, 40.366], // Valle de Iruelas sur
+  [-4.56, 40.358],
+  [-4.59, 40.354],
+  [-4.618, 40.356],
+  [-4.648, 40.36],
+  [-4.675, 40.366],
+  [-4.695, 40.372], // solape con el borde este del área EFFIS
 ];
 
 /**
@@ -241,6 +247,25 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
     source: 'Ávilared',
     url: 'https://avilared.com/art/93357/alerta-esalert-confinamiento-el-tiemblo-burgohondo-navaluenga-incendio-forestal',
   },
+  {
+    at: '2026-07-23T18:50:00+02:00',
+    label: 'Confinamiento de El Tiemblo por ES-Alert y evacuación de su urbanización La Atalaya (unos 1.200-1.300 residentes) ante el rápido avance del frente hacia la localidad.',
+    state: 'activo',
+  },
+  {
+    at: '2026-07-23T21:00:00+02:00',
+    label: 'Fase más crítica: comportamiento convectivo, avance de ~3 km en 40 min, «prácticamente fuera de la capacidad de extinción». El fuego penetra en la Reserva Natural del Valle de Iruelas, «prácticamente arrasada» (delegado territorial de la Junta). Unas 1.500 personas evacuadas en total (camping El Burguillo, Las Cruceras y La Rinconada).',
+    state: 'activo',
+  },
+  {
+    at: '2026-07-24T00:35:00+02:00',
+    label: 'El Ministro del Interior declara la EMERGENCIA DE INTERÉS NACIONAL (Situación Operativa 3, máximo del Sistema Nacional de Protección Civil) para la Comunidad de Madrid y la provincia de Ávila —primera vez en España por incendios forestales—, motivada por Burgohondo, Villa del Prado y San Martín de Valdeiglesias. El Estado asume la dirección; el mando operativo recae en la UME.',
+    state: 'activo',
+  },
+  {
+    at: '2026-07-24T08:00:00+02:00',
+    label: 'Mañana del 24: el perímetro se describe estabilizado tras la noche, pero sin controlar. Sin cifra oficial de superficie: el humo impidió medir con fiabilidad. La extensión se estima por detección satelital (focos FIRMS).',
+  },
 ];
 
 /**
@@ -252,7 +277,7 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
 const BURGOHONDO_DATA: Partial<Fire> = {
   perimeterExtra: BURGOHONDO_EXTENSION,
   evacuation:
-    'Desalojo de ~100 vecinos de Puente Nueva y Matalaceña (Burgohondo). Confinamiento por humo (ES-Alert) reportado en El Tiemblo, Navaluenga y Burgohondo; desalojo de La Rinconada y el camping del Valle de Iruelas según cobertura en directo (sin confirmación oficial).',
+    'Unos 1.500 evacuados (según medios): Puente Nueva y Matalaceña (Burgohondo), camping El Burguillo, Las Cruceras y La Rinconada del Valle de Iruelas, y la urbanización La Atalaya (El Tiemblo). Confinamiento por humo (ES-Alert) en El Tiemblo, Navaluenga y Burgohondo. Emergencia de interés nacional (situación operativa 3) declarada para Madrid y Ávila.',
   timeline: BURGOHONDO_TIMELINE,
 };
 
@@ -275,6 +300,11 @@ const SANMARTIN_TIMELINE: TimelineEntry[] = [
     label: 'El fuego avanza por el camino de las Navas en dirección a Pelayos de la Presa. En los últimos partes, el flanco sur queda extinguido y el norte sigue activo.',
     source: 'Telemadrid',
     url: 'https://www.telemadrid.es/noticias/madrid/Se-desata-un-incendio-forestal-en-San-Martin-de-Valdeiglesias-tras-arder-un-coche-en-la-M-501-0-2909709031--20260723042239.html',
+  },
+  {
+    at: '2026-07-24T00:35:00+02:00',
+    label: 'Incluido en la declaración de emergencia de interés nacional (situación operativa 3) para la Comunidad de Madrid y la provincia de Ávila, junto con Villa del Prado y Burgohondo. El Estado (Ministerio del Interior) asume la dirección.',
+    state: 'activo',
   },
 ];
 
@@ -305,6 +335,10 @@ const ALMOROX_TIMELINE: TimelineEntry[] = [
     source: 'Infobae',
     url: 'https://www.infobae.com/espana/2026/07/23/el-incendio-en-almorox-toledo-baja-a-nivel-1-tras-quedar-perimetrado-el-fuego-ha-quemado-1000-hectareas/',
   },
+  {
+    at: '2026-07-24T00:35:00+02:00',
+    label: 'Su propagación a Villa del Prado (Madrid) queda incluida en la declaración de emergencia de interés nacional (situación operativa 3) para Madrid y la provincia de Ávila, junto con Burgohondo y San Martín de Valdeiglesias.',
+  },
 ];
 
 /**
@@ -322,9 +356,10 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       municipalityIncludes: 'burgohondo',
     },
     patch: BURGOHONDO_DATA,
-    // Si EFFIS no adjunta superficie en vivo (visto ~2 547 ha en prod), no dejar
-    // «sin dato» durante la emergencia: estimación satelital de reserva.
-    hectaresFallback: 2547,
+    // Respaldo de superficie si no hay focos FIRMS ni EFFIS en vivo. Normalmente
+    // `upgradeExtraFromFirms` fija la cifra con la envolvente satelital real
+    // (~9 000 ha el 24 jul, tras arrasar el Valle de Iruelas). Estimación.
+    hectaresFallback: 9000,
     // Respaldo si el registro de INFORCYL/EFFIS desapareciera de la fuente en
     // vivo: sin perímetro satelital, se dibuja la extensión como perímetro
     // provisional (discontinuo) y se estima la superficie (~ EFFIS observada).
@@ -338,7 +373,7 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       state: 'activo',
       level: 2,
       type: 'forestal',
-      hectares: 2547,
+      hectares: 9000,
       hectaresApprox: true,
       perimeter: BURGOHONDO_EXTENSION,
       perimeterProvisional: true,

@@ -99,7 +99,7 @@ const pt: Dictionary = {
     perimeterApprox:
       'Extensão aproximada por deteção satelital (VIIRS/FIRMS) — não é um perímetro oficial.',
     perimeterProvisional:
-      'Traço tracejado: extensão provisória (imprensa e acompanhamento) até às zonas alcançadas — não é um perímetro oficial nem definitivo.',
+      'Traço tracejado: extensão aproximada por deteção satelital (focos FIRMS) até às zonas alcançadas — não é um perímetro oficial nem definitivo.',
     evacuationNotice: 'Evacuações e confinamentos',
     approxHotspot: 'estimativa muito aproximada (focos)',
   },

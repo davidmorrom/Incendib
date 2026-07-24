@@ -98,7 +98,7 @@ const es = {
     perimeterApprox:
       'Extensión aproximada por detección satelital (VIIRS/FIRMS) — no es un perímetro oficial.',
     perimeterProvisional:
-      'Trazo discontinuo: extensión provisional (prensa y seguimiento) hasta las zonas alcanzadas — no es un perímetro oficial ni definitivo.',
+      'Trazo discontinuo: extensión aproximada por detección satelital (focos FIRMS) hasta las zonas alcanzadas — no es un perímetro oficial ni definitivo.',
     evacuationNotice: 'Evacuaciones y confinamientos',
     approxHotspot: 'estimación muy aproximada (focos)',
   },

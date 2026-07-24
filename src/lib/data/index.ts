@@ -24,6 +24,7 @@ import {
   gateByHotspots,
   dedupeMutualAidFires,
   deriveApproxPerimeters,
+  upgradeExtraFromFirms,
 } from './adapters';
 import {
   getOverridesCached,
@@ -68,6 +69,9 @@ export function getDataMode(): DataMode {
  */
 export async function getFires(): Promise<Fire[]> {
   let fires: Fire[];
+  // Focos FIRMS de esta consulta (para actualizar extensiones de emergencia con
+  // el dato satelital real; vacío en mock).
+  let firmsHotspots: Hotspot[] = [];
   if (getDataMode() === 'live') {
     const [pt, cyl, and, cat, clm, hotspots, perimeters] = await Promise.all([
       fetchPortugalFires(),
@@ -96,6 +100,7 @@ export async function getFires(): Promise<Fire[]> {
     const withApprox = deriveApproxPerimeters(merged, hotspots);
     // Capa de calidad: confirma con focos FIRMS cercanos (señal positiva).
     fires = confirmWithHotspots(withApprox, hotspots);
+    firmsHotspots = hotspots;
   } else {
     fires = MOCK_FIRES;
   }
@@ -107,7 +112,11 @@ export async function getFires(): Promise<Fire[]> {
   // verificados en prensa (perímetro provisional, superficie, evacuaciones,
   // cronología) sobre el incendio en vivo, o añaden fichas reconstruidas donde no
   // hay fuente. Inerte fuera de la ventana de emergencia (ver emergency.ts).
-  return applyEmergencyOverrides(patched);
+  const withEmergency = applyEmergencyOverrides(patched);
+  // La extensión editorial (`perimeterExtra`) se actualiza con el dato satelital
+  // REAL: la envolvente del cúmulo conexo de focos FIRMS anclado en el incidente
+  // (dato actual; el editorial queda solo de respaldo si no hay focos).
+  return upgradeExtraFromFirms(withEmergency, firmsHotspots);
 }
 
 /**

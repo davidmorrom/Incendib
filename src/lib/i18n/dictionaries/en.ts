@@ -99,7 +99,7 @@ const en: Dictionary = {
     perimeterApprox:
       'Approximate extent from satellite detection (VIIRS/FIRMS) — not an official perimeter.',
     perimeterProvisional:
-      'Dashed line: provisional extent (press and tracking) to the areas reached — not an official or final perimeter.',
+      'Dashed line: approximate extent from satellite detection (FIRMS hotspots) to the areas reached — not an official or final perimeter.',
     evacuationNotice: 'Evacuations and shelter-in-place',
     approxHotspot: 'very rough estimate (hotspots)',
   },
