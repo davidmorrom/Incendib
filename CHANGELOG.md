@@ -5,6 +5,25 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.48.2] - 2026-07-24
+
+### Corregido
+
+- **El mapa dejaba de esconder el área quemada EFFIS (gris) cuando un incidente
+  ya tenía un perímetro más grande por focos FIRMS.** `getBurnedAreas` (la capa
+  de áreas quemadas del mapa) devolvía TODAS las cicatrices EFFIS sin excluir
+  las ya absorbidas por un incidente en vivo — esa exclusión solo existía para
+  `/p/[provincia]`. Un incendio como Burgohondo, cuyo perímetro pasó a ser el
+  cúmulo de focos (mucho más grande), seguía mostrando también su cicatriz
+  EFFIS original suelta, en gris, más pequeña, encima o al lado del perímetro
+  grande — el mismo incendio físico dibujado dos veces. Ahora `getBurnedAreas`
+  excluye toda área cuyo slug aparezca como `perimeterSourceSlug` de un
+  incidente en vivo (el campo se conserva a propósito aunque el perímetro
+  mostrado ya no sea esa geometría exacta). Verificado en vivo: Burgohondo,
+  Murias de Ponjos y Marjaliza conservan `perimeterSourceSlug` con su EFFIS
+  original pese a mostrar ya el cúmulo FIRMS, y esas 3 áreas ya no aparecen en
+  `getBurnedAreas` (antes sí, con 0 fugas confirmadas tras el fix).
+
 ## [0.48.1] - 2026-07-24
 
 ### Corregido

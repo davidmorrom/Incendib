@@ -31,6 +31,47 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos/mapa): el área quemada EFFIS ya no se duplica cuando hay perímetro por focos (v0.48.2)
+
+**Encargo del propietario:** «quiero que, si hay perímetro aproximado con los
+focos, el perímetro de EFFIS en gris se quite, no quiero que se vean otros
+perímetros si hay el de los focos».
+
+**Diagnóstico (script vitest con datos live, no supuesto):** confirmé que
+`getBurnedAreas` (`src/lib/data/index.ts`, alimenta la capa de áreas quemadas
+del mapa vía `/api/map-layers`) devuelve TODAS las cicatrices EFFIS del feed,
+sin excluir las que ya están absorbidas como `perimeter` de un incidente en
+vivo. La exclusión (`perimeterSourceSlug`) SÍ existía, pero solo se aplicaba en
+`getProvincePool` (`/p/[provincia]`), no en la capa del mapa. Motivo del bug
+que vio el propietario: cuando `deriveFirmsPerimeters` sustituye el perímetro
+EFFIS por el cúmulo de focos (más grande), el campo `perimeterSourceSlug`
+sigue apuntando a la cicatriz EFFIS original (a propósito, para esta misma
+exclusión) — pero como el mapa no la consultaba, esa cicatriz EFFIS seguía
+apareciendo suelta, en gris, más pequeña, junto al perímetro grande: el mismo
+incendio físico dibujado dos veces. Confirmado en vivo: Burgohondo, Murias de
+Ponjos y Marjaliza en ese estado exacto.
+
+**Hecho (typecheck + lint + 375 tests + build; verificado en vivo antes/
+después — 0 fugas tras el fix, confirmado con el mismo script):**
+`getBurnedAreas` ahora llama también a `getFires` (ya seguro para ISR, ver
+v0.48.0) y excluye toda área EFFIS cuyo slug esté en el `perimeterSourceSlug`
+de algún incidente en vivo. Simplificado `history-pool.ts` (`getProvincePool`)
+para quitar el filtro local ya redundante — la exclusión ahora es
+consistente en TODOS los consumidores (mapa y provincia), no solo uno.
+
+**Gotcha de sesión:** tras limpiar `.next` para descartar una caché corrupta
+(error de tipos "File ... page.ts not found", gotcha ya conocido de sesiones
+anteriores), `next build` falló dos veces más con errores de filesystem de
+Windows (`ENOTEMPTY`/`ENOENT` en `.next/export`) — transitorios, no relacionados
+con el código; un tercer intento limpio compiló bien.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/index.ts` (`getBurnedAreas`),
+`src/lib/fires/history-pool.ts` (`getProvincePool`, simplificado), CHANGELOG,
+package.json, este log.
+
+**Versión:** tomo **v0.48.2** (último tag v0.48.1; fix). **Siguiente tag
+libre: 0.48.3.**
+
 ### 2026-07-24 — Agente (datos): la adjudicación de focos alcanza el borde YA acumulado, no solo el origen (v0.48.1)
 
 **Encargo del propietario:** «hay algún foco FIRMS ahora fuera de los

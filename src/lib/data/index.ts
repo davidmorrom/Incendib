@@ -246,12 +246,21 @@ export async function getHotspots(): Promise<Hotspot[]> {
  * incendios pasados/mapeados por satélite (no incidentes activos): se dibujan
  * como perímetro real de área quemada, aparte de los marcadores de incidentes.
  * En mock ya vienen perímetros en los propios incendios, así que devuelve [].
+ *
+ * Excluye las áreas ya ABSORBIDAS por un incidente en vivo como su `perimeter`
+ * (`perimeterSourceSlug`) — incluidas las que ese incidente ha superado con un
+ * cúmulo de focos FIRMS más grande (`deriveFirmsPerimeters` conserva el campo
+ * aunque ya no dibuje esa geometría exacta, precisamente para esta exclusión).
+ * Sin esto, el mismo incendio físico se pintaba dos veces en el mapa: una vez
+ * grande y coloreada (el perímetro del incidente) y otra en gris, más pequeña y
+ * suelta, como si fuera un área quemada aparte.
  */
 export async function getBurnedAreas(): Promise<Fire[]> {
   if (getDataMode() !== 'live') return [];
-  const areas = await fetchEffisPerimeters().catch(() => []);
+  const [areas, fires] = await Promise.all([fetchEffisPerimeters().catch(() => []), getFires()]);
+  const absorbed = new Set(fires.map((f) => f.perimeterSourceSlug).filter((s): s is string => Boolean(s)));
   // Cap por higiene visual/perf; ya vienen ordenadas por actualización reciente.
-  const capped = areas.slice(0, 250);
+  const capped = areas.filter((a) => !absorbed.has(a.slug)).slice(0, 250);
   return filterOutSlugs(capped, (await safeOverrides()).hiddenBurned);
 }
 
