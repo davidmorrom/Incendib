@@ -5,6 +5,35 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.45.0] - 2026-07-24
+
+### Añadido
+
+- **Distintivo «INTERÉS NACIONAL» en la ficha**, separado del nivel de gravedad.
+  El Índice de Gravedad Potencial de un incendio solo llega a 0-2 (no existe «IGP
+  3»); el «3» que se oye es la **Situación Operativa 3 / emergencia de interés
+  nacional**, que declara el Ministro del Interior para un TERRITORIO, no para un
+  incendio. Se muestra como etiqueta propia en los tres incendios de la
+  declaración del 24 jul (Burgohondo, Almorox–Villa del Prado y San Martín de
+  Valdeiglesias), sin falsear el nivel del incendio.
+- **Fuente de los datos de medios, junto a los medios** en la ficha (bloque
+  «Medios desplegados» y casilla «Medios» del resumen): p. ej. «Fuente: Castilla y
+  León (JCyL)».
+
+### Cambiado
+
+- **Almorox se identifica también como «Villa del Prado».** Es el mismo incendio:
+  se originó en Almorox (Toledo) y cruzó a Villa del Prado (Madrid), que el 112 de
+  Madrid nombra por su municipio. Se renombra el registro para que no parezcan dos.
+- **Datos de Burgohondo actualizados (24 jul).** Aviso de evacuaciones/
+  confinamientos al día: incendio ACTIVO y sin controlar, interés nacional
+  VIGENTE, ~1.500 evacuados sin levantar (La Atalaya de El Tiemblo, Valle de
+  Iruelas, Puente Nueva/Matalaceña; residencia de El Tiemblo a Cebreros) y
+  confinamiento por humo VIGENTE en El Tiemblo, Navaluenga y Burgohondo. Cronología
+  ampliada (confinamiento ~18:23, La Atalaya, fase convectiva, interés nacional,
+  parte de la mañana del 24). Superficie sin cifra oficial (el humo impide medir);
+  se mantiene la estimación por focos FIRMS, marcada «~».
+
 ## [0.44.0] - 2026-07-24
 
 ### Añadido

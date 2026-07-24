@@ -152,7 +152,7 @@ const sum = (units: { count: number }[]) => units.reduce((n, u) => n + u.count, 
  * extranjeros). Se muestra en la ficha cuando la fuente aporta el detalle; si no
  * lo hay, no se renderiza (la ficha ya muestra el resumen agregado).
  */
-export function ResourcesPanel({ resources }: { resources?: Resources }) {
+export function ResourcesPanel({ resources, source }: { resources?: Resources; source?: string }) {
   const d = useDict();
   const aerial = resources?.aerialUnits ?? [];
   const ground = resources?.groundUnits ?? [];
@@ -161,8 +161,15 @@ export function ResourcesPanel({ resources }: { resources?: Resources }) {
 
   return (
     <section aria-label={d.resources.heading} className="pb-1">
-      <div className="mb-2 font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
-        {d.resources.heading}
+      <div className="mb-2 flex items-baseline justify-between gap-2">
+        <span className="font-mono text-label font-semibold uppercase tracking-[0.12em] text-fg-mute">
+          {d.resources.heading}
+        </span>
+        {source && (
+          <span className="truncate font-mono text-[9px] text-fg-mute">
+            {d.fire.source}: {source}
+          </span>
+        )}
       </div>
 
       {(aerial.length > 0 || ground.length > 0) && (

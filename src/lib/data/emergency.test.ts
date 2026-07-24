@@ -183,6 +183,20 @@ describe('applyEmergencyOverrides', () => {
 describe('EMERGENCY_OVERRIDES (datos reales)', () => {
   const burgo = EMERGENCY_OVERRIDES.find((o) => o.id === 'burgohondo-2026-07')!;
 
+  it('marca interés nacional (Situación Operativa 3) en los tres incendios de la declaración', () => {
+    const flag = (o: (typeof EMERGENCY_OVERRIDES)[number]) =>
+      o.patch.nationalInterest === true || o.standalone?.nationalInterest === true;
+    expect(flag(EMERGENCY_OVERRIDES.find((o) => o.id === 'burgohondo-2026-07')!)).toBe(true);
+    expect(flag(EMERGENCY_OVERRIDES.find((o) => o.id === 'almorox-2026-07')!)).toBe(true);
+    expect(flag(EMERGENCY_OVERRIDES.find((o) => o.id === 'san-martin-valdeiglesias-2026-07')!)).toBe(true);
+  });
+
+  it('Almorox se identifica también como Villa del Prado (mismo incendio)', () => {
+    const almorox = EMERGENCY_OVERRIDES.find((o) => o.id === 'almorox-2026-07')!;
+    expect(almorox.patch.name).toMatch(/villa del prado/i);
+    expect(almorox.standalone?.name).toMatch(/villa del prado/i);
+  });
+
   it('el override de Burgohondo NO toca perímetro ni superficie (lo hace FIRMS)', () => {
     // El perímetro y la superficie los pone `deriveFirmsPerimeters` (cúmulo de
     // focos); el override solo añade evacuación y cronología.

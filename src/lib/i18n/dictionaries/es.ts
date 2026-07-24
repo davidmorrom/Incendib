@@ -100,6 +100,9 @@ const es = {
     perimeterProvisional:
       'Trazo discontinuo: extensión aproximada por detección satelital (focos FIRMS) hasta las zonas alcanzadas — no es un perímetro oficial ni definitivo.',
     evacuationNotice: 'Evacuaciones y confinamientos',
+    nationalInterest: 'INTERÉS NACIONAL',
+    nationalInterestFull:
+      'Emergencia de interés nacional (Situación Operativa 3, el máximo del Sistema Nacional de Protección Civil), declarada por el Ministerio del Interior para el territorio. Distinta del nivel de gravedad del incendio.',
     approxHotspot: 'estimación muy aproximada (focos)',
   },
   resources: {

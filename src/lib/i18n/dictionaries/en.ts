@@ -101,6 +101,9 @@ const en: Dictionary = {
     perimeterProvisional:
       'Dashed line: approximate extent from satellite detection (FIRMS hotspots) to the areas reached — not an official or final perimeter.',
     evacuationNotice: 'Evacuations and shelter-in-place',
+    nationalInterest: 'NATIONAL EMERGENCY',
+    nationalInterestFull:
+      'Emergency of national interest (Operational Situation 3, the top level of the National Civil Protection System), declared by the Ministry of the Interior for the territory. Distinct from the fire’s severity level.',
     approxHotspot: 'very rough estimate (hotspots)',
   },
   resources: {

@@ -166,6 +166,15 @@ export interface Fire {
   resources?: Resources;
   /** Aviso de evacuación / cortes, si lo hay. */
   evacuation?: string;
+  /**
+   * El incendio está bajo una declaración de EMERGENCIA DE INTERÉS NACIONAL
+   * (Situación Operativa 3, el máximo del Sistema Nacional de Protección Civil),
+   * declarada por el Ministro del Interior para el territorio. OJO: es una escala
+   * OPERATIVA del territorio, distinta del `level` (Índice de Gravedad Potencial
+   * del incendio, que solo llega a 0-2; no existe un «IGP 3»). Se muestra como
+   * distintivo aparte, no como nivel del incendio.
+   */
+  nationalInterest?: boolean;
   /** Fuentes que alimentan esta ficha, en orden de prioridad. */
   sources: SourceId[];
   timeline?: TimelineEntry[];

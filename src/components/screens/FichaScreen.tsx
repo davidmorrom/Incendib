@@ -85,6 +85,13 @@ export function FichaScreen({
     ...(otherEpisodes.length > 0 ? [{ id: 'episodios' as const, label: d.fire.episodesShort }] : []),
   ];
   const activeDetailTab = detailTabs.some((t) => t.id === detailTab) ? detailTab : 'medios';
+  // Fuente de los datos de medios (para mostrarla junto a ellos): la fuente
+  // operativa principal del incendio, o «prensa» si la ficha es reconstruida.
+  const mediosSource = fire.reconstructed
+    ? d.fire.reconstructedSource
+    : fire.sources[0]
+      ? SOURCES[fire.sources[0]].label
+      : undefined;
 
   const stateLabel =
     fire.country === 'PT' && fire.ptState ? PT_TEXT[fire.ptState] : d.states[STATE_LABEL_KEY[fire.state]];
@@ -353,6 +360,18 @@ export function FichaScreen({
                 {`NIVEL ${fire.level}`}
               </span>
             )}
+            {/* Emergencia de interés nacional (Situación Operativa 3): escala del
+                TERRITORIO, distinta del nivel de gravedad del incendio. Distintivo
+                propio, en tono de máxima alerta. */}
+            {!historical && fire.nationalInterest && (
+              <span
+                className="rounded-chip border px-[9px] py-[3.5px] font-mono text-[10.5px] font-bold text-state-activo-text"
+                style={{ backgroundColor: mix(V.activo, 14), borderColor: mix(V.activo, 50) }}
+                title={d.fire.nationalInterestFull}
+              >
+                {d.fire.nationalInterest}
+              </span>
+            )}
             {fire.fwi && (
               <span className="rounded-chip border border-strong px-[9px] py-[3.5px] font-mono text-[10.5px] font-medium text-fg-secondary">
                 {interpolate(d.fire.fwi, { level: fire.fwi }).toUpperCase()}
@@ -472,6 +491,12 @@ export function FichaScreen({
                 {fire.resources?.note}
               </div>
             )}
+            {/* Fuente de los datos de medios, junto a ellos (transparencia). */}
+            {fire.resources && mediosSource && (
+              <div className="truncate font-mono text-[9px] text-fg-mute" title={mediosSource}>
+                {d.fire.source}: {mediosSource}
+              </div>
+            )}
           </div>
           <div className="bg-bg-card px-4 py-2.5">
             <div className={STAT_LABEL}>{d.fire.weather}</div>
@@ -519,7 +544,7 @@ export function FichaScreen({
         )}
 
         <div className="px-4 pb-5 pt-3">
-          {activeDetailTab === 'medios' && <ResourcesPanel resources={fire.resources} />}
+          {activeDetailTab === 'medios' && <ResourcesPanel resources={fire.resources} source={mediosSource} />}
 
           {/* Carrusel horizontal (más reciente primero, a la izquierda): cada
               hito es una tarjeta con espacio propio. */}

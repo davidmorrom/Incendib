@@ -242,14 +242,15 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
     url: 'https://avilared.com/art/93350/incendio-navaluenga-burgohondo-desalojo-refuerzos-avance-peligroso',
   },
   {
-    at: '2026-07-23T17:45:00+02:00',
-    label: 'ES-Alert de confinamiento preventivo por humo para El Tiemblo, Burgohondo y Navaluenga (Junta de Castilla y León, vía Red de Alerta Nacional). Se pide permanecer en los domicilios. Dato de fuente única, pendiente de confirmación independiente.',
+    at: '2026-07-23T18:23:00+02:00',
+    label: 'La Junta de Castilla y León ordena (~18:00) el confinamiento preventivo por humo de El Tiemblo, Burgohondo y Navaluenga, difundido por ES-Alert (~18:23). Se pide permanecer en los domicilios.',
+    state: 'activo',
     source: 'Ávilared',
     url: 'https://avilared.com/art/93357/alerta-esalert-confinamiento-el-tiemblo-burgohondo-navaluenga-incendio-forestal',
   },
   {
-    at: '2026-07-23T18:50:00+02:00',
-    label: 'Confinamiento de El Tiemblo por ES-Alert y evacuación de su urbanización La Atalaya (unos 1.200-1.300 residentes) ante el rápido avance del frente hacia la localidad.',
+    at: '2026-07-23T21:30:00+02:00',
+    label: 'Evacuación de la urbanización La Atalaya (El Tiemblo, ~1.200-1.300 residentes) y traslado de la residencia de mayores de El Tiemblo a Cebreros ante el avance del frente hacia la localidad.',
     state: 'activo',
   },
   {
@@ -263,8 +264,9 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
     state: 'activo',
   },
   {
-    at: '2026-07-24T08:00:00+02:00',
-    label: 'Mañana del 24: el perímetro se describe estabilizado tras la noche, pero sin controlar. Sin cifra oficial de superficie: el humo impidió medir con fiabilidad. La extensión se estima por detección satelital (focos FIRMS).',
+    at: '2026-07-24T07:20:00+02:00',
+    label: 'Mañana del 24: el incendio sigue ACTIVO y sin controlar, «prácticamente fuera de la capacidad de extinción». Emergencia de interés nacional vigente; evacuaciones y confinamientos sin levantar. Sin cifra oficial de superficie (el humo impide medir): la extensión se estima por detección satelital (focos FIRMS); en medios, «más de 1.000 ha» provisional.',
+    state: 'activo',
   },
 ];
 
@@ -275,8 +277,9 @@ const BURGOHONDO_TIMELINE: TimelineEntry[] = [
  * añade la evacuación y la cronología (contexto verificado en prensa).
  */
 const BURGOHONDO_DATA: Partial<Fire> = {
+  nationalInterest: true, // Situación Operativa 3 / interés nacional (Madrid + Ávila)
   evacuation:
-    'Unos 1.500 evacuados (según medios): Puente Nueva y Matalaceña (Burgohondo), camping El Burguillo, Las Cruceras y La Rinconada del Valle de Iruelas, y la urbanización La Atalaya (El Tiemblo). Confinamiento por humo (ES-Alert) en El Tiemblo, Navaluenga y Burgohondo. Emergencia de interés nacional (situación operativa 3) declarada para Madrid y Ávila.',
+    'Según medios: incendio ACTIVO y sin controlar; emergencia de interés nacional (situación operativa 3) VIGENTE. ~1.500 evacuados, sin levantar ninguna evacuación: urbanización La Atalaya (El Tiemblo, ~1.200), Valle de Iruelas (camping de El Burguillo, casas rurales de Las Cruceras y La Rinconada) y Puente Nueva/Matalaceña (Burgohondo); residencia de mayores de El Tiemblo trasladada a Cebreros. Confinamiento por humo (ES-Alert) VIGENTE en El Tiemblo, Navaluenga y Burgohondo.',
   timeline: BURGOHONDO_TIMELINE,
 };
 
@@ -379,6 +382,7 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       updatedAt: '2026-07-23T17:45:00+02:00',
       sources: ['jcyl'],
       reconstructed: true,
+      nationalInterest: true,
       evacuation: BURGOHONDO_DATA.evacuation,
       timeline: BURGOHONDO_TIMELINE,
     },
@@ -392,16 +396,21 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       municipalityIncludes: 'almorox',
     },
     patch: {
+      // Es el MISMO incendio que Madrid (112) declara como «IF Villa del Prado»:
+      // se originó en Almorox (Toledo) y cruzó a Villa del Prado (Madrid). Se
+      // renombra para que quede claro que no son dos incendios distintos.
+      name: 'Almorox – Villa del Prado',
       hectares: 1000,
       hectaresApprox: true,
       level: 1,
+      nationalInterest: true, // vía Villa del Prado (Madrid), dentro de la declaración
       evacuation:
         'Urbanización El Pinar (Almorox) evacuada y El Romillo confinado. En Madrid: Villa del Prado confinada (ES-Alert) y El Encinar del Alberche evacuado (~700). Cortadas N-403, M-507 y M-540.',
       timeline: ALMOROX_TIMELINE,
     },
     standalone: {
       slug: 'clm-almorox-emergencia-2026-07',
-      name: 'Almorox',
+      name: 'Almorox – Villa del Prado',
       municipality: 'Almorox',
       province: 'Toledo',
       region: 'Castilla-La Mancha',
@@ -414,6 +423,7 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       coordinates: [-4.385, 40.234],
       startedAt: '2026-07-22T16:52:00+02:00',
       updatedAt: '2026-07-23T12:00:00+02:00',
+      nationalInterest: true,
       evacuation:
         'Urbanización El Pinar (Almorox) evacuada y El Romillo confinado. En Madrid: Villa del Prado confinada (ES-Alert) y El Encinar del Alberche evacuado (~700). Cortadas N-403, M-507 y M-540.',
       sources: ['infocam'],
@@ -430,6 +440,7 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       municipalityIncludes: 'valdeiglesias',
     },
     patch: {
+      nationalInterest: true,
       evacuation:
         'Confinada la residencia de mayores López Rumayor; ES-Alert a las urbanizaciones San Ramón y Jaracruz (Jaracruz desalojada) y a Pelayos de la Presa.',
       timeline: SANMARTIN_TIMELINE,
@@ -448,6 +459,7 @@ export const EMERGENCY_OVERRIDES: EmergencyOverride[] = [
       coordinates: [-4.395, 40.352],
       startedAt: '2026-07-23T16:22:00+02:00',
       updatedAt: '2026-07-23T17:15:00+02:00',
+      nationalInterest: true,
       evacuation:
         'Confinada la residencia de mayores López Rumayor; ES-Alert a las urbanizaciones San Ramón y Jaracruz (Jaracruz desalojada) y a Pelayos de la Presa.',
       sources: ['nacional'],
