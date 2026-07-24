@@ -218,5 +218,37 @@ describe('deriveFirmsPerimeters', () => {
       expect(out!.hotspotHectares).toBe(prevArea * 10);
       expect(out!.perimeter).toEqual(prevRing);
     });
+
+    it('un foco nuevo pegado al borde YA acumulado se adjudica aunque esté lejos del origen', () => {
+      // Simula un incendio ya muy grande (tipo Burgohondo, ~20 km): un anillo
+      // previo en forma de pasillo alargado hacia el este, muy por encima de
+      // FIRMS_ASSIGN_MAX_KM (5 km) desde el punto de origen.
+      const origin: [number, number] = [-4.66, 40.384];
+      const eastRing: [number, number][] = [
+        [origin[0], origin[1] - 0.01],
+        [origin[0] + 0.24, origin[1] - 0.01], // ~20 km al este
+        [origin[0] + 0.24, origin[1] + 0.01],
+        [origin[0], origin[1] + 0.01],
+        [origin[0], origin[1] - 0.01],
+      ];
+      const previous: FirmsGrowthState = {
+        grande: { points: eastRing, ring: eastRing, areaHa: 5000 },
+      };
+      // Foco nuevo justo más allá del borde este del anillo (~1 km fuera), pero a
+      // ~21 km del origen: muy por encima de ASSIGN_MAX_KM medido desde el origen.
+      const newFront = hotspotGrid([origin[0] + 0.25, origin[1]], 3, 0.003);
+      const f = fire({ slug: 'grande', coordinates: origin });
+
+      const withMemory = deriveFirmsPerimeters([f], newFront, previous);
+      expect(withMemory.fires[0]!.perimeter?.length).toBeGreaterThan(0);
+      // El cúmulo nuevo se fusionó con el anillo previo: el área final incorpora
+      // ambos, no se queda solo con la franja original de baja superficie.
+      expect(withMemory.fires[0]!.hotspotHectares!).toBeGreaterThan(0);
+
+      // Sin memoria previa (solo el origen como referencia), el mismo foco nuevo
+      // NO se adjudica: está a ~21 km del origen, muy por encima de ASSIGN_MAX_KM.
+      const withoutMemory = deriveFirmsPerimeters([f], newFront, {});
+      expect(withoutMemory.fires[0]!.perimeter).toBeUndefined();
+    });
   });
 });

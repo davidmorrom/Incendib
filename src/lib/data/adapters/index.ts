@@ -1495,6 +1495,18 @@ function minDistToCluster(pt: [number, number], cluster: [number, number][]): nu
   for (const c of cluster) {
     const d = haversineKm(pt, c);
     if (d < best) best = d;
+    if (best === 0) break;
+  }
+  return best;
+}
+
+/** Distancia mínima (km) entre dos conjuntos de puntos cualesquiera. */
+function minDistBetweenClusters(a: [number, number][], b: [number, number][]): number {
+  let best = Infinity;
+  for (const p of a) {
+    const d = minDistToCluster(p, b);
+    if (d < best) best = d;
+    if (best === 0) break;
   }
   return best;
 }
@@ -1566,6 +1578,18 @@ export function deriveFirmsPerimeters(
     : [];
 
   const candidates = fires.filter((f) => f.state !== 'extinguido');
+  // Punto(s) de referencia de cada incendio para adjudicar: su coordenada más el
+  // anillo YA acumulado (el borde de su extensión conocida), si lo tiene. Sin
+  // esto, un incendio que ya ha crecido mucho más allá de ASSIGN_MAX_KM desde su
+  // foco de origen (Burgohondo real: ~27 km de valle) dejaría de poder reclamar
+  // los focos nuevos que aparecen junto a su frente ya avanzado, aunque estén
+  // claramente pegados a su propio perímetro. Con el anillo como referencia, el
+  // alcance de ASSIGN_MAX_KM se mide desde el borde actual, no desde el origen.
+  const refPoints = new Map<string, [number, number][]>();
+  for (const f of candidates) {
+    const ring = previous[f.slug]?.ring;
+    refPoints.set(f.slug, ring && ring.length ? [f.coordinates, ...ring] : [f.coordinates]);
+  }
   // Adjudica cada componente de ESTA ronda al incendio candidato más cercano (a
   // ≤ ASSIGN_MAX_KM); cada incendio se queda con la componente MÁS GRANDE que le
   // toque. Los focos de rondas anteriores ya llevan su adjudicación resuelta
@@ -1575,7 +1599,7 @@ export function deriveFirmsPerimeters(
     let best: Fire | null = null;
     let bestKm = Infinity;
     for (const f of candidates) {
-      const km = minDistToCluster(f.coordinates, comp);
+      const km = minDistBetweenClusters(refPoints.get(f.slug)!, comp);
       if (km < bestKm) {
         bestKm = km;
         best = f;

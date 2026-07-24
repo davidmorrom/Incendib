@@ -5,6 +5,23 @@ Todas las novedades relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y el
 proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
+## [0.48.1] - 2026-07-24
+
+### Corregido
+
+- **Un incendio ya muy grande podía dejar de adjudicarse los focos nuevos que
+  aparecían junto a su frente ya avanzado.** La adjudicación de cúmulos
+  medía siempre la distancia al foco de ORIGEN del incendio (máx. 5 km); para
+  un incendio que ya ha crecido mucho más allá de esos 5 km (Burgohondo real:
+  ~27 km de valle), un foco nuevo pegado a su borde actual pero lejos del
+  origen se quedaba sin adjudicar. Ahora la adjudicación también mide contra
+  el anillo YA acumulado del incendio (su borde conocido), no solo el origen,
+  así que el perímetro sigue alcanzando los focos nuevos que aparecen junto a
+  él aunque estén lejos de donde empezó. Verificado en vivo: los focos
+  realmente huérfanos (fuera de todo perímetro cercano) se redujeron a casos
+  aislados por debajo del umbral de ruido (`FIRMS_MIN_HOTSPOTS=5`) o a
+  detecciones a más de 10 km de cualquier incidente rastreado.
+
 ## [0.48.0] - 2026-07-24
 
 ### Cambiado

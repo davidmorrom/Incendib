@@ -31,6 +31,52 @@
 
 ## Log
 
+### 2026-07-24 — Agente (datos): la adjudicación de focos alcanza el borde YA acumulado, no solo el origen (v0.48.1)
+
+**Encargo del propietario:** «hay algún foco FIRMS ahora fuera de los
+perímetros, inclúyelos».
+
+**Diagnóstico (script vitest con datos live + Redis real, no supuesto):**
+comparé cada incendio activo con perímetro contra los focos FIRMS cercanos
+(≤15 km), cruzando también contra los perímetros de los DEMÁS incendios (para
+no contar como «huérfano» un foco que ya cubre el vecino — el complejo
+Burgohondo/Almorox/San Martín es, en la realidad, UN solo frente continuo
+repartido en 3 fichas). Encontré el caso real: la adjudicación de cúmulos
+(`deriveFirmsPerimeters`) medía siempre la distancia al foco de ORIGEN del
+incendio (`FIRMS_ASSIGN_MAX_KM=5 km`); un incendio ya crecido mucho más allá de
+esos 5 km (Burgohondo real: ~27 km de valle, documentado en el propio código)
+no podía reclamar un foco nuevo pegado a su frente YA avanzado si ese frente
+estaba a >5 km de donde empezó el fuego.
+
+**Hecho (typecheck + lint + 375 tests + build; verificado en vivo antes/
+después con el mismo script):** en `deriveFirmsPerimeters`
+(`src/lib/data/adapters/index.ts`), la adjudicación ahora mide la distancia
+mínima contra `[origen, ...anillo YA acumulado]` de cada incendio candidato
+(`minDistBetweenClusters`, nuevo), no solo contra el origen. El anillo previo
+viene de `previous` (memoria persistida), así que el alcance de 5 km se mide
+desde el borde conocido más reciente — un incendio que ya ha crecido sigue
+pudiendo reclamar focos junto a su frente actual. La conectividad física
+(`FIRMS_LINK_KM=1,3 km` para formar una componente) sigue siendo la guardia
+real contra "heredar" el fuego de un vecino no relacionado: esto solo amplía
+DESDE QUÉ PUNTO se mide el alcance, no relaja qué cuenta como la misma
+componente. Test nuevo (`firms-cluster.test.ts`): un foco a ~21 km del origen
+pero ~1 km del borde de un anillo previo alargado (tipo pasillo, simulando un
+incendio ya grande) se adjudica CON memoria previa y NO se adjudica sin ella.
+
+**Resultado verificado:** los focos realmente huérfanos (fuera de TODO
+perímetro cercano, cruzando contra los vecinos) quedaron en casos aislados de
+1-4 focos por debajo del umbral de ruido (`FIRMS_MIN_HOTSPOTS=5`, correcto
+descartarlos) o detecciones a >10 km de cualquier incidente rastreado (fuera
+de alcance razonable, no atribuibles sin más contexto). No queda ningún cúmulo
+grande (≥5 focos conexos) sin cubrir cerca de un incidente activo.
+
+**Tocado (solo míos, por ruta):** `src/lib/data/adapters/index.ts`
+(`minDistBetweenClusters` + adjudicación), `src/lib/data/adapters/
+firms-cluster.test.ts` (+1 test), CHANGELOG, package.json, este log.
+
+**Versión:** tomo **v0.48.1** (último tag v0.48.0; fix). **Siguiente tag
+libre: 0.48.2.**
+
 ### 2026-07-24 — Agente (datos): el perímetro por focos FIRMS ya SOLO CRECE (v0.48.0)
 
 **Encargo del propietario:** «mantén el sistema de perímetro aproximado por
